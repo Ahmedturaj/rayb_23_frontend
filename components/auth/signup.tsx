@@ -16,7 +16,7 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Eye, EyeOff, Mail, User, Lock, SplinePointer, Loader } from "lucide-react"
+import { Eye, EyeOff, Mail, User, Lock, Loader } from "lucide-react"
 import { registerUser } from '@/app/actions/auth'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
@@ -56,7 +56,10 @@ export default function SignupForm() {
                 toast.error(res.message)
             }
         } catch (error) {
-            toast.error("Something went wrong. Please try again later.");
+            if (error instanceof Error) {
+                toast.error(error.message)
+            }
+            toast.error("Something went wrong. Please try again later.")
         } finally {
             setIsLoading(false)
             signUpForm.reset()

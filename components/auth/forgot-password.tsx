@@ -49,6 +49,9 @@ export default function ForgotPassForm() {
                 router.push(`/auth/verify-email?token=${res?.token}&type=forget-password`)
             }
         } catch (error) {
+            if (error instanceof Error) {
+                toast.error(error.message)
+            }
             toast.error("Something went wrong. Please try again later.");
         } finally {
             setIsLoading(false)

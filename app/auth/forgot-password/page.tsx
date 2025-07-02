@@ -1,10 +1,12 @@
 import ForgotPassForm from '@/components/auth/forgot-password'
-import React from 'react'
+import React, { Suspense } from 'react'
 
 export default function ForgotPasswordPage() {
     return (
         <main>
-            <ForgotPassForm />
+            <Suspense fallback={<div>Loading...</div>}>
+                <ForgotPassForm />
+            </Suspense>
         </main>
     )
 }

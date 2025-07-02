@@ -3,8 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { Eye, EyeOff, Mail, Lock } from "lucide-react";
-
 import { resendOTP, verifyEmail } from "@/app/actions/auth";
 
 export default function VerifyOTPPage() {
@@ -17,12 +15,6 @@ export default function VerifyOTPPage() {
     const searchParams = useSearchParams();
     const token = searchParams.get("token") || "";
     const type = searchParams.get("type") || "";
-
-
-    if (!token || !type) {
-        router.push("/auth/register")
-        return
-    }
 
     useEffect(() => {
         if (!token) router.push("/auth/register");
@@ -40,6 +32,11 @@ export default function VerifyOTPPage() {
             if (timer) clearTimeout(timer);
         };
     }, [resendDisabled, countdown]);
+
+    if (!token || !type) {
+        router.push("/auth/register")
+        return
+    }
 
     const handleChange = (index: number, value: string) => {
         if (!/^\d*$/.test(value)) return;
@@ -144,7 +141,7 @@ export default function VerifyOTPPage() {
                     </button>
 
                     <div className="flex items-center justify-between text-sm text-gray-600">
-                        <span>Didn't receive OTP?</span>
+                        <span>Didn&apos;t receive OTP?</span>
                         <button
                             type="button"
                             onClick={handleResendOTP}

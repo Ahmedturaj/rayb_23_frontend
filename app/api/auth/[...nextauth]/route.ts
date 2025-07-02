@@ -36,9 +36,11 @@ const handler = NextAuth({
                         userType: result.data.user.userType,
                         accessToken: result.data.accessToken,
                     };
-                } catch (error: any) {
-                    console.error("Authorization error:", error);
-                    throw new Error(error.message || "Authentication failed");
+                } catch (error) {
+                    if (error instanceof Error) {
+                        throw new Error(error.message);
+                    }
+                    throw new Error("An error occurred during login");
                 }
             }
         })

@@ -37,12 +37,6 @@ export default function ResetPasswordForm() {
     const searchParams = useSearchParams()
     const token = searchParams.get("token") || ""
 
-
-    if (!token) {
-        router.push("/auth/login")
-        return
-    }
-
     const form = useForm<z.infer<typeof resetPasswordSchema>>({
         resolver: zodResolver(resetPasswordSchema),
         defaultValues: {
@@ -50,6 +44,13 @@ export default function ResetPasswordForm() {
             confirmPassword: "",
         },
     })
+
+
+    if (!token) {
+        router.push("/auth/login")
+        return
+    }
+
 
     const onSubmit = async (values: z.infer<typeof resetPasswordSchema>) => {
         setIsLoading(true)
@@ -66,6 +67,9 @@ export default function ResetPasswordForm() {
                 router.push("/auth/login")
             }
         } catch (error) {
+            if (error instanceof Error) {
+                toast.error(error.message)
+            }
             toast.error("Something went wrong. Please try again later.")
         } finally {
             setIsLoading(false)

@@ -15,7 +15,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-import { Eye, EyeOff, Mail, User, Lock, Loader } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, Loader } from "lucide-react"
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
@@ -56,7 +56,10 @@ export default function LoginForm() {
             }
 
         } catch (error) {
-            toast.error("Something went wrong. Please try again later.");
+            if (error instanceof Error) {
+                toast.error(error.message)
+            }
+            toast.error("Something went wrong. Please try again later.")
         } finally {
             setIsLoading(false)
         }
