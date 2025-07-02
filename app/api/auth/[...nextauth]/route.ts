@@ -11,28 +11,39 @@ const handler = NextAuth({
                 password: { label: "Password", type: "password" },
             },
             async authorize(credentials) {
-                if (!credentials?.email || !credentials?.password) {
-                    throw new Error("Email and password are required");
+                try {
+                    if (!credentials?.email || !credentials?.password) {
+                        throw new Error("Email and password are required");
+                    }
+
+                    const result = await loginUser({
+                        email: credentials.email,
+                        password: credentials.password,
+                    });
+
+                    if (!result.success) {
+                        throw new Error(result.message || "Login failed");
+                    }
+
+                    if (!result.data?.user?._id || !result.data?.accessToken) {
+                        throw new Error("Invalid user data received");
+                    }
+
+                    return {
+                        id: result.data.user._id,
+                        name: result.data.user.name,
+                        email: result.data.user.email,
+                        userType: result.data.user.userType,
+                        accessToken: result.data.accessToken,
+                    };
+                } catch (error) {
+                    if (error instanceof Error) {
+                        throw new Error(error.message);
+                    }
+                    throw new Error("An error occurred during login");
                 }
-
-                const result = await loginUser({
-                    email: credentials.email,
-                    password: credentials.password,
-                });
-
-                if (!result.success) {
-                    throw new Error(result.message || "Invalid credentials");
-                }
-
-                return {
-                    id: result.data._id,
-                    name: `${result.data.firstName} ${result.data.lastName}`,
-                    email: result.data.email,
-                    userType: result.data.userType,
-                    accessToken: result.token,
-                };
-            },
-        }),
+            }
+        })
     ],
     pages: {
         signIn: "/auth/login",
@@ -41,7 +52,6 @@ const handler = NextAuth({
     },
     callbacks: {
         async jwt({ token, user }) {
-            // Initial sign in
             if (user) {
                 token.id = user.id;
                 token.userType = user.userType;
@@ -64,7 +74,6 @@ const handler = NextAuth({
         maxAge: 24 * 60 * 60, // 24 hours
     },
     secret: process.env.NEXTAUTH_SECRET,
-    // Add this to ensure JWT is properly configured
     jwt: {
         secret: process.env.NEXTAUTH_SECRET,
     },

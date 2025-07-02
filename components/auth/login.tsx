@@ -15,21 +15,18 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Eye, EyeOff, Mail, User, Lock, Loader } from "lucide-react"
-import { registerUser } from '@/app/actions/auth'
+import { Eye, EyeOff, Mail, Lock, Loader } from "lucide-react"
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 
 const signUpFormSchema = z.object({
-    name: z.string().min(1, { message: "Name is required" }),
     email: z.string().email({ message: "Invalid email" }),
-    password: z.string().min(8, { message: "Password must be at least 8 characters" }),
-    userType: z.enum(["user", "businessMan"]),
+    password: z.string().min(8, { message: "Password must be at least 8 characters" })
 })
 
-export default function SignupForm() {
+export default function LoginForm() {
     const [showPassword, setShowPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const router = useRouter()
@@ -37,24 +34,27 @@ export default function SignupForm() {
     const signUpForm = useForm<z.infer<typeof signUpFormSchema>>({
         resolver: zodResolver(signUpFormSchema),
         defaultValues: {
-            name: "",
             email: "",
             password: "",
-            userType: "user",
         },
     })
 
     const onSubmit = async (values: z.infer<typeof signUpFormSchema>) => {
         setIsLoading(true)
         try {
-            const res = await registerUser(values)
-            console.log(res)
-            if (res.success === true) {
-                toast.success(res.message)
-                router.push(`/auth/verify-email?token=${res?.data?.accessToken}&type=signup`)
+            const res = await signIn("credentials", {
+                email: values.email,
+                password: values.password,
+                redirect: false,
+            })
+
+            if (res?.error) {
+                toast.error(res.error)
             } else {
-                toast.error(res.message)
+                toast.success("Login successful")
+                router.push("/")
             }
+
         } catch (error) {
             if (error instanceof Error) {
                 toast.error(error.message)
@@ -62,7 +62,6 @@ export default function SignupForm() {
             toast.error("Something went wrong. Please try again later.")
         } finally {
             setIsLoading(false)
-            signUpForm.reset()
         }
     }
 
@@ -70,28 +69,11 @@ export default function SignupForm() {
         <section className="h-screen flex justify-center items-center">
             <div className="max-w-2xl mx-auto w-full px-4">
                 <div className="text-center space-y-4 lg:pb-10">
-                    <h2 className='lg:text-3xl font-bold'>Sign Up</h2>
-                    <p className='text-[#485150] lg:text-base'>Please enter your details to create a new account</p>
+                    <h2 className='lg:text-3xl font-bold'>Log In</h2>
+                    <p className='text-[#485150] lg:text-base'>Please login to enjoy all features of instrufix.</p>
                 </div>
                 <Form {...signUpForm}>
                     <form onSubmit={signUpForm.handleSubmit(onSubmit)} className="lg:space-y-6 space-y-3">
-                        {/* Full Name */}
-                        <FormField
-                            control={signUpForm.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Full Name</FormLabel>
-                                    <FormControl>
-                                        <div className="relative">
-                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
-                                            <Input className="pl-10 h-14 bg-[#F7F8F8] border border-[#E7E9E9]" placeholder="Please enter your name" {...field} />
-                                        </div>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
 
                         {/* Email */}
                         <FormField
@@ -141,48 +123,18 @@ export default function SignupForm() {
                             )}
                         />
 
-                        {/* User Type */}
-                        <FormField
-                            control={signUpForm.control}
-                            name="userType"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>User Type</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger className='bg-[#F7F8F8] h-14'>
-                                                <SelectValue placeholder="Select type" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="user">Customer</SelectItem>
-                                            <SelectItem value="businessMan">Business Owner</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        <div className="flex justify-between items-center">
+                            <Link href="/auth/signup" className="text-sm text-[#485150]">Don&apos;t have an account? <span className='text-blue-400 underline'>Sign Up</span></Link>
+                            <Link href="/auth/forgot-password" className="text-sm text-blue-400 underline">Forgot Password?</Link>
+                        </div>
 
                         {/* Submit */}
                         <Button disabled={isLoading} type="submit" className="w-full">
                             {isLoading && (
                                 <Loader className="mr-2 h-4 w-4 animate-spin" />
                             )}
-                            Sign Up
+                            Log In
                         </Button>
-
-                        <div className="flex justify-between items-center">
-                            <Link href="/auth/login" className="text-sm text-[#485150]">Have an account?</Link>
-                            <Link href="/auth/login" className="text-sm text-blue-400 underline">Log In</Link>
-                        </div>
-
-                        {/* Footer */}
-                        <p className="text-center text-sm text-muted-foreground">
-                            By signing up, you agree to our{" "}
-                            <span className="underline cursor-pointer">Terms and Conditions</span> and{" "}
-                            <span className="underline cursor-pointer">Privacy Policy</span>.
-                        </p>
                     </form>
                 </Form>
             </div>
