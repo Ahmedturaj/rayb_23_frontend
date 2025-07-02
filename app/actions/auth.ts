@@ -1,5 +1,3 @@
-"use server";
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function registerUser(userData: {
@@ -14,12 +12,10 @@ export async function registerUser(userData: {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(userData)
+            body: JSON.stringify(userData),
         });
 
         const data = await response.json();
-
-        console.log(API_BASE_URL)
 
         if (!response.ok) {
             return {
@@ -30,7 +26,8 @@ export async function registerUser(userData: {
 
         return {
             success: true,
-            data: data.user,
+            message: data.message,
+            data: data.data,
         };
     } catch (error) {
         console.error("Registration error:", error);
@@ -41,6 +38,74 @@ export async function registerUser(userData: {
     }
 }
 
+
+
+// Email verification
+
+export async function verifyEmail(token: string, otp: string, type: string) {
+    try {
+        const url =
+            type === "forget-password"
+                ? `${process.env.NEXT_PUBLIC_API_URL}/auth/verify-token`
+                : `${process.env.NEXT_PUBLIC_API_URL}/auth/verify-email`;
+
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ otp }),
+        });
+
+        const data = await response.json();
+
+        return {
+            ok: response.ok,
+            data,
+        };
+    } catch (error) {
+        console.error("Verify email error:", error);
+        return {
+            ok: false,
+            data: null,
+            error,
+        };
+    }
+}
+
+
+
+// Resend OTP
+
+export async function resendOTP(token: string, otp: string) {
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/resend-otp`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ otp }),
+        });
+
+        const data = await response.json();
+
+        return {
+            ok: response.ok,
+            data,
+        };
+    } catch (error) {
+        console.error("Resend OTP error:", error);
+        return {
+            ok: false,
+            data: null,
+            error,
+        };
+    }
+}
+
+
 export async function loginUser(credentials: {
     email: string;
     password: string;
@@ -48,72 +113,29 @@ export async function loginUser(credentials: {
     try {
         const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(credentials),
         });
 
         const data = await response.json();
 
         if (!response.ok || !data.success) {
-            return {
-                success: false,
-                message: data.message || "Login failed",
-            };
+            return { success: false, message: data.message || "Login failed" };
         }
 
-        // Don't set cookies manually - let NextAuth handle this
         return {
             success: true,
-            data: data.user,
-            token: data.token,
+            data: {
+                accessToken: data.data.accessToken,
+                user: data.data.user
+            }
         };
     } catch (error) {
         console.error("Login error:", error);
-        return {
-            success: false,
-            message: "An error occurred during login",
-        };
+        return { success: false, message: "An error occurred during login" };
     }
 }
 
-// ... rest of your functions remain the same
-
-export async function verifyEmail(verificationData: {
-    code: string;
-    email: string;
-}) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/auth/verify-email`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(verificationData),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            return {
-                success: false,
-                message: data.message || "Verification failed",
-            };
-        }
-
-        return {
-            success: true,
-            data: data.data,
-        };
-    } catch (error) {
-        console.error("Verification error:", error);
-        return {
-            success: false,
-            message: "An error occurred during verification",
-        };
-    }
-}
 
 export async function forgotPassword(email: string) {
     try {
@@ -130,13 +152,14 @@ export async function forgotPassword(email: string) {
         if (!response.ok) {
             return {
                 success: false,
-                message: data.message || "Failed to send reset email",
+                message: data.message,
             };
         }
 
         return {
             success: true,
-            message: "Password reset instructions sent to your email",
+            message: data.message,
+            token: data.data.accessToken
         };
     } catch (error) {
         console.error("Forgot password error:", error);
@@ -156,8 +179,9 @@ export async function resetPassword(resetData: {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${resetData.token}`,
             },
-            body: JSON.stringify(resetData),
+            body: JSON.stringify({ newPassword: resetData.password }),
         });
 
         const data = await response.json();

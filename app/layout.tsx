@@ -4,6 +4,7 @@ import { DM_Sans } from "next/font/google";
 import LayoutVisibilityWrapper from "@/providers/layout-provider";
 import QueryProvider from "@/providers/query-provider";
 import SessionWrapper from "@/providers/session-provider";
+import { Toaster } from "sonner";
 
 
 const font = DM_Sans({
@@ -30,6 +31,7 @@ export default function RootLayout({
           <QueryProvider>
             <LayoutVisibilityWrapper>
               {children}
+              <Toaster position="top-right" />
             </LayoutVisibilityWrapper>
           </QueryProvider>
         </SessionWrapper>
