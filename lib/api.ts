@@ -24,4 +24,14 @@ api.interceptors.request.use(
 );
 
 
+// User API
 
+export const getUserProfile = async () => {
+    try {
+        const response = await api.get(`/user/profile`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching user:", error);
+        return null;
+    }
+};
