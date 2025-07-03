@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Search, ChevronDown, Menu, Bell, Inbox, Bookmark, User, User2, User2Icon, Edit2, Edit, Edit3, Settings, LogOut } from 'lucide-react';
+import { Search, ChevronDown, Menu, Bell, Inbox, Bookmark, User2Icon, Settings, LogOut } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { signOut, useSession } from 'next-auth/react';
