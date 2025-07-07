@@ -7,7 +7,7 @@ const Categories = () => {
       link: "/",
       image: "/images/strings.png",
       title: "Strings",
-      width: "50px",
+      width: "100px",
       height: "100px",
     },
     {
@@ -48,7 +48,7 @@ const Categories = () => {
   ];
 
   return (
-    <section className="bg-[#f0f9f9] py-16">
+    <section className="bg-[#f0f9f9] py-20">
       <div className="container lg:max-w-[1100px]">
         <div className="text-center">
           <h1 className="text-[40px] text-gray-700 font-semibold">
@@ -68,8 +68,8 @@ const Categories = () => {
                   <Image
                     src={category.image}
                     alt="category-img"
-                    width={6000}
-                    height={6000}
+                    width={7000}
+                    height={7000}
                     className={`w-[${category.width}] h-[${category.height}]`}
                   />
                 </div>
