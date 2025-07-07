@@ -29,7 +29,7 @@ const App = () => {
 
 
   return (
-    <nav className="p-4 shadow-md">
+    <nav className="p-4 shadow-md sticky top-0 z-50 bg-white">
       <div className="container flex items-center justify-between h-14">
         {/* Logo */}
         <Link href="/">
