@@ -4,10 +4,10 @@ import Popular from "@/components/home/Popular";
 
 export default function Home() {
   return (
-    <main>
+    <div>
       <BannerHome />
       <Categories />
       <Popular />
-    </main>
+    </div>
   );
 }
