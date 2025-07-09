@@ -6,7 +6,6 @@ import QueryProvider from "@/providers/query-provider";
 import SessionWrapper from "@/providers/session-provider";
 import { Toaster } from "sonner";
 
-
 const font = DM_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -24,13 +23,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${font.className} antialiased`}
-      >
+      <body className={`${font.className} antialiased`}>
         <SessionWrapper>
           <QueryProvider>
             <LayoutVisibilityWrapper>
-              {children}
+              <main className="min-h-[calc(100vh-510px)]">{children}</main>
               <Toaster position="top-right" />
             </LayoutVisibilityWrapper>
           </QueryProvider>

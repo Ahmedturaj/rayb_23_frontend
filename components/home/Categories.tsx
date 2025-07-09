@@ -7,43 +7,31 @@ const Categories = () => {
       link: "/",
       image: "/images/strings.png",
       title: "Strings",
-      width: "100px",
-      height: "100px",
     },
     {
       link: "/",
       image: "/images/woodwinds.png",
       title: "Woodwinds",
-      width: "200px",
-      height: "20px",
     },
     {
       link: "/",
       image: "/images/percussions.png",
       title: "Percussions",
-      width: "100px",
-      height: "100px",
     },
     {
       link: "/",
       image: "/images/brass.png",
       title: "Brass",
-      width: "200px",
-      height: "80px",
     },
     {
       link: "/",
       image: "/images/Keyboard.png",
       title: "Keyboard",
-      width: "100px",
-      height: "100px",
     },
     {
       link: "/",
       image: "/images/others.png",
       title: "Other",
-      width: "100px",
-      height: "100px",
     },
   ];
 
@@ -63,18 +51,19 @@ const Categories = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-10">
           {categories.map((category, index) => (
             <Link key={index} href={category.link}>
-              <div className="bg-white  flex flex-col justify-center items-center py-5 shadow-[0px_2px_12px_0px_#003D3914] rounded-lg h-[180px]">
-                <div className="h-[100px] flex flex-col justify-center items-center">
+              <div className="bg-white flex flex-col justify-center items-center py-5 shadow-[0px_2px_12px_0px_#003D3914] rounded-lg h-[200px]">
+                <div className="w-[100px] h-[100px] relative">
                   <Image
                     src={category.image}
-                    alt="category-img"
-                    width={7000}
-                    height={7000}
-                    className={`w-[${category.width}] h-[${category.height}]`}
+                    alt={`${category.title} Image`}
+                    fill
+                    className="object-contain"
                   />
                 </div>
 
-                <h1 className="mt-3 font-semibold">{category.title}</h1>
+                <h1 className="mt-4 font-semibold text-gray-700">
+                  {category.title}
+                </h1>
               </div>
             </Link>
           ))}
