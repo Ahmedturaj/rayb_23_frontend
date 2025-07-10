@@ -19,13 +19,11 @@ const App = () => {
   const { data: session, status: sessionStatus } = useSession();
 
   const { data: userData } = useQuery({
-    queryKey: ['user', session?.user?.email],
+    queryKey: ['userData', session?.user?.email],
     queryFn: getUserProfile,
     select: (data) => data.data,
     enabled: sessionStatus === "authenticated",
   })
-
-  console.log(userData)
 
 
   return (
@@ -121,13 +119,13 @@ const App = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="bg-white border-gray-700 border-none">
                       <DropdownMenuItem className="hover:bg-[#F7F8F8] cursor-pointer">
-                        <Link href="/profile" className='flex gap-2 items-center'>
+                        <Link href="/customer-dashboard/profile" className='flex gap-2 items-center'>
                           <User2Icon className='h-6 w-6' />
                           {"View Profile"}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
-                        <Link href="/profile/settings" className='flex gap-2 items-center'>
+                        <Link href="/customer-dashboard/settings" className='flex gap-2 items-center'>
                           <Settings className='h-6 w-6' />
                           {"Settings"}
                         </Link>
