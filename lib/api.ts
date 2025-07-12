@@ -35,3 +35,14 @@ export const getUserProfile = async () => {
         return null;
     }
 };
+
+
+export async function updateUserProfile(data: any) {
+    try {
+        const response = await api.put(`/user/update-profile`, data);
+        return response.data;
+    } catch (error) {
+        console.error("Error updating user profile:", error);
+        throw error;
+    }
+}
