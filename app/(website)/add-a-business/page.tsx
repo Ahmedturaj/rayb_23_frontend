@@ -11,6 +11,7 @@ const page = () => {
         />
       </div>
 
+      {/* divider */}
       <div className=" border-b border-gray-200 pt-8"></div>
 
       {/* add functionality here */}
