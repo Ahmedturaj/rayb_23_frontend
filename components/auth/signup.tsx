@@ -33,6 +33,7 @@ export default function SignupForm() {
     const [showPassword, setShowPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const router = useRouter()
+    const [error, setError] = useState<String>("")
 
     const signUpForm = useForm<z.infer<typeof signUpFormSchema>>({
         resolver: zodResolver(signUpFormSchema),
@@ -53,7 +54,7 @@ export default function SignupForm() {
                 toast.success(res.message)
                 router.push(`/auth/verify-email?token=${res?.data?.accessToken}&type=signup`)
             } else {
-                toast.error(res.message)
+                setError(res?.message)
             }
         } catch (error) {
             if (error instanceof Error) {
@@ -62,7 +63,6 @@ export default function SignupForm() {
             toast.error("Something went wrong. Please try again later.")
         } finally {
             setIsLoading(false)
-            signUpForm.reset()
         }
     }
 
@@ -163,6 +163,19 @@ export default function SignupForm() {
                                 </FormItem>
                             )}
                         />
+
+                        {
+                            error && (
+                                error == "User already exists" ?
+                                    (
+                                        <p className='text-center'>Looks like you already have an account—try <Link href="/auth/login" className='text-[#00998E] underline'>logging in.</Link></p>
+                                    )
+                                    :
+                                    (
+                                        <p className='text-center'>{error}</p>
+                                    )
+                            )
+                        }
 
                         {/* Submit */}
                         <Button disabled={isLoading} type="submit" className="w-full">

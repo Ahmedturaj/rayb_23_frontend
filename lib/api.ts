@@ -46,3 +46,44 @@ export async function updateUserProfile(data: any) {
         throw error;
     }
 }
+
+
+// Message API
+
+
+// Get my chat
+export async function getMyChat(userId: string) {
+    try {
+        const response = await api.get(`/chat/my-chat/${userId}`)
+        return response.data
+    } catch (error) {
+        console.error("Error fetching my chat:", error)
+        return error
+    }
+}
+
+
+
+// get messages
+export async function getMessages(chatId: string) {
+    try {
+        const response = await api.get(`/message/${chatId}`)
+        return response.data
+    } catch (error) {
+        console.error("Error fetching messages:", error)
+        return error
+    }
+}
+
+
+
+// Send message
+export async function sendMessage({ data }: any) {
+    try {
+        const response = await api.post(`/message/send-message`, data)
+        return response.data
+    } catch (error) {
+        console.error("Error sending message:", error)
+        return error
+    }
+}
