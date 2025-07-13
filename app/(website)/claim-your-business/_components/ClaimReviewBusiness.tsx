@@ -19,6 +19,7 @@ interface Service {
 }
 
 interface Business {
+  _id: string;
   businessInfo: BusinessItem;
   instrumentInfo: Service[];
 }
@@ -127,9 +128,13 @@ const ClaimReviewBusiness = () => {
 
                     {/* Action Button */}
                     {pathname === "/claim-your-business" && (
-                      <button className=" bg-[#e0f2f1] h-[48px] text-[#139a8e] px-5 rounded-lg w-[180px]">
-                        Claim Business
-                      </button>
+                      <Link
+                        href={`/claim-your-business/${business?._id}`}
+                      >
+                        <button className=" bg-[#e0f2f1] h-[48px] text-[#139a8e] px-5 rounded-lg w-[180px]">
+                          Claim Business
+                        </button>
+                      </Link>
                     )}
 
                     {pathname === "/review-business" && (
