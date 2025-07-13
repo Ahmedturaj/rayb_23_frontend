@@ -33,7 +33,7 @@ export default function SignupForm() {
     const [showPassword, setShowPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const router = useRouter()
-    const [error, setError] = useState<String>("")
+    const [error, setError] = useState<string>("")
 
     const signUpForm = useForm<z.infer<typeof signUpFormSchema>>({
         resolver: zodResolver(signUpFormSchema),
