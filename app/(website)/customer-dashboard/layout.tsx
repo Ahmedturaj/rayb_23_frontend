@@ -10,6 +10,6 @@ export default function layout({
         <main>
             <CustomerDashboardLayout />
             {children}
-        </main>
+        </main >
     );
 }
