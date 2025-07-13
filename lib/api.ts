@@ -86,5 +86,17 @@ export async function getAllbusiness() {
     return res.data;
   } catch (error) {
     console.error("error fetching all business", error);
+    return error;
+  }
+}
+
+//get single business
+export async function getSingleBusiness(params: string | string[]) {
+  try {
+    const res = await api.get(`/business/${params}`);
+    return res.data;
+  } catch (error) {
+    console.error("error fetching single business", error);
+    return error;
   }
 }
