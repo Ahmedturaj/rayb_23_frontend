@@ -88,7 +88,7 @@ const Service = () => {
     Percussions: ["Drums", "Symbol", "Xylophone"],
   };
 
-  const [value, setValue] = useState("yes");
+  const [value, setValue] = useState("");
 
   type OptionKey = "buy" | "sell" | "trade" | "rent";
 
