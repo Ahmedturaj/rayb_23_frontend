@@ -3,7 +3,15 @@ import Image from "next/image";
 import React from "react";
 import { MdDelete } from "react-icons/md";
 
-const BusinessInform = ({handleFileChange, handleUploadImage, images, handleRemoveImage}) => {
+
+interface BusinessInformProps {
+  handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleUploadImage: () => void;
+  images: string[];
+  handleRemoveImage: (index: number) => void;
+}
+
+const BusinessInform: React.FC<BusinessInformProps> = ({handleFileChange, handleUploadImage, images, handleRemoveImage}) => {
   return (
     <div>
       {/* upload photos */}

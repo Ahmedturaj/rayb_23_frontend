@@ -1,104 +1,27 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Badge, MapPin, Search, Star } from "lucide-react";
+import { getAllbusiness } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { Search, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 
-interface Instructor {
-  id: number;
+interface BusinessItem {
+  email: string;
   name: string;
   image: string;
-  rating: number;
-  reviewCount: number;
-  distance: string;
-  services: string[];
-  timeAgo: string;
 }
 
-const instructors: Instructor[] = [
-  {
-    id: 1,
-    name: "Bronstein Music",
-    image: "/images/guitar.png",
-    rating: 4.7,
-    reviewCount: 1346,
-    distance: "3.8 km away",
-    services: ["Recording", "Mastering", "Demo Removal", "Repairing"],
-    timeAgo: "3 hours",
-  },
-  {
-    id: 2,
-    name: "San Francisco Guitar Tech",
-    image: "/images/guitar.png",
-    rating: 4.7,
-    reviewCount: 1346,
-    distance: "3.8 km away",
-    services: ["Recording", "Mastering", "Demo Removal", "Repairing"],
-    timeAgo: "3 hours",
-  },
-  {
-    id: 3,
-    name: "San Francisco Guitar Tech",
-    image: "/images/guitar.png",
-    rating: 4.7,
-    reviewCount: 1346,
-    distance: "3.8 km away",
-    services: ["Recording", "Mastering", "Demo Removal", "Repairing"],
-    timeAgo: "3 hours",
-  },
-  {
-    id: 4,
-    name: "Bronstein Music",
-    image: "/images/guitar.png",
-    rating: 4.7,
-    reviewCount: 1346,
-    distance: "3.8 km away",
-    services: ["Recording", "Mastering", "Demo Removal", "Repairing"],
-    timeAgo: "2 hours",
-  },
-  {
-    id: 5,
-    name: "Bronstein Music",
-    image: "/placeholder.svg?height=80&width=80",
-    rating: 4.7,
-    reviewCount: 1346,
-    distance: "3.8 km away",
-    services: ["Recording", "Mastering", "Demo Removal", "Repairing"],
-    timeAgo: "1 hours",
-  },
-  {
-    id: 6,
-    name: "Golden Gate Studios",
-    image: "/placeholder.svg?height=80&width=80",
-    rating: 4.8,
-    reviewCount: 892,
-    distance: "2.1 km away",
-    services: ["Recording", "Mixing", "Mastering"],
-    timeAgo: "4 hours",
-  },
-  {
-    id: 7,
-    name: "Bay Area Music Lab",
-    image: "/placeholder.svg?height=80&width=80",
-    rating: 4.6,
-    reviewCount: 567,
-    distance: "5.2 km away",
-    services: ["Lessons", "Recording", "Equipment Rental"],
-    timeAgo: "6 hours",
-  },
-  {
-    id: 8,
-    name: "Sound Wave Productions",
-    image: "/placeholder.svg?height=80&width=80",
-    rating: 4.9,
-    reviewCount: 234,
-    distance: "1.7 km away",
-    services: ["Recording", "Mastering", "Live Sound"],
-    timeAgo: "2 hours",
-  },
-];
+interface Service {
+  serviceName: string;
+}
+
+interface Business {
+  businessInfo: BusinessItem;
+  instrumentInfo: Service[];
+}
 
 const ClaimReviewBusiness = () => {
   const pathname = usePathname();
@@ -106,26 +29,30 @@ const ClaimReviewBusiness = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  const filteredInstructors = instructors.filter(
-    (instructor) =>
-      instructor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      instructor.services.some((service) =>
-        service.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-  );
+  const { data: allBusiness = [], isLoading } = useQuery({
+    queryKey: ["get-all-business"],
+    queryFn: async () => await getAllbusiness().then((res) => res.data),
+  });
 
-  const totalPages = Math.ceil(filteredInstructors.length / itemsPerPage);
+  const totalPages = Math.ceil(allBusiness.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentInstructors = filteredInstructors.slice(startIndex, endIndex);
+  const currentBusiness = allBusiness.slice(startIndex, endIndex);
 
   const handleSearch = () => {
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
+
+  if (isLoading)
+    return (
+      <div className="text-center flex flex-col items-center justify-center min-h-[650px] text-lg">
+        Loading...
+      </div>
+    );
 
   return (
     <div className="mt-8">
@@ -154,17 +81,17 @@ const ClaimReviewBusiness = () => {
 
         {/* Instructors List */}
         <div className="space-y-6">
-          {currentInstructors.map((instructor) => (
+          {currentBusiness.map((business: Business) => (
             <div
-              key={instructor.id}
+              key={business?.businessInfo?.email}
               className="bg-white rounded-lg shadow-[0px_2px_12px_0px_#003d3924] p-6"
             >
               <div className="flex items-center gap-5">
                 {/* Profile Image */}
                 <div className="flex-shrink-0 overflow-hidden rounded-lg">
                   <Image
-                    src={instructor.image || "/placeholder.svg"}
-                    alt={instructor.name}
+                    src={business?.businessInfo?.image[0] || "/placeholder.svg"}
+                    alt={"business.png"}
                     width={1000}
                     height={1000}
                     className="rounded-lg object-cover h-[200px] w-[200px] hover:scale-105 transition"
@@ -175,43 +102,26 @@ const ClaimReviewBusiness = () => {
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                        {instructor.name}
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {business?.businessInfo?.name}
                       </h3>
 
                       {/* Rating */}
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="text-sm font-medium">
-                            {instructor.rating}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            ({instructor.reviewCount.toLocaleString()})
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Distance */}
-                      <div className="flex items-center gap-1 mb-3">
-                        <MapPin className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">
-                          {instructor.distance}
-                        </span>
+                      <div className="flex items-center gap-1 my-3">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-sm font-medium">{"3.7"}</span>
                       </div>
 
                       {/* Services */}
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {instructor.services.map((service, index) => (
-                          <Badge key={index} className="text-xs">
-                            {service}
-                          </Badge>
+                      <div className="flex items-center gap-2 mb-2">
+                        {business?.instrumentInfo?.map((service, index) => (
+                          <button
+                            className="h-[48px] px-5 rounded-lg bg-[#F8F8F8]"
+                            key={index}
+                          >
+                            {service?.serviceName}
+                          </button>
                         ))}
-                      </div>
-
-                      {/* Time */}
-                      <div className="text-sm text-gray-500">
-                        {instructor.timeAgo}
                       </div>
                     </div>
 
@@ -287,7 +197,7 @@ const ClaimReviewBusiness = () => {
           </div>
 
           <div>
-            <Link href={'/add-a-business'}>
+            <Link href={"/add-a-business"}>
               <Button className="bg-teal-600 hover:bg-teal-700 text-white px-8 h-[48px]">
                 Add Business
               </Button>
@@ -296,7 +206,7 @@ const ClaimReviewBusiness = () => {
         </div>
 
         {/* No Results */}
-        {filteredInstructors.length === 0 && (
+        {currentBusiness.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">
               No instructors found matching your search.

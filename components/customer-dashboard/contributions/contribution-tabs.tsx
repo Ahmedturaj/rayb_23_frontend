@@ -4,8 +4,6 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { MapPin, MoreVertical, Star } from 'lucide-react'
-import { stat } from 'fs'
-import { id } from 'zod/v4/locales'
 
 export default function ContributionTabs() {
 
@@ -280,7 +278,7 @@ export default function ContributionTabs() {
                                 <div className="space-y-5">
                                     {
                                         reviewsData.reviews.map((review) => (
-                                            <div className="p-6 border rounded-md shadow-md">
+                                            <div key={review?.author.name} className="p-6 border rounded-md shadow-md">
                                                 <div className="space-y-4">
                                                     <div className="flex justify-between">
                                                         <div className="">
@@ -386,7 +384,7 @@ export default function ContributionTabs() {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {
                                         reviewsData?.photos?.map((photo) => (
-                                            <div className="p-4 space-y-4 border shadow-md rounded-md">
+                                            <div key={photo?.business.name} className="p-4 space-y-4 border shadow-md rounded-md">
                                                 <div className="flex gap-2 items-center">
                                                     <Image
                                                         src={photo.business.logo}
@@ -403,7 +401,7 @@ export default function ContributionTabs() {
                                                 <div className="grid grid-cols-2 gap-2 items-center">
                                                     {
                                                         photo?.images?.map((image) => (
-                                                            <div className="relative">
+                                                            <div key={image?.url} className="relative">
                                                                 <Image
                                                                     src={image.url}
                                                                     alt="Photo"
@@ -466,7 +464,7 @@ export default function ContributionTabs() {
                                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                     {
                                         reviewsData?.businesses?.map((business) => (
-                                            <div className="p-6 border border-gray-200 rounded-md">
+                                            <div key={business?.name} className="p-6 border border-gray-200 rounded-md">
                                                 <div className="relative mb-3">
                                                     <Image
                                                         src={business.image[0]}
