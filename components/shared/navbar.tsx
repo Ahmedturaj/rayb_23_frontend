@@ -112,7 +112,7 @@ const App = () => {
                     <DropdownMenuTrigger className="hover:text-teal-400 flex gap-1 items-center outline-none">
                       <Avatar>
                         <AvatarImage src={userData?.imageLink} />
-                        <AvatarFallback>{`${userData?.name.split(" ")[0][0]}${userData?.name.split(" ")[1][0]}`}</AvatarFallback>
+                        <AvatarFallback>{`${userData?.name.split(" ")[0][0]}${userData?.name.split(" ")[0]}`}</AvatarFallback>
                       </Avatar>
                       {userData?.name}
                       <ChevronDown className="ml-1 h-4 w-4" />
