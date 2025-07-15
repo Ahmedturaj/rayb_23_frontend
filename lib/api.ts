@@ -100,3 +100,17 @@ export async function getSingleBusiness(params: string | string[]) {
     return error;
   }
 }
+
+
+
+// Saved API
+
+export async function getSavedBusiness() {
+  try {
+    const response = await api.get(`/saved-business/my-saved-business`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching saved business:", error);
+    return error;
+  }
+}

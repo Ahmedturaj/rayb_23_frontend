@@ -154,7 +154,7 @@ export default function ContributionTabs() {
         ],
         businesses: [
             {
-                id: "1",
+                _id: "1",
                 name: "Updated Melody Hub",
                 image: [
                     "/images/percussions.png",
@@ -171,7 +171,7 @@ export default function ContributionTabs() {
                 status: "Published"
             },
             {
-                id: "2",
+                _id: "2",
                 name: "Harmony Instruments",
                 image: [
                     "/images/percussions.png",
@@ -188,7 +188,7 @@ export default function ContributionTabs() {
                 status: "Pending"
             },
             {
-                id: "3",
+                _id: "3",
                 name: "Rhythm & Strings",
                 image: [
                     "/images/percussions.png",
@@ -205,7 +205,7 @@ export default function ContributionTabs() {
                 status: "Rejected"
             },
             {
-                id: "4",
+                _id: "4",
                 name: "Melody Makers",
                 image: [
                     "/images/percussions.png",
@@ -222,7 +222,7 @@ export default function ContributionTabs() {
                 status: "Published"
             },
             {
-                id: "5",
+                _id: "5",
                 name: "Updated Melody Hub",
                 image: [
                     "/images/percussions.png",
@@ -464,7 +464,7 @@ export default function ContributionTabs() {
                             (
                                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                     {reviewsData?.businesses.map((business) => (
-                                        <BusinessCard key={business.id} business={business} />
+                                        <BusinessCard key={business._id} business={business} />
                                     ))}
                                 </div>
                             )
