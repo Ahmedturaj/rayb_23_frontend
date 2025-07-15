@@ -196,7 +196,7 @@ export default function InboxPage() {
     }, [liveMessages, selectedChat]); // Added selectedChat to dependencies
 
     return (
-        <div className="flex gap-5 h-[85vh] bg-white container py-4 lg:py-10">
+        <div className="flex gap-5 h-[70vh] bg-white container">
             {/* Left Sidebar - Chat List */}
             <div className="w-full md:w-80 border-gray-200 flex flex-col">
                 <ScrollArea className="flex-1">
