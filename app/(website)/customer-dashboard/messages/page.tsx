@@ -249,7 +249,7 @@ export default function InboxPage() {
                                     </div>
                                 </div>
                                 <Avatar className="h-12 w-12 mt-1">
-                                    <AvatarImage src={selectedChat.senderId?.image || "/placeholder.svg"} />
+                                    <AvatarImage src={selectedChat.bussinessId.businessInfo?.image || "/placeholder.svg"} />
                                     <AvatarFallback className="bg-gray-200 text-gray-600 text-xs">
                                         {getInitials(selectedChat?.senderId?.name || selectedChat?.userId?.name)}
                                     </AvatarFallback>
