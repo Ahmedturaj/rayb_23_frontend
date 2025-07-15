@@ -6,6 +6,8 @@ import { getSavedBusiness } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { useSession } from 'next-auth/react'
 import BusinessCard from '@/components/shared/business-card'
+import Image from 'next/image'
+import Link from 'next/link'
 
 
 export interface BusinessInfo {
@@ -46,7 +48,7 @@ export default function UserSavedData() {
     const { data: savedData, isLoading, isError, error } = useQuery({
         queryKey: ["savedBusinessData"],
         queryFn: getSavedBusiness,
-        select: (data) => data.data,
+        select: (data) => data?.data,
         enabled: status === "authenticated",
     })
 
@@ -72,7 +74,30 @@ export default function UserSavedData() {
     )
 
 
-    console.log(savedData)
+    if (savedData?.length === 0) {
+        return (
+            <div className="flex justify-between items-center bg-[#F7F8F8] p-6 rounded-md">
+                <div className="flex items-center gap-4">
+                    <Image
+                        src="/images/business.png"
+                        alt='No photos yet'
+                        width={300}
+                        height={300}
+                        className="h-16 w-16 object-contain"
+                    />
+                    <div className="space-y-2">
+                        <h4 className='text-xl font-semibold'>No Business Added</h4>
+                        <p>Know a hidden gem? Add it to support our music community</p>
+                    </div>
+                </div>
+                <Link href="/search-result" className="flex-shrink-0">
+                    <Button>
+                        Add Business
+                    </Button>
+                </Link>
+            </div>
+        )
+    }
 
     return (
         <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4'>
