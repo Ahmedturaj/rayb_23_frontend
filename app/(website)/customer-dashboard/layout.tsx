@@ -9,7 +9,9 @@ export default function layout({
     return (
         <main>
             <CustomerDashboardLayout />
-            {children}
+            <div className="py-5 lg:py-12">
+                {children}
+            </div>
         </main >
     );
 }

@@ -102,6 +102,19 @@ export async function getSingleBusiness(params: string | string[]) {
   }
 }
 
+
+
+// Saved API
+
+export async function getSavedBusiness() {
+  try {
+    const response = await api.get(`/saved-business/my-saved-business`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching saved business:", error);
+    return error;
+  }
+}
 //post a review
 export async function addReview(data: ReviewType) {
   try {
