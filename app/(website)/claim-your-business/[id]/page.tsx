@@ -1,14 +1,16 @@
 "use client";
+import VerifyBusinessEmail from "@/components/modals/VerifyBusinessEmail";
 import PathTracker from "@/components/shared/PathTracker";
 import { getSingleBusiness } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
+import { useState } from "react";
 
 const SingleBusiness = () => {
   const params = useParams();
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const id = params?.id;
 
   const { data: singleBusiness, isLoading } = useQuery({
@@ -29,22 +31,22 @@ const SingleBusiness = () => {
         <PathTracker title={""} header={singleBusiness?.businessInfo?.name} />
       </div>
 
-      <div className="bg-white rounded-lg shadow-[0px_2px_12px_0px_#003d3924] p-6">
-        <div className="flex items-center gap-5">
+      <div className="bg-white rounded-lg shadow-[0px_2px_12px_0px_#003d3924] p-4 md:p-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-5">
           {/* Profile Image */}
-          <div className="flex-shrink-0 overflow-hidden rounded-lg">
+          <div className="flex-shrink-0 overflow-hidden rounded-lg w-full max-w-[200px]">
             <Image
               src={singleBusiness?.businessInfo?.image[0] || "/placeholder.svg"}
               alt={"business.png"}
               width={1000}
               height={1000}
-              className="rounded-lg object-cover h-[200px] w-[200px] hover:scale-105 transition"
+              className="rounded-lg object-cover h-[200px] w-full hover:scale-105 transition"
             />
           </div>
 
           {/* Content */}
-          <div className="flex-1">
-            <div className="flex items-center justify-between">
+          <div className="flex-1 w-full">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-y-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
                   {singleBusiness?.businessInfo?.name}
@@ -57,11 +59,11 @@ const SingleBusiness = () => {
                 </div>
 
                 {/* Services */}
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
                   {singleBusiness?.instrumentInfo?.map(
                     (service: { serviceName: string }, index: string) => (
                       <button
-                        className="h-[48px] px-5 rounded-lg bg-[#F8F8F8]"
+                        className="h-[40px] px-4 rounded-lg bg-[#F8F8F8] text-sm"
                         key={index}
                       >
                         {service?.serviceName}
@@ -72,7 +74,7 @@ const SingleBusiness = () => {
               </div>
 
               {/* Action Button */}
-              <button className=" bg-[#139a8e] h-[48px] text-white px-5 rounded-lg w-[180px]">
+              <button className="bg-[#139a8e] h-[40px] text-white px-5 rounded-lg w-full md:w-[180px]">
                 View Profile
               </button>
             </div>
@@ -80,6 +82,7 @@ const SingleBusiness = () => {
         </div>
       </div>
 
+      {/* Verification Section */}
       <div className="mt-10">
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-gray-900 mb-2">
@@ -92,19 +95,17 @@ const SingleBusiness = () => {
 
         <div className="space-y-4">
           {/* Email Verification */}
-          <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12">
-                    <Image
-                      src={"/images/email.png"}
-                      alt="/images/email.png"
-                      width={2000}
-                      height={2000}
-                      className="h-full w-full"
-                    />
-                  </div>
+          <div className="p-4 md:p-6 bg-gray-50 border border-gray-200 rounded-lg">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-start space-x-4 w-full">
+                <div className="w-12 h-12 flex-shrink-0">
+                  <Image
+                    src={"/images/email.png"}
+                    alt="/images/email.png"
+                    width={2000}
+                    height={2000}
+                    className="h-full w-full"
+                  />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -122,26 +123,27 @@ const SingleBusiness = () => {
                   </ul>
                 </div>
               </div>
-              <button className="bg-teal-600 hover:bg-teal-700 text-white px-8 h-[40px] rounded-lg">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="bg-teal-600 hover:bg-teal-700 text-white px-8 h-[40px] rounded-lg w-full md:w-auto"
+              >
                 Verify
               </button>
             </div>
           </div>
 
           {/* Phone Verification */}
-          <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12">
-                    <Image
-                      src={"/images/phone.png"}
-                      alt="/images/phone.png"
-                      width={2000}
-                      height={2000}
-                      className="h-full w-full"
-                    />
-                  </div>
+          <div className="p-4 md:p-6 bg-gray-50 border border-gray-200 rounded-lg">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-start space-x-4 w-full">
+                <div className="w-12 h-12 flex-shrink-0">
+                  <Image
+                    src={"/images/phone.png"}
+                    alt="/images/phone.png"
+                    width={2000}
+                    height={2000}
+                    className="h-full w-full"
+                  />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -158,26 +160,24 @@ const SingleBusiness = () => {
                   </ul>
                 </div>
               </div>
-              <button className="bg-teal-600 hover:bg-teal-700 text-white px-8 h-[40px] rounded-lg">
+              <button className="bg-teal-600 hover:bg-teal-700 text-white px-8 h-[40px] rounded-lg w-full md:w-auto">
                 Verify
               </button>
             </div>
           </div>
 
           {/* Document Verification */}
-          <div className="p-6 bg-gray-50 border border-gray-200 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12">
-                    <Image
-                      src={"/images/document.png"}
-                      alt="/images/document.png"
-                      width={2000}
-                      height={2000}
-                      className="h-full w-full"
-                    />
-                  </div>
+          <div className="p-4 md:p-6 bg-gray-50 border border-gray-200 rounded-lg">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-start space-x-4 w-full">
+                <div className="w-12 h-12 flex-shrink-0">
+                  <Image
+                    src={"/images/document.png"}
+                    alt="/images/document.png"
+                    width={2000}
+                    height={2000}
+                    className="h-full w-full"
+                  />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-900 mb-1">
@@ -200,18 +200,22 @@ const SingleBusiness = () => {
                   </ul>
                 </div>
               </div>
-              <button className="bg-teal-600 hover:bg-teal-700 text-white px-8 h-[40px] rounded-lg">
+              <button className="bg-teal-600 hover:bg-teal-700 text-white px-8 h-[40px] rounded-lg w-full md:w-auto">
                 Verify
               </button>
+
+              {isModalOpen && (
+                <VerifyBusinessEmail setIsModalOpen={setIsModalOpen} />
+              )}
             </div>
           </div>
         </div>
 
         {/* Note */}
         <div>
-          <p className="mt-5">
+          <p className="mt-5 text-sm md:text-base">
             <span className="font-medium">Note:</span> Submission will be
-            reviewed by the admin and you will be notified through sms or email.
+            reviewed by the admin and you will be notified through SMS or email.
           </p>
         </div>
       </div>
