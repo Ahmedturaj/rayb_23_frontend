@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import { getSession } from "next-auth/react";
+import { ReviewType } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -98,5 +99,38 @@ export async function getSingleBusiness(params: string | string[]) {
   } catch (error) {
     console.error("error fetching single business", error);
     return error;
+  }
+}
+
+//post a review
+export async function addReview(data: ReviewType) {
+  try {
+    const formData = new FormData();
+
+    // Send non-file data as JSON string
+    formData.append(
+      "data",
+      JSON.stringify({
+        rating: data.rating,
+        feedback: data.feedback,
+        business: data.business,
+      })
+    );
+
+    // Append each file
+    data.image.forEach((file) => {
+      formData.append("image", file);
+    });
+
+    const res = await api.post("/review/create", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    
+    return res.data;
+  } catch (error) {
+    console.error("Error submitting review:", error);
+    throw error;
   }
 }

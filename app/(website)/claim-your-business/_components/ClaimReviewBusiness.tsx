@@ -1,4 +1,6 @@
 "use client";
+import ReviewModal from "@/components/modals/ReviewModal";
+import ReviewSubmittedModal from "@/components/modals/ReviewSubmittedModal";
 import { Button } from "@/components/ui/button";
 import { getAllbusiness } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
@@ -26,6 +28,9 @@ interface Business {
 
 const ClaimReviewBusiness = () => {
   const pathname = usePathname();
+  const [businessID, setBusinessID] = useState<string>();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -60,7 +65,7 @@ const ClaimReviewBusiness = () => {
       <div>
         {/* Search Section */}
         <div className="mb-10">
-          <div className="flex gap-4">
+          <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <input
@@ -87,21 +92,21 @@ const ClaimReviewBusiness = () => {
               key={business?.businessInfo?.email}
               className="bg-white rounded-lg shadow-[0px_2px_12px_0px_#003d3924] p-6"
             >
-              <div className="flex items-center gap-5">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-5">
                 {/* Profile Image */}
-                <div className="flex-shrink-0 overflow-hidden rounded-lg">
+                <div className="flex-shrink-0 overflow-hidden rounded-lg w-full sm:w-auto">
                   <Image
                     src={business?.businessInfo?.image[0] || "/placeholder.svg"}
                     alt={"business.png"}
                     width={1000}
                     height={1000}
-                    className="rounded-lg object-cover h-[200px] w-[200px] hover:scale-105 transition"
+                    className="rounded-lg object-cover w-full sm:w-[200px] h-[200px] hover:scale-105 transition"
                   />
                 </div>
 
                 {/* Content */}
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
+                <div className="flex-1 w-full">
+                  <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">
                         {business?.businessInfo?.name}
@@ -114,7 +119,7 @@ const ClaimReviewBusiness = () => {
                       </div>
 
                       {/* Services */}
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
                         {business?.instrumentInfo?.map((service, index) => (
                           <button
                             className="h-[48px] px-5 rounded-lg bg-[#F8F8F8]"
@@ -127,21 +132,27 @@ const ClaimReviewBusiness = () => {
                     </div>
 
                     {/* Action Button */}
-                    {pathname === "/claim-your-business" && (
-                      <Link
-                        href={`/claim-your-business/${business?._id}`}
-                      >
-                        <button className=" bg-[#e0f2f1] h-[48px] text-[#139a8e] px-5 rounded-lg w-[180px]">
-                          Claim Business
-                        </button>
-                      </Link>
-                    )}
+                    <div className="mt-4 lg:mt-0 w-full sm:w-auto">
+                      {pathname === "/claim-your-business" && (
+                        <Link href={`/claim-your-business/${business?._id}`}>
+                          <button className="w-full sm:w-[180px] bg-[#e0f2f1] h-[48px] text-[#139a8e] px-5 rounded-lg">
+                            Claim Business
+                          </button>
+                        </Link>
+                      )}
 
-                    {pathname === "/review-business" && (
-                      <button className=" bg-[#e0f2f1] h-[48px] text-[#139a8e] px-5 rounded-lg w-[180px]">
-                        Review Business
-                      </button>
-                    )}
+                      {pathname === "/review-business" && (
+                        <button
+                          onClick={() => {
+                            setIsOpen(true);
+                            setBusinessID(business?._id);
+                          }}
+                          className="w-full sm:w-[180px] bg-[#e0f2f1] h-[48px] text-[#139a8e] px-5 rounded-lg"
+                        >
+                          Review Business
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -151,8 +162,7 @@ const ClaimReviewBusiness = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-8">
-            {/* Page Numbers */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-8">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <Button
                 key={page}
@@ -166,8 +176,6 @@ const ClaimReviewBusiness = () => {
                 {page}
               </Button>
             ))}
-
-            {/* Next Page Button */}
             {currentPage < totalPages && (
               <Button
                 onClick={() => handlePageChange(currentPage + 1)}
@@ -179,8 +187,9 @@ const ClaimReviewBusiness = () => {
           </div>
         )}
 
-        <div className="border border-gray-200 bg-gray-50 mt-10 p-5 rounded-lg flex justify-between items-center">
-          <div className="flex items-center gap-6">
+        {/* Add Business Section */}
+        <div className="border border-gray-200 bg-gray-50 mt-10 p-5 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="flex gap-6 items-start md:items-center">
             <div>
               <Image
                 src={"/images/location.png"}
@@ -201,9 +210,9 @@ const ClaimReviewBusiness = () => {
             </div>
           </div>
 
-          <div>
+          <div className="w-full md:w-auto">
             <Link href={"/add-a-business"}>
-              <Button className="bg-teal-600 hover:bg-teal-700 text-white px-8 h-[48px]">
+              <Button className="w-full md:w-auto bg-teal-600 hover:bg-teal-700 text-white px-8 h-[48px]">
                 Add Business
               </Button>
             </Link>
@@ -217,6 +226,14 @@ const ClaimReviewBusiness = () => {
               No instructors found matching your search.
             </p>
           </div>
+        )}
+
+        {isOpen && (
+          <ReviewModal setIsModalOpen={setIsModalOpen} setIsOpen={setIsOpen} businessID={businessID} />
+        )}
+
+        {isModalOpen && (
+          <ReviewSubmittedModal setIsModalOpen={setIsModalOpen} />
         )}
       </div>
     </div>
