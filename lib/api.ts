@@ -56,6 +56,17 @@ export async function deactivateAccount({ deactivedReason }: { deactivedReason: 
   }
 }
 
+
+export async function changePassword(data: any) {
+  try {
+    const response = await api.post(`/auth/change-password`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error changing password:", error);
+    throw error;
+  }
+}
+
 // Message API
 
 // Get my chat

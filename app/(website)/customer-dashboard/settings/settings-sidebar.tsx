@@ -32,7 +32,7 @@ export default function SettingsSidebar() {
     return (
         <aside className="w-full space-y-3">
             {links.map(({ href, label, description, icon: Icon }) => {
-                const isActive = pathname === href;
+                const isActive = pathname === href || pathname.startsWith(`/${href}/`);
                 return (
                     <Link
                         key={href}
