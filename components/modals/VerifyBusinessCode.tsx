@@ -1,20 +1,23 @@
-"use client";
 import axios from "axios";
 import { Loader } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
 
+import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+
 interface ReviewModalProps {
-  setIsModalOpen: (isModalOpen: boolean) => void;
-  setIsOpen : (isOpen  : boolean) => void;
+  setIsOpen: (isOpen: boolean) => void;
   businessID: string;
 }
-
-const VerifyBusinessEmail: React.FC<ReviewModalProps> = ({
-  setIsModalOpen,
+const VerifyBusinessCode: React.FC<ReviewModalProps> = ({
+  setIsOpen,
   businessID,
-  setIsOpen
 }) => {
   const [loading, setLoading] = useState(false);
   const session = useSession();
@@ -24,28 +27,27 @@ const VerifyBusinessEmail: React.FC<ReviewModalProps> = ({
     e.preventDefault();
     setLoading(true);
     const form = e.target as HTMLFormElement;
-    const email = (form.elements.namedItem("email") as HTMLInputElement)?.value;
+    const code = (form.elements.namedItem("code") as HTMLInputElement)?.value;
 
-    const verificationEmail = { email: email };
+    const sendOtp = { otp: code };
 
     try {
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/claim-bussiness/send-otp/${businessID}`,
-        verificationEmail,
+        `${process.env.NEXT_PUBLIC_API_URL}/claim-bussiness/verify-email/${businessID}`,
+        sendOtp,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      toast.success("Verification email send. Please check your email.");
-      setIsOpen(true)
+      toast.success("Verification Successful!");
+      setIsOpen(false);
     } catch (error) {
-      console.log(`error from verify business : ${error}`);
-      toast.error("Failed to send verification email!");
+      console.log(`error from verify code : ${error}`);
+      toast.error("Failed to verify!");
     } finally {
       setLoading(false);
-      setIsModalOpen(false)
     }
   };
 
@@ -55,21 +57,29 @@ const VerifyBusinessEmail: React.FC<ReviewModalProps> = ({
         <form onSubmit={handleSubmit}>
           <div>
             <div className="text-center text-xl font-semibold">
-              Enter Your Business Email
+              Enter Your Verification Code
             </div>
 
-            <div>
-              <input
-                type="email"
-                className="border border-gray-200 bg-gray-50 h-[48px] w-full rounded-lg my-5 focus:outline-none p-4"
-                placeholder="Enter your business email"
-                name="email"
-              />
+            <div className="my-8 flex justify-center">
+              <InputOTP
+                name="code"
+                maxLength={6}
+                pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
             </div>
 
             <div className="flex items-center gap-5">
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => setIsOpen(false)}
                 className="h-[48px] border border-gray-200 w-full text-center rounded-lg"
               >
                 Cancel
@@ -97,4 +107,4 @@ const VerifyBusinessEmail: React.FC<ReviewModalProps> = ({
   );
 };
 
-export default VerifyBusinessEmail;
+export default VerifyBusinessCode;
