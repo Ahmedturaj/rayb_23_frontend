@@ -45,6 +45,17 @@ export async function updateUserProfile(data: any) {
   }
 }
 
+
+export async function deactivateAccount({ deactivedReason }: { deactivedReason: string }) {
+  try {
+    const response = await api.put(`/user/deactive-account`, deactivedReason);
+    return response.data;
+  } catch (error) {
+    console.error("Error deactivating account:", error);
+    throw error;
+  }
+}
+
 // Message API
 
 // Get my chat
@@ -140,7 +151,7 @@ export async function addReview(data: ReviewType) {
         "Content-Type": "multipart/form-data",
       },
     });
-    
+
     return res.data;
   } catch (error) {
     console.error("Error submitting review:", error);
