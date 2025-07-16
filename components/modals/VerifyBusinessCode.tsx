@@ -14,10 +14,12 @@ import {
 interface ReviewModalProps {
   setIsOpen: (isOpen: boolean) => void;
   businessID: string;
+  refetch: () => void;
 }
 const VerifyBusinessCode: React.FC<ReviewModalProps> = ({
   setIsOpen,
   businessID,
+  refetch,
 }) => {
   const [loading, setLoading] = useState(false);
   const session = useSession();
@@ -43,6 +45,7 @@ const VerifyBusinessCode: React.FC<ReviewModalProps> = ({
       );
       toast.success("Verification Successful!");
       setIsOpen(false);
+      refetch();
     } catch (error) {
       console.log(`error from verify code : ${error}`);
       toast.error("Failed to verify!");
