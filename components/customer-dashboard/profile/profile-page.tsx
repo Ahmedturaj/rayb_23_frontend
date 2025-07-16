@@ -6,7 +6,7 @@ export default function ProfilePage() {
     return (
         <main>
             <div className='container'>
-                <div className="grid lg:grid-cols-3 gap-6 py-8 lg:py-20">
+                <div className="grid lg:grid-cols-3 gap-6">
                     {/* Profile Information */}
                     <div className="lg:col-span-1">
                         <UserData />

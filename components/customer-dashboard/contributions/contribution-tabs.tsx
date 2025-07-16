@@ -3,7 +3,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { MapPin, MoreVertical, Star } from 'lucide-react'
+import { MoreVertical, Star } from 'lucide-react'
+import BusinessCard from '@/components/shared/business-card'
 
 export default function ContributionTabs() {
 
@@ -153,7 +154,7 @@ export default function ContributionTabs() {
         ],
         businesses: [
             {
-                id: 1,
+                _id: "1",
                 name: "Updated Melody Hub",
                 image: [
                     "/images/percussions.png",
@@ -170,7 +171,7 @@ export default function ContributionTabs() {
                 status: "Published"
             },
             {
-                id: 2,
+                _id: "2",
                 name: "Harmony Instruments",
                 image: [
                     "/images/percussions.png",
@@ -187,7 +188,7 @@ export default function ContributionTabs() {
                 status: "Pending"
             },
             {
-                id: 3,
+                _id: "3",
                 name: "Rhythm & Strings",
                 image: [
                     "/images/percussions.png",
@@ -204,7 +205,7 @@ export default function ContributionTabs() {
                 status: "Rejected"
             },
             {
-                id: 4,
+                _id: "4",
                 name: "Melody Makers",
                 image: [
                     "/images/percussions.png",
@@ -221,7 +222,7 @@ export default function ContributionTabs() {
                 status: "Published"
             },
             {
-                id: 5,
+                _id: "5",
                 name: "Updated Melody Hub",
                 image: [
                     "/images/percussions.png",
@@ -459,35 +460,12 @@ export default function ContributionTabs() {
                         }
                     </div>
                     {
-                        reviewsData?.photos?.length > 0 ?
+                        reviewsData?.businesses?.length > 0 ?
                             (
                                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                    {
-                                        reviewsData?.businesses?.map((business) => (
-                                            <div key={business?.name} className="p-6 border border-gray-200 rounded-md">
-                                                <div className="relative mb-3">
-                                                    <Image
-                                                        src={business.image[0]}
-                                                        alt={business.name}
-                                                        width={300}
-                                                        height={300}
-                                                        className="w-full aspect-[5/4] object-contain rounded-md"
-                                                    />
-                                                    <p className={`absolute top-2 right-2 ${business.status === "Published" ? "text-green-500" : business.status === "Pending" ? "text-[#E38441] bg-[#E384411F]" : "text-[#E24040] bg-[#E240401F]"} px-4 py-1 rounded-xl`}>{business.status}</p>
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <h4 className="text-lg font-semibold">{business.name}</h4>
-                                                    <div className="flex items-center gap-2 text-[#485150]">
-                                                        <Star className='h-5 w-5' fill={business.reviewsCount > 0 ? "#F4C321" : "#E7E9E9"} stroke='none' /> {business?.rating || "Not Rated"} ({business.reviewsCount})
-                                                    </div>
-                                                    <p className="text-sm text-gray-500 flex items-center gap-2">
-                                                        <MapPin className='h-5 w-5' />
-                                                        {business.address}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        ))
-                                    }
+                                    {reviewsData?.businesses.map((business) => (
+                                        <BusinessCard key={business._id} business={business} />
+                                    ))}
                                 </div>
                             )
                             :
