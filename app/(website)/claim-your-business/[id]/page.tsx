@@ -15,7 +15,11 @@ const SingleBusiness = () => {
   const [isOpen, setIsOpen] = useState(false);
   const id = params?.id;
 
-  const { data: singleBusiness, isLoading } = useQuery({
+  const {
+    data: singleBusiness,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["get-single-business", id],
     queryFn: async () => await getSingleBusiness(id).then((res) => res.data),
   });
@@ -26,8 +30,6 @@ const SingleBusiness = () => {
         Loading...
       </div>
     );
-
-  console.log(singleBusiness);
 
   return (
     <div className="container pt-8 pb-16 space-y-10">
@@ -129,9 +131,13 @@ const SingleBusiness = () => {
               </div>
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="bg-teal-600 hover:bg-teal-700 text-white px-8 h-[40px] rounded-lg w-full md:w-auto"
+                disabled={singleBusiness?.isMailVerified}
+                className={`bg-teal-600 hover:bg-teal-700 text-white px-8 h-[40px] rounded-lg w-full md:w-auto ${
+                  singleBusiness?.isMailVerified &&
+                  " bg-gray-400 border border-gray-200 text-white font-bold h-[40px] disabled:cursor-not-allowed disabled:bg-gray-400"
+                }`}
               >
-                Verify
+                {singleBusiness?.isMailVerified ? "Verified" : "Verify"}
               </button>
             </div>
           </div>
@@ -164,7 +170,9 @@ const SingleBusiness = () => {
                   </ul>
                 </div>
               </div>
-              <button className="bg-teal-600 hover:bg-teal-700 text-white px-8 h-[40px] rounded-lg w-full md:w-auto">
+              <button
+                className={`bg-teal-600 hover:bg-teal-700 text-white px-8 h-[40px] rounded-lg w-full md:w-auto`}
+              >
                 Verify
               </button>
             </div>
@@ -220,6 +228,7 @@ const SingleBusiness = () => {
                 <VerifyBusinessCode
                   setIsOpen={setIsOpen}
                   businessID={singleBusiness?._id}
+                  refetch={refetch}
                 />
               )}
             </div>
