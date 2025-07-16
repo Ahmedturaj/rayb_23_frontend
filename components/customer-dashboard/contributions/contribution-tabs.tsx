@@ -1,3 +1,5 @@
+"use client"
+
 import React from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Image from 'next/image'
@@ -5,6 +7,24 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { MoreVertical, Star } from 'lucide-react'
 import BusinessCard from '@/components/shared/business-card'
+import { useQuery } from '@tanstack/react-query'
+import { getUserPhotos, getUserReview } from '@/lib/api'
+
+
+export interface Review {
+    _id: number;
+    feedback: string;
+    status: string;
+    user: {
+        name: string;
+        imageLink: string;
+        role: string;
+    };
+    image: string[];
+    rating: number;
+    createdAt: string;
+}
+
 
 export default function ContributionTabs() {
 
@@ -241,6 +261,20 @@ export default function ContributionTabs() {
         ]
     }
 
+
+    const { data: myReviews } = useQuery({
+        queryKey: ["myReviews"],
+        queryFn: getUserReview,
+        select: (data) => data?.data
+    })
+
+    const { data: myPhotos } = useQuery({
+        queryKey: ["myPhotos"],
+        queryFn: getUserPhotos,
+    })
+
+    console.log(myPhotos)
+
     return (
         <div>
             <Tabs defaultValue="reviews" className="w-full">
@@ -274,26 +308,26 @@ export default function ContributionTabs() {
                         }
                     </div>
                     {
-                        reviewsData?.reviews?.length > 0 ?
+                        myReviews?.length > 0 ?
                             (
                                 <div className="space-y-5">
                                     {
-                                        reviewsData.reviews.map((review) => (
-                                            <div key={review?.author.name} className="p-6 border rounded-md shadow-md">
+                                        myReviews.map((review: Review) => (
+                                            <div key={review._id} className="p-6 border rounded-md shadow-md">
                                                 <div className="space-y-4">
                                                     <div className="flex justify-between">
                                                         <div className="">
                                                             <div className="flex items-center gap-4">
                                                                 <Image
-                                                                    src={review.author.profilePicture || "/images/default_profile.png"}
-                                                                    alt={review.author.name}
+                                                                    src={review.user.imageLink || "/images/default_profile.png"}
+                                                                    alt={review.user.name}
                                                                     width={50}
                                                                     height={50}
                                                                     className="h-16 w-16 rounded-full object-cover"
                                                                 />
                                                                 <div className="">
-                                                                    <h3 className='text-lg font-semibold'>{review.author.name}</h3>
-                                                                    <p className='text-base text-[#485150]'>{review.author.role}</p>
+                                                                    <h3 className='text-lg font-semibold'>{review.user.name}</h3>
+                                                                    {/* <p className='text-base text-[#485150]'>{review.user.role}</p> */}
                                                                 </div>
                                                             </div>
                                                             <div className="flex items-center gap-1 py-3">
@@ -309,17 +343,17 @@ export default function ContributionTabs() {
                                                             </div>
                                                         </div>
                                                         <div className="flex gap-3 items-center">
-                                                            <p className={`${review.status === "Published" ? "text-green-500" : review.status === "Pending" ? "text-[#E38441] bg-[#E384411F]" : "text-[#E24040] bg-[#E240401F]"} px-4 py-1 rounded-xl`}>{review.status}</p>
+                                                            <p className={`${review.status === "approved" ? "text-green-500 bg-green-100" : review.status === "pending" ? "text-[#E38441] bg-[#E384411F]" : "text-[#E24040] bg-[#E240401F]"} px-4 py-1 rounded-xl`}>{review.status}</p>
                                                             <MoreVertical />
                                                         </div>
                                                     </div>
-                                                    <p className='text-base text-[#485150]'>{review.content}</p>
+                                                    <p className='text-base text-[#485150]'>{review.feedback}</p>
                                                     <div className="flex items-center gap-3">
                                                         {
-                                                            review.photos.length > 0 && (
+                                                            review.image.length > 0 && (
                                                                 <div className="flex gap-6 flex-wrap">
                                                                     {
-                                                                        review.photos.slice(0, 3).map((photo, index) => (
+                                                                        review.image.slice(0, 3).map((photo: string, index: number) => (
                                                                             <Image
                                                                                 key={index}
                                                                                 src={photo}
@@ -331,8 +365,8 @@ export default function ContributionTabs() {
                                                                         ))
                                                                     }
                                                                     {
-                                                                        review.photos.length > 3 && (
-                                                                            <span className="text-gray-500">+{review.photos.length - 3} more</span>
+                                                                        review.image.length > 3 && (
+                                                                            <span className="text-gray-500">+{review.image.length - 3} more</span>
                                                                         )
                                                                     }
                                                                 </div>

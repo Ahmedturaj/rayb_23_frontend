@@ -25,6 +25,7 @@ api.interceptors.request.use(
 
 // User API
 
+// Get user Profile
 export const getUserProfile = async () => {
   try {
     const response = await api.get(`/user/profile`);
@@ -35,6 +36,8 @@ export const getUserProfile = async () => {
   }
 };
 
+
+// Update user profile
 export async function updateUserProfile(data: any) {
   try {
     const response = await api.put(`/user/update-profile`, data);
@@ -45,7 +48,7 @@ export async function updateUserProfile(data: any) {
   }
 }
 
-
+// Deactivate account
 export async function deactivateAccount({ deactivedReason }: { deactivedReason: string }) {
   try {
     const response = await api.put(`/user/deactive-account`, deactivedReason);
@@ -56,7 +59,7 @@ export async function deactivateAccount({ deactivedReason }: { deactivedReason: 
   }
 }
 
-
+// Change password
 export async function changePassword(data: any) {
   try {
     const response = await api.post(`/auth/change-password`, data);
@@ -66,6 +69,32 @@ export async function changePassword(data: any) {
     throw error;
   }
 }
+
+
+// Get user review
+export async function getUserReview() {
+  try {
+    const response = await api.get(`/review/my-review`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user review:", error);
+    return error;
+  }
+}
+
+
+// Get user photos
+export async function getUserPhotos() {
+  try {
+    const response = await api.get(`/picture/get-all-pictures-by-user`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user photos:", error);
+    return error;
+  }
+}
+
+
 
 // Message API
 
@@ -137,6 +166,8 @@ export async function getSavedBusiness() {
     return error;
   }
 }
+
+
 //post a review
 export async function addReview(data: ReviewType) {
   try {
