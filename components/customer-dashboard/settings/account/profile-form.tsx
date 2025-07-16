@@ -144,7 +144,7 @@ export default function UserProfileForm() {
         <div className="space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle className="text-xl font-semibold text-gray-900">Account Info</CardTitle>
+                    <CardTitle className="text-xl font-semibold text-gray-900 border-b pb-4">Account Info</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="space-y-2">
@@ -181,7 +181,7 @@ export default function UserProfileForm() {
                                                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                                                 <Input
                                                     {...field}
-                                                    className="pl-10 bg-gray-50 border-gray-200 focus:bg-white"
+                                                    className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white"
                                                     placeholder="Enter your full name"
                                                     disabled={!isEditing}
                                                 />
@@ -204,7 +204,7 @@ export default function UserProfileForm() {
                                                 <Input
                                                     {...field}
                                                     type="email"
-                                                    className="pl-10 bg-gray-50 border-gray-200 focus:bg-white"
+                                                    className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white"
                                                     placeholder="Enter your email"
                                                     disabled={!isEditing}
                                                 />
@@ -245,7 +245,7 @@ export default function UserProfileForm() {
                                                 <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                                                 <Input
                                                     {...field}
-                                                    className="pl-10 bg-gray-50 border-gray-200 focus:bg-white"
+                                                    className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white"
                                                     placeholder="Enter your phone number"
                                                     disabled={!isEditing}
                                                 />

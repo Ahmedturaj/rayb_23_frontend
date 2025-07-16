@@ -53,7 +53,7 @@ export default function ChangePassForm() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="text-lg font-semibold">Change Password</CardTitle>
+                <CardTitle className="text-lg font-semibold border-b pb-4">Change Password</CardTitle>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
