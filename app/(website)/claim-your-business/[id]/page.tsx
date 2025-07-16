@@ -1,4 +1,5 @@
 "use client";
+import VerifyBusinessCode from "@/components/modals/VerifyBusinessCode";
 import VerifyBusinessEmail from "@/components/modals/VerifyBusinessEmail";
 import PathTracker from "@/components/shared/PathTracker";
 import { getSingleBusiness } from "@/lib/api";
@@ -11,6 +12,7 @@ import { useState } from "react";
 const SingleBusiness = () => {
   const params = useParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const id = params?.id;
 
   const { data: singleBusiness, isLoading } = useQuery({
@@ -24,6 +26,8 @@ const SingleBusiness = () => {
         Loading...
       </div>
     );
+
+  console.log(singleBusiness);
 
   return (
     <div className="container pt-8 pb-16 space-y-10">
@@ -205,7 +209,18 @@ const SingleBusiness = () => {
               </button>
 
               {isModalOpen && (
-                <VerifyBusinessEmail setIsModalOpen={setIsModalOpen} />
+                <VerifyBusinessEmail
+                  businessID={singleBusiness?._id}
+                  setIsModalOpen={setIsModalOpen}
+                  setIsOpen={setIsOpen}
+                />
+              )}
+
+              {isOpen && (
+                <VerifyBusinessCode
+                  setIsOpen={setIsOpen}
+                  businessID={singleBusiness?._id}
+                />
               )}
             </div>
           </div>
