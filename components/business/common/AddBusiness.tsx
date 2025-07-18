@@ -30,9 +30,14 @@ const AddBusiness = () => {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log("clicked");
+  }
+
   return (
     <div>
-      <form>
+      <form onSubmit={handleSubmit}>
         {/* business information */}
         <div>
           <div>
@@ -109,7 +114,7 @@ const AddBusiness = () => {
 
         {/* submit button */}
         <div className="pt-10 text-center">
-          <button className="py-3 h-[48px] w-[288px] rounded-lg bg-[#139a8e] text-white">
+          <button type="submit" className="py-3 h-[48px] w-[288px] rounded-lg bg-[#139a8e] text-white">
             Submit
           </button>
         </div>
