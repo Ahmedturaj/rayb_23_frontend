@@ -9,7 +9,7 @@ export default function layout({
     return (
         <main>
             <AdminDashboardLayout />
-            <div className="container py-5 lg:py-12">
+            <div className="py-5 lg:py-12">
                 {children}
             </div>
         </main >
