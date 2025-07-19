@@ -19,8 +19,7 @@ export default function CustomerDashboardLayout() {
             <div className="container">
                 <nav className="flex lg:space-x-6 space-x-2">
                     {tabs.map((tab) => {
-                        const isActive = pathname === tab.href;
-
+                        const isActive = pathname === tab.href || pathname.startsWith(`${tab.href}/`);
                         return (
                             <Link
                                 key={tab.name}

@@ -176,16 +176,14 @@ export default function InboxPage() {
         return `${Math.floor(diffInHours / 720)}m`
     }
 
-    const getInitials = (name?: string | null) => {
-        if (!name) return "NA";
+    const getInitials = (name: string) => {
         return name
             .split(" ")
-            .filter(Boolean)
             .map((word) => word[0])
             .join("")
             .toUpperCase()
-            .slice(0, 2);
-    };
+            .slice(0, 2)
+    }
 
     // Auto-scroll to bottom when new messages arrive or chat changes
     useEffect(() => {
@@ -203,55 +201,38 @@ export default function InboxPage() {
             <div className="w-full md:w-80 border-gray-200 flex flex-col">
                 <ScrollArea className="flex-1">
                     <div className="divide-y divide-gray-100">
-                        {chats?.length > 0 ? (
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            chats.map((chat: any) => (
-                                <div
-                                    key={chat._id}
-                                    className={`p-4 rounded-xl cursor-pointer hover:bg-[#F7F8F8] transition-colors ${selectedChat?._id === chat._id ? "bg-[#F7F8F8]" : ""
-                                        }`}
-                                    onClick={() => setSelectedChat(chat)}
-                                >
-                                    <div className="flex items-center space-x-3">
-                                        <Avatar className="h-12 w-12">
-                                            <AvatarImage
-                                                src={chat?.bussinessId?.businessInfo?.image || "/placeholder.svg"}
-                                            />
-                                            <AvatarFallback className="bg-gray-200 text-gray-600">
-                                                {getInitials(chat?.bussinessId?.businessInfo?.name)}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div className="flex-1">
-                                            <div className="flex items-center justify-between">
-                                                <p className="text-sm font-medium text-gray-900 truncate">
-                                                    {chat?.bussinessId?.businessInfo?.name}
-                                                </p>
-                                                <span className="text-xs text-gray-500">
-                                                    {chat.lastMessage && formatTime(chat.lastMessage.date)}
-                                                </span>
-                                            </div>
-                                            <p className="text-sm text-gray-500 truncate mt-1 max-w-[230px]">
-                                                <span>{chat.lastMessage?.senderId === myUserId ? "You: " : ""}</span>
-                                                {chat.lastMessage?.message || "No messages yet"}
-                                            </p>
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                        {chats?.map((chat: any) => (
+                            <div
+                                key={chat._id}
+                                className={`p-4 rounded-xl cursor-pointer hover:bg-[#F7F8F8] transition-colors ${selectedChat?._id === chat._id ? "bg-[#F7F8F8]" : ""
+                                    }`}
+                                onClick={() => setSelectedChat(chat)}
+                            >
+                                <div className="flex items-center space-x-3">
+                                    <Avatar className="h-12 w-12">
+                                        <AvatarImage src={chat?.bussinessId?.businessInfo?.image || "/placeholder.svg"} />
+                                        <AvatarFallback className="bg-gray-200 text-gray-600">
+                                            {getInitials(chat?.bussinessId?.businessInfo?.name)}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-sm font-medium text-gray-900 truncate">{chat.bussinessId.businessInfo.name}</p>
+                                            <span className="text-xs text-gray-500">
+                                                {chat.lastMessage && formatTime(chat.lastMessage.date)}
+                                            </span>
                                         </div>
+                                        <p className="text-sm text-gray-500 truncate mt-1 max-w-[230px]">
+                                            <span>{chat.lastMessage?.senderId === myUserId ? "You: " : ""}</span>
+                                            {chat.lastMessage?.message || "No messages yet"}
+                                        </p>
                                     </div>
                                 </div>
-                            ))
-                        ) : (
-                            <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-                                <p className="mb-4 text-gray-500">You have no messages yet.</p>
-                                <a
-                                    href="/search"
-                                    className="inline-block px-4 py-2 bg-[#00998E] text-white rounded-lg hover:bg-[#008A7E] transition-colors"
-                                >
-                                    Go to Search Results
-                                </a>
                             </div>
-                        )}
+                        ))}
                     </div>
                 </ScrollArea>
-
             </div>
 
             {/* Right Chat Window */}
@@ -263,8 +244,8 @@ export default function InboxPage() {
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
                                     <div className="flex items-center gap-5">
-                                        <h2 className="text-lg font-medium text-gray-900">{selectedChat?.bussinessId?.businessInfo?.name}</h2>
-                                        <p className="text-sm text-gray-500">{selectedChat?.bussinessId?.businessInfo?.email}</p>
+                                        <h2 className="text-lg font-medium text-gray-900">{selectedChat.bussinessId.businessInfo.name}</h2>
+                                        <p className="text-sm text-gray-500">{selectedChat.bussinessId.businessInfo.email}</p>
                                     </div>
                                 </div>
                                 <Avatar className="h-12 w-12 mt-1">

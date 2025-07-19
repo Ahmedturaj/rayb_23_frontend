@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
@@ -15,15 +14,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { getUserProfile, updateUserProfile } from "@/lib/api"
+import { deactivateAccount, getUserProfile, updateUserProfile } from "@/lib/api"
 import { User, Mail, Phone, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
-// Zod schema for form validation
+// ✅ Zod schema
 const profileFormSchema = z.object({
-    name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name must be less than 50 characters"),
-    email: z.string().email("Please enter a valid email address"),
-    bio: z.string().max(500, "Bio must be less than 500 characters").optional(),
+    name: z.string().min(2, "Name must be at least 2 characters").max(50),
+    email: z.string().email("Invalid email"),
+    bio: z.string().max(500).optional(),
     phone: z.string().optional(),
 })
 
@@ -35,59 +34,56 @@ export default function UserProfileForm() {
     const fileInputRef = useRef<HTMLInputElement>(null)
     const queryClient = useQueryClient()
 
-    // Initialize form with react-hook-form and zod validation
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+    const [selectedFile, setSelectedFile] = useState<File | null>(null)
+
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(profileFormSchema),
-        defaultValues: {
-            name: "",
-            email: "",
-            bio: "",
-            phone: "",
-        },
+        defaultValues: { name: "", email: "", bio: "", phone: "" },
     })
 
-    // Fetch user profile
-    const {
-        data: userProfile,
-        isLoading,
-        error,
-    } = useQuery({
+    const { data: userProfile, isLoading, error } = useQuery({
         queryKey: ["userProfile"],
         queryFn: getUserProfile,
         select: (data) => data?.data,
     })
 
-    console.log(userProfile)
-
-    // Update form values when user profile data is loaded
     useEffect(() => {
         if (userProfile) {
             form.reset({
                 name: userProfile.name || "",
                 email: userProfile.email || "",
                 bio: userProfile.bio || "",
-                phone: "", // Phone not in API response
+                phone: "",
             })
+            setPreviewUrl(null)
+            setSelectedFile(null)
         }
     }, [userProfile, form])
 
-    // Update profile mutation
     const updateProfileMutation = useMutation({
         mutationFn: updateUserProfile,
         onSuccess: (data) => {
-            toast(data.message)
+            toast.success(data.message)
             queryClient.invalidateQueries({ queryKey: ["userData"] })
             setIsEditing(false)
         },
         onError: (error) => {
-            if (error instanceof Error) {
-                toast.error(error.message)
-            }
+            if (error instanceof Error) toast.error(error.message)
         },
     })
 
     const onSubmit = (data: ProfileFormValues) => {
-        updateProfileMutation.mutate(data)
+        const formData = new FormData()
+        formData.append("name", data.name)
+        formData.append("email", data.email)
+        formData.append("bio", data.bio || "")
+        formData.append("phone", data.phone || "")
+        if (selectedFile) {
+            formData.append("image", selectedFile)
+        }
+
+        updateProfileMutation.mutate(formData)
     }
 
     const handleImageEdit = () => {
@@ -97,8 +93,8 @@ export default function UserProfileForm() {
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
-            // Handle image upload logic here
-            console.log("Image selected:", file)
+            setPreviewUrl(URL.createObjectURL(file))
+            setSelectedFile(file)
         }
     }
 
@@ -112,6 +108,24 @@ export default function UserProfileForm() {
                 phone: "",
             })
         }
+        setPreviewUrl(null)
+        setSelectedFile(null)
+    }
+
+    const { mutate: deactivateAccountMutation } = useMutation({
+        mutationFn: () => deactivateAccount({ deactivedReason: deactivationReason }),
+        onSuccess: (data) => {
+            toast.success(data.message)
+            queryClient.invalidateQueries({ queryKey: ["userData"] })
+        },
+        onError: (error) => {
+            if (error instanceof Error) toast.error(error.message)
+        },
+    })
+
+ 
+    const handleDeactivateAccount = () => {
+        deactivateAccountMutation()
     }
 
     if (isLoading) {
@@ -128,21 +142,18 @@ export default function UserProfileForm() {
 
     return (
         <div className="space-y-6">
-            {/* Account Info Section */}
             <Card>
                 <CardHeader>
-                    <CardTitle className="text-xl font-semibold text-gray-900">Account Info</CardTitle>
+                    <CardTitle className="text-xl font-semibold text-gray-900 border-b pb-4">Account Info</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    {/* Profile Picture */}
                     <div className="space-y-2">
-                        {/* ✅ FIX: Use plain <label> instead of FormLabel */}
                         <label className="text-sm font-medium text-gray-700">Profile Picture</label>
                         <div className="flex items-center justify-between">
                             <div className="relative">
                                 <Avatar className="h-16 w-16">
                                     <AvatarImage
-                                        src={userProfile?.imageLink || "/placeholder.svg"}
+                                        src={previewUrl || userProfile?.imageLink || "/placeholder.svg"}
                                         alt={userProfile?.name || "Profile"}
                                     />
                                     <AvatarFallback className="bg-gray-100">
@@ -159,7 +170,6 @@ export default function UserProfileForm() {
 
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            {/* Full Name */}
                             <FormField
                                 control={form.control}
                                 name="name"
@@ -171,7 +181,7 @@ export default function UserProfileForm() {
                                                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                                                 <Input
                                                     {...field}
-                                                    className="pl-10 bg-gray-50 border-gray-200 focus:bg-white"
+                                                    className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white"
                                                     placeholder="Enter your full name"
                                                     disabled={!isEditing}
                                                 />
@@ -182,7 +192,6 @@ export default function UserProfileForm() {
                                 )}
                             />
 
-                            {/* Email */}
                             <FormField
                                 control={form.control}
                                 name="email"
@@ -195,7 +204,7 @@ export default function UserProfileForm() {
                                                 <Input
                                                     {...field}
                                                     type="email"
-                                                    className="pl-10 bg-gray-50 border-gray-200 focus:bg-white"
+                                                    className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white"
                                                     placeholder="Enter your email"
                                                     disabled={!isEditing}
                                                 />
@@ -206,7 +215,6 @@ export default function UserProfileForm() {
                                 )}
                             />
 
-                            {/* Bio */}
                             <FormField
                                 control={form.control}
                                 name="bio"
@@ -226,7 +234,6 @@ export default function UserProfileForm() {
                                 )}
                             />
 
-                            {/* Phone Number */}
                             <FormField
                                 control={form.control}
                                 name="phone"
@@ -238,7 +245,7 @@ export default function UserProfileForm() {
                                                 <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                                                 <Input
                                                     {...field}
-                                                    className="pl-10 bg-gray-50 border-gray-200 focus:bg-white"
+                                                    className="pl-10 h-12 bg-gray-50 border-gray-200 focus:bg-white"
                                                     placeholder="Enter your phone number"
                                                     disabled={!isEditing}
                                                 />
@@ -249,7 +256,6 @@ export default function UserProfileForm() {
                                 )}
                             />
 
-                            {/* Action Buttons */}
                             <div className="flex flex-col sm:flex-row gap-3 pt-4">
                                 {!isEditing ? (
                                     <Button
@@ -319,8 +325,8 @@ export default function UserProfileForm() {
                                 <SelectContent>
                                     <SelectItem value="not-useful">Not useful anymore</SelectItem>
                                     <SelectItem value="privacy-concerns">Privacy concerns</SelectItem>
-                                    <SelectItem value="too-many-emails">Too many emails</SelectItem>
                                     <SelectItem value="found-alternative">Found an alternative</SelectItem>
+                                    <SelectItem value="other">I don&apos;t feel safe</SelectItem>
                                     <SelectItem value="other">Other</SelectItem>
                                 </SelectContent>
                             </Select>
@@ -330,12 +336,14 @@ export default function UserProfileForm() {
                             variant="secondary"
                             className="bg-gray-200 hover:bg-gray-300 text-gray-700 w-full sm:w-auto"
                             disabled={!deactivationReason}
+                            onClick={handleDeactivateAccount}
                         >
                             Deactivate Account
                         </Button>
                     </div>
                 </CardContent>
             </Card>
+
         </div>
     )
 }
