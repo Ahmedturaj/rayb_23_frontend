@@ -38,8 +38,8 @@ export async function middleware(request: NextRequest) {
     }
 
     if (pathname.startsWith("/customer-dashboard")) {
-        if (!token || token.userType !== "user") {
-            return NextResponse.redirect(new URL("/403", request.url));
+        if (!token || token.userType !== "businessMan") {
+            return NextResponse.redirect(new URL("/business-dashboard", request.url));
         }
     }
 
