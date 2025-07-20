@@ -3,15 +3,18 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-export default function CustomerDashboardLayout() {
+export default function  AdminDashboardLayout() {
     const pathname = usePathname();
 
     const tabs = [
-        { name: 'Profile', href: '/customer-dashboard/profile' },
-        { name: 'My Contributions', href: '/customer-dashboard/my-contributions' },
-        { name: 'Messages', href: '/customer-dashboard/messages' },
-        { name: 'Saved', href: '/customer-dashboard/saved' },
-        { name: 'Settings', href: '/customer-dashboard/settings' },
+        { name: 'Dashboard', href: '/admin-dashboard/dashboard' },
+        { name: 'Business Submissions', href: '/admin-dashboard/business-submissions' },
+        { name: 'Business Claims', href: '/admin-dashboard/admin-claims' },
+        { name: 'Manage Photos', href: '/admin-dashboard/manage-photos' },
+        { name: 'Manage Reviews', href: '/admin-dashboard/manage-reviews' },
+        { name: 'Manage Users', href: '/admin-dashboard/manage-users' },
+        { name: 'Messages', href: '/admin-dashboard/messages' },
+        { name: 'Settings', href: '/admin-dashboard/settings ' }, 
     ];
 
     return (

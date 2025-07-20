@@ -9,10 +9,10 @@ export default function layout({
     return (
         <main className="container">
             <div className="grid grid-cols-7 gap-6">
-                <div className="col-span-2">
+                <div className="lg:col-span-2">
                     <SettingsSidebar />
                 </div>
-                <div className="col-span-5">
+                <div className="lg:col-span-5 col-span-7">
                     {children}
                 </div>
             </div>

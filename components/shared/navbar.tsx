@@ -100,7 +100,9 @@ const App = () => {
               (
                 <div className="flex gap-3">
                   <div className="flex items-center justify-center h-12 w-12 bg-[#F7F8F8] rounded-full">
-                    <Bell className='h-6 w-6' />
+                    <Link href={`${session?.user?.userType === "user" ? "/customer-dashboard/settings/notifications" : "/business-dashboard/settings/notifications"}`}>
+                      <Bell className='h-6 w-6' />
+                    </Link>
                   </div>
                   <div className="flex items-center justify-center h-12 w-12 bg-[#F7F8F8] rounded-full">
                     <Inbox className='h-6 w-6' />
