@@ -25,25 +25,15 @@ export async function middleware(request: NextRequest) {
     }
 
     // ✅ Role-based access for protected routes
-    if (pathname.startsWith("/admin-dashboard")) {
-        if (!token || token.userType !== "admin") {
-            return NextResponse.redirect(new URL("/403", request.url));
-        }
-    }
-
-    if (pathname.startsWith("/business-dashboard")) {
-        if (!token || token.userType !== "businessMan") {
-            return NextResponse.redirect(new URL("/403", request.url));
-        }
-    }
-
-    if (pathname.startsWith("/customer-dashboard")) {
-        if (!token || token.userType !== "businessMan") {
+    if (pathname.startsWith("/admin-dashboard") || pathname.startsWith("/business-dashboard") || pathname.startsWith("/customer-dashboard")) {
+        if (!token || (token.userType as string) === "admin") {
+            return NextResponse.redirect(new URL("/admin-dashboard", request.url));
+        } else if ((token.userType as string) === "businessMan") {
             return NextResponse.redirect(new URL("/business-dashboard", request.url));
+        } else if ((token.userType as string) === "user") {
+            return NextResponse.redirect(new URL("/customer-dashboard", request.url));
         }
     }
-
-    console.log(token)
 
     // ✅ If logged in & visiting auth routes → redirect to dashboard
     if (

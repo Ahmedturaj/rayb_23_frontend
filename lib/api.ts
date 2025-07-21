@@ -155,6 +155,24 @@ export async function getSingleBusiness(params: string | string[]) {
 
 
 
+
+// Admin claim business api
+
+export async function getAllBusinessClaims() {
+  try {
+    const response = await api.get(`/claim-bussiness`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching business claims:", error);
+    return error;
+  }
+}
+
+
+// Approve business claim
+
+
+
 // Saved API
 
 export async function getSavedBusiness() {
