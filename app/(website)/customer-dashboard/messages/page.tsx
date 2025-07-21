@@ -1,4 +1,5 @@
 "use client"
+
 import type React from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState, useEffect, useRef } from "react"
@@ -9,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Send, Paperclip } from "lucide-react"
+import { Send, Paperclip, ArrowLeft } from "lucide-react"
 
 export default function InboxPage() {
     const queryClient = useQueryClient()
@@ -23,6 +24,9 @@ export default function InboxPage() {
     const currentChatRef = useRef<string | null>(null)
     const { data: session } = useSession()
     const myUserId = session?.user?.id
+
+    // Mobile view state - true shows chat list, false shows selected chat
+    const [showChatList, setShowChatList] = useState(true)
 
     // Ref for the messages scroll area
     const messagesScrollAreaRef = useRef<HTMLDivElement>(null)
@@ -67,11 +71,9 @@ export default function InboxPage() {
                                     new Date(msg.createdAt || msg.date).getTime(),
                                 ) < 1000),
                     )
-
                     if (messageExists) {
                         return prev
                     }
-
                     return [...prev, msg]
                 })
             }
@@ -153,7 +155,6 @@ export default function InboxPage() {
 
         const formData = new FormData()
         formData.append("data", JSON.stringify(payload))
-
         sendMutation.mutate(formData)
     }
 
@@ -177,30 +178,47 @@ export default function InboxPage() {
     }
 
     const getInitials = (name?: string | null) => {
-        if (!name) return "NA";
+        if (!name) return "NA"
         return name
             .split(" ")
             .filter(Boolean)
             .map((word) => word[0])
             .join("")
             .toUpperCase()
-            .slice(0, 2);
-    };
+            .slice(0, 2)
+    }
+
+    // Handle chat selection for mobile
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleChatSelect = (chat: any) => {
+        setSelectedChat(chat)
+        setShowChatList(false) // Hide chat list on mobile
+    }
+
+    // Handle back to chat list on mobile
+    const handleBackToChatList = () => {
+        setShowChatList(true)
+        setSelectedChat(null)
+    }
 
     // Auto-scroll to bottom when new messages arrive or chat changes
     useEffect(() => {
         if (messagesScrollAreaRef.current) {
-            const scrollContent = messagesScrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement;
+            const scrollContent = messagesScrollAreaRef.current.querySelector(
+                "[data-radix-scroll-area-viewport]",
+            ) as HTMLElement
             if (scrollContent) {
-                scrollContent.scrollTop = scrollContent.scrollHeight;
+                scrollContent.scrollTop = scrollContent.scrollHeight
             }
         }
-    }, [liveMessages, selectedChat]); // Added selectedChat to dependencies
+    }, [liveMessages, selectedChat]) // Added selectedChat to dependencies
+
+    console.log(session, "Session Data")
 
     return (
         <div className="flex gap-5 h-[70vh] bg-white container">
             {/* Left Sidebar - Chat List */}
-            <div className="w-full md:w-80 border-gray-200 flex flex-col">
+            <div className={`w-full md:w-80 border-gray-200 flex flex-col ${showChatList ? "block" : "hidden md:flex"}`}>
                 <ScrollArea className="flex-1">
                     <div className="divide-y divide-gray-100">
                         {chats?.length > 0 ? (
@@ -210,13 +228,11 @@ export default function InboxPage() {
                                     key={chat._id}
                                     className={`p-4 rounded-xl cursor-pointer hover:bg-[#F7F8F8] transition-colors ${selectedChat?._id === chat._id ? "bg-[#F7F8F8]" : ""
                                         }`}
-                                    onClick={() => setSelectedChat(chat)}
+                                    onClick={() => handleChatSelect(chat)}
                                 >
                                     <div className="flex items-center space-x-3">
                                         <Avatar className="h-12 w-12">
-                                            <AvatarImage
-                                                src={chat?.bussinessId?.businessInfo?.image || "/placeholder.svg"}
-                                            />
+                                            <AvatarImage src={chat?.bussinessId?.businessInfo?.image[0] || "/placeholder.svg"} />
                                             <AvatarFallback className="bg-gray-200 text-gray-600">
                                                 {getInitials(chat?.bussinessId?.businessInfo?.name)}
                                             </AvatarFallback>
@@ -251,24 +267,31 @@ export default function InboxPage() {
                         )}
                     </div>
                 </ScrollArea>
-
             </div>
 
             {/* Right Chat Window */}
-            <div className="flex-1 flex flex-col border rounded-lg">
+            <div className={`flex-1 flex flex-col border rounded-lg ${showChatList ? "hidden md:flex" : "flex"}`}>
                 {selectedChat ? (
                     <>
                         {/* Chat Header */}
                         <div className="px-4 py-2 border-b">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
+                                    {/* Back button for mobile */}
+                                    <Button variant="ghost" size="sm" className="md:hidden p-2" onClick={handleBackToChatList}>
+                                        <ArrowLeft className="h-4 w-4" />
+                                    </Button>
                                     <div className="flex items-center gap-5">
-                                        <h2 className="text-lg font-medium text-gray-900">{selectedChat?.bussinessId?.businessInfo?.name}</h2>
-                                        <p className="text-sm text-gray-500">{selectedChat?.bussinessId?.businessInfo?.email}</p>
+                                        <h2 className="text-lg font-medium text-gray-900 line-clamp-1 max-w-[200px]">
+                                            {selectedChat?.bussinessId?.businessInfo?.name}
+                                        </h2>
+                                        <p className="text-sm text-gray-500 hidden sm:block">
+                                            {selectedChat?.bussinessId?.businessInfo?.email}
+                                        </p>
                                     </div>
                                 </div>
                                 <Avatar className="h-12 w-12 mt-1">
-                                    <AvatarImage src={selectedChat?.bussinessId?.businessInfo?.image || "/placeholder.svg"} />
+                                    <AvatarImage src={selectedChat?.bussinessId?.businessInfo?.image[0] || "/placeholder.svg"} />
                                     <AvatarFallback className="bg-gray-200 text-gray-600 text-xs">
                                         {getInitials(selectedChat?.senderId?.name || selectedChat?.userId?.name)}
                                     </AvatarFallback>

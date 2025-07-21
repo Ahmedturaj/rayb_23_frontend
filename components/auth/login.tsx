@@ -52,8 +52,9 @@ export default function LoginForm() {
                 toast.error(res.error)
             } else {
                 toast.success("Login successful")
-                router.push("/")
+                router.push("/admin-dashboard")
             }
+            console.log(res)
 
         } catch (error) {
             if (error instanceof Error) {
