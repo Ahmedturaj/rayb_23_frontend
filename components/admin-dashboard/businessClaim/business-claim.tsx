@@ -18,20 +18,16 @@ interface User {
 
 interface BusinessClaim {
     _id: string
-    businessId: {
-        businessInfo: {
-            name: string
-            address: string
-        }
+    business: {
         _id: string
+        name: string
+        address: string
     }
-    userId: User
+    user: User
     documents: string[]
     status: "pending" | "approved" | "rejected"
     isVerified: boolean
     createdAt: string
-    updatedAt: string
-    __v: number
 }
 
 interface ApiResponse {
@@ -80,7 +76,7 @@ export default function ManageBusinessClaims() {
     }
 
     const handleViewDocuments = (documents: string[]) => {
-        if (documents.length === 0) {
+        if (!documents) {
             toast.info("No documents available")
             return
         }
@@ -227,7 +223,7 @@ export default function ManageBusinessClaims() {
                                         {/* Top section */}
                                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between items-start gap-2">
                                             <div className="space-y-1">
-                                                <p className="text-sm text-gray-600">Claim #{claim._id.slice(-8)}</p>
+                                                <p className="text-sm text-gray-600">Claim #{claim._id?.slice(-8)}</p>
                                                 <p className="text-sm text-gray-600">{formatDate(claim.createdAt)}</p>
                                             </div>
                                             <div className="sm:text-right">{getStatusBadge(claim.status)}</div>
@@ -237,22 +233,22 @@ export default function ManageBusinessClaims() {
                                             <div className="space-y-3 w-1/2 border-r-2 border-[#E7E9E9]">
                                                 <div className="space-y-1">
                                                     <p className="text-base font-medium text-gray-700">Business</p>
-                                                    <p className="text-lg font-medium text-gray-900">{claim.businessId?.businessInfo?.name}</p>
+                                                    <p className="text-lg font-medium text-gray-900">{claim.business.name}</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-base font-medium text-gray-700">Location</p>
-                                                    <p className="text-lg font-medium text-gray-900">{claim.businessId?.businessInfo?.address}</p>
+                                                    <p className="text-lg font-medium text-gray-900">{claim.business.address}</p>
                                                 </div>
                                             </div>
 
                                             <div className="space-y-3">
                                                 <div className="space-y-1">
                                                     <p className="text-base font-medium text-gray-700">Claimed By</p>
-                                                    <p className="text-lg font-medium text-gray-900">{claim.userId?.name}</p>
+                                                    <p className="text-lg font-medium text-gray-900">{claim.user?.name}</p>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <p className="text-base font-medium text-gray-700">Email</p>
-                                                    <p className="text-lg font-medium text-gray-900">{claim.userId?.email}</p>
+                                                    <p className="text-lg font-medium text-gray-900">{claim.user?.email}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -263,7 +259,7 @@ export default function ManageBusinessClaims() {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            onClick={() => handleViewDocuments(claim.documents)}
+                                            onClick={() => handleViewDocuments(claim?.documents)}
                                             className={`bg-[#F7F8F8] h-12 border-none ${claim.status === "approved" || claim.status === "rejected" ? "col-span-3" : "col-span-1"}`}
                                         >
                                             <FileText className="w-4 h-4 mr-2" />

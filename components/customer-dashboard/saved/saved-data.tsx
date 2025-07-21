@@ -86,13 +86,13 @@ export default function UserSavedData() {
                         className="h-16 w-16 object-contain"
                     />
                     <div className="space-y-2">
-                        <h4 className='text-xl font-semibold'>No Business Added</h4>
-                        <p>Know a hidden gem? Add it to support our music community</p>
+                        <h4 className='text-xl font-semibold'>No Shops Saved</h4>
+                        <p>You haven’t saved any shops yet. Bookmark the ones you want to support or visit later.</p>
                     </div>
                 </div>
                 <Link href="/search-result" className="flex-shrink-0">
                     <Button>
-                        Add Business
+                        Save Business
                     </Button>
                 </Link>
             </div>
