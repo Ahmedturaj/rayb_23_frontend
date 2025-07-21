@@ -9,7 +9,7 @@ export default function  AdminDashboardLayout() {
     const tabs = [
         { name: 'Dashboard', href: '/admin-dashboard/dashboard' },
         { name: 'Business Submissions', href: '/admin-dashboard/business-submissions' },
-        { name: 'Business Claims', href: '/admin-dashboard/admin-claims' },
+        { name: 'Business Claims', href: '/admin-dashboard/business-claims' },
         { name: 'Manage Photos', href: '/admin-dashboard/manage-photos' },
         { name: 'Manage Reviews', href: '/admin-dashboard/manage-reviews' },
         { name: 'Manage Users', href: '/admin-dashboard/manage-users' },

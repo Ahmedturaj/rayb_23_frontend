@@ -215,7 +215,7 @@ export default function InboxPage() {
                                     <div className="flex items-center space-x-3">
                                         <Avatar className="h-12 w-12">
                                             <AvatarImage
-                                                src={chat?.bussinessId?.businessInfo?.image || "/placeholder.svg"}
+                                                src={chat?.bussinessId?.businessInfo?.image[0]}
                                             />
                                             <AvatarFallback className="bg-gray-200 text-gray-600">
                                                 {getInitials(chat?.bussinessId?.businessInfo?.name)}
@@ -268,7 +268,7 @@ export default function InboxPage() {
                                     </div>
                                 </div>
                                 <Avatar className="h-12 w-12 mt-1">
-                                    <AvatarImage src={selectedChat?.bussinessId?.businessInfo?.image || "/placeholder.svg"} />
+                                    <AvatarImage src={selectedChat?.bussinessId?.businessInfo?.image[0] || "/placeholder.svg"} />
                                     <AvatarFallback className="bg-gray-200 text-gray-600 text-xs">
                                         {getInitials(selectedChat?.senderId?.name || selectedChat?.userId?.name)}
                                     </AvatarFallback>

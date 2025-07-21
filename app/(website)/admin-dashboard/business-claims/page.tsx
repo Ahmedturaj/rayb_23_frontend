@@ -1,9 +1,10 @@
+import ManageBusinessClaims from '@/components/admin-dashboard/businessClaim/business-claim'
 import React from 'react'
 
 export default function page() {
     return (
-        <div>
-            Business Claims Page
-        </div>
+        <main>
+            <ManageBusinessClaims />
+        </main>
     )
 }

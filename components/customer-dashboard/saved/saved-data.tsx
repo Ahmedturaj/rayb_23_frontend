@@ -74,7 +74,7 @@ export default function UserSavedData() {
     )
 
 
-    if (savedData?.length === 0) {
+    if (!savedData) {
         return (
             <div className="flex justify-between items-center bg-[#F7F8F8] p-6 rounded-md">
                 <div className="flex items-center gap-4">
