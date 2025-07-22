@@ -309,7 +309,6 @@ export default function BdDashComponent() {
         </div>
 
         {/* New Messages */}
-        {/* New Messages */}
         <div className="space-y-4 border border-gray-300 rounded-lg p-5">
           <div className="flex items-center justify-between border-b border-gray-300 pb-3">
             <h2 className="text-lg font-semibold text-gray-900">

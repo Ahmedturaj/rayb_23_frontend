@@ -284,7 +284,7 @@ const Navbar = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white border-gray-700 border-none">
                   <DropdownMenuItem className="hover:bg-[#F7F8F8] cursor-pointer">
-                    <Link href="/customer-dashboard/profile" className="flex gap-2 items-center">
+                    <Link href={userData?.userType === "user" ? "customer-dashboard/profile" : userData?.userType === "admin" ? "admin-dashboard/settings" : "business-dashboard/profile"} className="flex gap-2 items-center">
                       <User2Icon className="h-6 w-6" />
                       {"View Profile"}
                     </Link>

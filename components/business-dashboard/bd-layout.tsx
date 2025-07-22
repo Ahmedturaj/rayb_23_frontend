@@ -1,5 +1,7 @@
 "use client";
 
+// import { getMyBusinesses } from "@/lib/api";
+// import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -14,9 +16,15 @@ export default function BusinessDashboardLayout() {
     { name: "Settings", href: "/business-dashboard/settings" },
   ];
 
+  // const myBusinesses = useQuery({
+  //   queryKey: ["myBusinesses"],
+  //   queryFn: getMyBusinesses,
+  //   select: (data) => data?.data,
+  // })
+
   return (
     <section className="border-b py-4">
-      <div className="container">
+      <div className="container flex justify-between items-center">
         <nav className="flex lg:space-x-6 space-x-2">
           {tabs.map((tab) => {
             const isActive =
@@ -25,17 +33,19 @@ export default function BusinessDashboardLayout() {
               <Link
                 key={tab.name}
                 href={tab.href}
-                className={`py-1 text-sm font-medium ${
-                  isActive
-                    ? "text-teal-600 border-b-2 border-teal-600"
-                    : "text-gray-700 hover:text-teal-600"
-                }`}
+                className={`py-1 text-sm font-medium ${isActive
+                  ? "text-teal-600 border-b-2 border-teal-600"
+                  : "text-gray-700 hover:text-teal-600"
+                  }`}
               >
                 {tab.name}
               </Link>
             );
           })}
         </nav>
+        <div className="">
+          Hello
+        </div>
       </div>
     </section>
   );
