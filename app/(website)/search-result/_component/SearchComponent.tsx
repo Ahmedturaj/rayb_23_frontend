@@ -3,10 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -14,78 +12,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Star,
-  MapPin,
-  MessageCircle,
-  X,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getAllbusiness } from "@/lib/api";
+import Link from "next/link";
 
-const instructors = [
-  {
-    id: 1,
-    name: "Brookston Music",
-    image: "/placeholder.svg?height=80&width=80",
-    rating: 4.5,
-    reviews: 125,
-    distance: "5.8 km away",
-    price: "$45.00",
-    services: ["Recording", "Lessons"],
-    instruments: ["Guitar", "Piano"],
-  },
-  {
-    id: 2,
-    name: "San Francisco Guitar Tech",
-    image: "/placeholder.svg?height=80&width=80",
-    rating: 4.7,
-    reviews: 89,
-    distance: "2.8 km away",
-    price: "$55.00",
-    services: ["Recording", "Setup"],
-    instruments: ["Guitar"],
-  },
-  {
-    id: 3,
-    name: "San Francisco Guitar Tech",
-    image: "/placeholder.svg?height=80&width=80",
-    rating: 4.2,
-    reviews: 156,
-    distance: "3.1 km away",
-    price: "$40.00",
-    services: ["Recording", "Lessons"],
-    instruments: ["Guitar"],
-  },
-  {
-    id: 4,
-    name: "Brookston Music",
-    image: "/placeholder.svg?height=80&width=80",
-    rating: 4.8,
-    reviews: 203,
-    distance: "4.2 km away",
-    price: "$50.00",
-    services: ["Lessons", "Tuning"],
-    instruments: ["Piano", "Violin"],
-  },
-  {
-    id: 5,
-    name: "Brookston Music",
-    image: "/placeholder.svg?height=80&width=80",
-    rating: 4.6,
-    reviews: 167,
-    distance: "6.1 km away",
-    price: "$42.00",
-    services: ["Recording", "Lessons"],
-    instruments: ["Guitar", "Bass"],
-  },
-];
+interface BusinessItem {
+  email: string;
+  name: string;
+  image: string;
+}
+
+interface Service {
+  serviceName: string;
+}
+
+interface Business {
+  _id: string;
+  businessInfo: BusinessItem;
+  instrumentInfo: Service[];
+}
 
 export default function SearchComponent() {
   const [priceRange, setPriceRange] = useState([20, 80]);
   const [selectedInstruments, setSelectedInstruments] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [showChat, setShowChat] = useState(true);
 
   const instrumentFamilies = [
     { name: "Guitar", count: 45 },
@@ -132,11 +83,21 @@ export default function SearchComponent() {
     }
   };
 
+  const { data: allBusiness = [] } = useQuery({
+    queryKey: ["all-business-search-result"],
+    queryFn: async () => {
+      const response = await getAllbusiness();
+      return response.data;
+    },
+  });
+
+  console.log(allBusiness);
+
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex">
       {/* Sidebar Filters */}
-      <div className="w-80 bg-white p-6 border-r">
-        <h2 className="text-lg font-semibold mb-6">Filters</h2>
+      <div className="border-r pr-6">
+        <h2 className="text-2xl font-bold mb-6">Filters</h2>
 
         {/* Instrument Family */}
         <div className="mb-8">
@@ -153,7 +114,6 @@ export default function SearchComponent() {
                     {family.name}
                   </label>
                 </div>
-                <span className="text-xs text-gray-500">{family.count}</span>
               </div>
             ))}
           </div>
@@ -225,40 +185,9 @@ export default function SearchComponent() {
       <div className="flex-1 p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
+          <div className="space-y-2">
+            <p className="text-gray-500">24 result for</p>
             <h1 className="text-2xl font-semibold">Online Classes</h1>
-            <div className="flex items-center space-x-2">
-              <Select defaultValue="design">
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="design">Design</SelectItem>
-                  <SelectItem value="music">Music</SelectItem>
-                  <SelectItem value="art">Art</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select defaultValue="guitar">
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="guitar">Guitar</SelectItem>
-                  <SelectItem value="piano">Piano</SelectItem>
-                  <SelectItem value="violin">Violin</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select defaultValue="beginner">
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="beginner">Beginner</SelectItem>
-                  <SelectItem value="intermediate">Intermediate</SelectItem>
-                  <SelectItem value="advanced">Advanced</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
           <div className="flex items-center space-x-4">
             <span className="text-sm text-gray-600">Sort by</span>
@@ -273,18 +202,20 @@ export default function SearchComponent() {
                 <SelectItem value="distance">Distance</SelectItem>
               </SelectContent>
             </Select>
-            <div className="flex items-center space-x-2">
+            {/* <div className="flex items-center space-x-2">
               <Checkbox id="open-now" />
               <label htmlFor="open-now" className="text-sm">
                 Open Now
               </label>
-            </div>
+            </div> */}
           </div>
         </div>
 
+        <div className="mb-8">tags section</div>
+
         {/* Instructor Cards */}
-        <div className="grid gap-4 mb-8">
-          {instructors.map((instructor) => (
+        <div className="grid gap-4">
+          {/* {instructors.map((instructor) => (
             <Card key={instructor.id} className="p-4">
               <CardContent className="p-0">
                 <div className="flex items-start space-x-4">
@@ -347,11 +278,70 @@ export default function SearchComponent() {
                 </div>
               </CardContent>
             </Card>
+          ))} */}
+        </div>
+
+        <div className="space-y-8">
+          {allBusiness?.map((business: Business) => (
+            <div
+              key={business?.businessInfo?.email}
+              className="bg-white rounded-lg shadow-[0px_2px_12px_0px_#003d3924] p-6"
+            >
+              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-5">
+                {/* Profile Image */}
+                <div className="flex-shrink-0 overflow-hidden rounded-lg w-full sm:w-auto">
+                  <Image
+                    src={business?.businessInfo?.image[0] || "/placeholder.svg"}
+                    alt={"business.png"}
+                    width={1000}
+                    height={1000}
+                    className="rounded-lg object-cover w-full sm:w-[200px] h-[200px] hover:scale-105 transition"
+                  />
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 w-full">
+                  <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {business?.businessInfo?.name}
+                      </h3>
+
+                      {/* Rating */}
+                      <div className="flex items-center gap-1 my-3">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-sm font-medium">{"3.7"}</span>
+                      </div>
+
+                      {/* Services */}
+                      <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          {business?.instrumentInfo?.map((service, index) => (
+                            <button
+                              className="h-[48px] px-5 rounded-lg bg-[#F8F8F8]"
+                              key={index}
+                            >
+                              {service?.serviceName}
+                            </button>
+                          ))}
+                        </div>
+
+                        <div>
+                          <Link href={`/business/${business?._id}`}>
+                            <button className="text-teal-500">See More</button>
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-center space-x-2 mb-8">
+        <div className="flex items-center justify-center space-x-2 my-8">
           <Button variant="outline" size="sm">
             <ChevronLeft className="w-4 h-4" />
           </Button>
@@ -377,40 +367,47 @@ export default function SearchComponent() {
           </Button>
         </div>
 
-        <div className="text-center">
-          <Button className="bg-teal-600 hover:bg-teal-700">See More</Button>
-        </div>
-      </div>
-
-      {/* Chat Widget */}
-      {showChat && (
-        <div className="fixed bottom-6 right-6 bg-white rounded-lg shadow-lg p-4 w-80 border">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center space-x-2">
-              <MessageCircle className="w-5 h-5 text-teal-600" />
-              <span className="font-medium">Can&apos;t find the music class?</span>
+        {/* Add Business Section */}
+        <div className="border border-gray-200 bg-gray-50 mt-10 p-5 rounded-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="flex gap-6 items-start md:items-center">
+            <div>
+              <Image
+                src={"/images/location.png"}
+                alt="location.png"
+                width={1000}
+                height={1000}
+                className="w-[48px] h-[60px]"
+              />
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowChat(false)}
-            >
-              <X className="w-4 h-4" />
-            </Button>
+
+            <div>
+              <h1 className="font-semibold text-xl">
+                Can’t find your business?
+              </h1>
+              <p className="text-[#485150] text-[16px] mt-2">
+                Adding your business to Instrufix is completely free!
+              </p>
+            </div>
           </div>
-          <p className="text-sm text-gray-600 mb-4">
-            Get a recommendation based on your needs and preferences
-          </p>
-          <div className="space-y-2">
-            <Button className="w-full bg-teal-600 hover:bg-teal-700">
-              Quick Answers
-            </Button>
-            <p className="text-xs text-gray-500 text-center">
-              Get answers from our music experts
+
+          <div className="w-full md:w-auto">
+            <Link href={"/add-a-business"}>
+              <Button className="w-full md:w-auto bg-teal-600 hover:bg-teal-700 text-white px-8 h-[48px]">
+                Add Business
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* No Results */}
+        {allBusiness.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">
+              No instructors found matching your search.
             </p>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

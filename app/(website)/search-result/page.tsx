@@ -2,7 +2,7 @@ import SearchComponent from "./_component/SearchComponent";
 
 const page = () => {
   return (
-    <div>
+    <div className="container py-12">
       <SearchComponent />
     </div>
   );
