@@ -213,7 +213,6 @@ export default function InboxPage() {
         }
     }, [liveMessages, selectedChat]) // Added selectedChat to dependencies
 
-    console.log(session, "Session Data")
 
     return (
         <div className="flex gap-5 h-[70vh] bg-white container">

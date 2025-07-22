@@ -108,6 +108,18 @@ export async function getUserBusinesses() {
 
 
 
+// Business API
+export async function getMyBusinesses() {
+  try {
+    const response = await api.get(`business/my-approved-business`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching my businesses:", error);
+    return error;
+  }
+}
+
+
 // Message API
 
 // Get my chat
