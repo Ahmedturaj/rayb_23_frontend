@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { MoreVertical, Star } from 'lucide-react'
 import BusinessCard from '@/components/shared/business-card'
 import { useQuery } from '@tanstack/react-query'
-import { getUserPhotos, getUserReview } from '@/lib/api'
+import { getUserBusinesses, getUserPhotos, getUserReview } from '@/lib/api'
 
 
 export interface Review {
@@ -28,240 +28,6 @@ export interface Review {
 
 export default function ContributionTabs() {
 
-    const reviewsData = {
-        reviews: [
-            {
-                id: 1,
-                content: "Bronstein Music is amazing! They repaired my guitar perfectly and quickly. Excellent service, knowledgeable staff, and great attention to detail!",
-                status: "Published",
-                author: {
-                    name: "John Doe",
-                    profilePicture: "/images/profilePlaceholder.jpg",
-                    role: "Guitarist"
-                },
-                photos: [
-                    "/images/percussions.png",
-                    "/images/percussions.png",
-                    "/images/percussions.png"
-                ],
-                rating: 5,
-                createdAt: "2023-01-01"
-            },
-            {
-                id: 2,
-                content: "Bronstein Music is amazing! They repaired my guitar perfectly and quickly. Excellent service, knowledgeable staff, and great attention to detail!",
-                status: "Pending",
-                author: {
-                    name: "Jane Smith",
-                    profilePicture: "/images/profilePlaceholder.jpg",
-                    role: "Bassist"
-                },
-                photos: [
-                    "/images/percussions.png",
-                    "/images/percussions.png",
-                    "/images/percussions.png"
-                ],
-                rating: 3,
-                createdAt: "2023-01-02"
-            },
-            {
-                id: 3,
-                content: "Bronstein Music is amazing! They repaired my guitar perfectly and quickly. Excellent service, knowledgeable staff, and great attention to detail!",
-                status: "Rejected",
-                author: {
-                    name: "Sam Wilson",
-                    profilePicture: "/images/profilePlaceholder.jpg",
-                    role: "Drummer"
-                },
-                photos: [
-                    "/images/percussions.png",
-                    "/images/percussions.png",
-                    "/images/percussions.png"
-                ],
-                rating: 4,
-                createdAt: "2023-01-03"
-            }
-        ],
-        photos: [
-            {
-                id: 1,
-                business: {
-                    name: "Bronstein Music",
-                    logo: "/images/percussions.png",
-                    price: 50
-                },
-                images: [
-                    {
-                        url: "/images/percussions.png",
-                        status: "Approved"
-                    },
-                    {
-                        url: "/images/percussions.png",
-                        status: "Pending"
-                    },
-                    {
-                        url: "/images/percussions.png",
-                        status: "Rejected"
-                    }
-                ]
-            },
-            {
-                id: 2,
-                business: {
-                    name: "Bronstein Music",
-                    logo: "/images/percussions.png",
-                    price: 50
-                },
-                images: [
-                    {
-                        url: "/images/percussions.png",
-                        status: "Approved"
-                    },
-                    {
-                        url: "/images/percussions.png",
-                        status: "Pending"
-                    },
-                    {
-                        url: "/images/percussions.png",
-                        status: "Rejected"
-                    }
-                ]
-            },
-            {
-                id: 3,
-                business: {
-                    name: "Bronstein Music",
-                    logo: "/images/percussions.png",
-                    price: 50
-                },
-                images: [
-                    {
-                        url: "/images/percussions.png",
-                        status: "Approved"
-                    },
-                    {
-                        url: "/images/percussions.png",
-                        status: "Pending"
-                    },
-                    {
-                        url: "/images/percussions.png",
-                        status: "Rejected"
-                    }
-                ]
-            },
-            {
-                id: 4,
-                business: {
-                    name: "Bronstein Music",
-                    logo: "/images/percussions.png",
-                    price: 50
-                },
-                images: [
-                    {
-                        url: "/images/percussions.png",
-                        status: "Approved"
-                    },
-                    {
-                        url: "/images/percussions.png",
-                        status: "Pending"
-                    },
-                    {
-                        url: "/images/percussions.png",
-                        status: "Rejected"
-                    }
-                ]
-            }
-        ],
-        businesses: [
-            {
-                _id: "1",
-                name: "Updated Melody Hub",
-                image: [
-                    "/images/percussions.png",
-                    "/images/percussions.png",
-                    "/images/percussions.png"
-                ],
-                address: "New Address, Dhaka",
-                phone: "+880199999999",
-                email: "new@melodyhub.com",
-                website: "https://melodyhub-updated.com",
-                description: "Updated description of the business",
-                rating: 4.5,
-                reviewsCount: 150,
-                status: "Published"
-            },
-            {
-                _id: "2",
-                name: "Harmony Instruments",
-                image: [
-                    "/images/percussions.png",
-                    "/images/percussions.png",
-                    "/images/percussions.png"
-                ],
-                address: "Harmony Street, Dhaka",
-                phone: "+880188888888",
-                email: "harmony@instruments.com",
-                website: "https://harmonyinstruments.com",
-                description: "Description of Harmony Instruments",
-                rating: 4.0,
-                reviewsCount: 100,
-                status: "Pending"
-            },
-            {
-                _id: "3",
-                name: "Rhythm & Strings",
-                image: [
-                    "/images/percussions.png",
-                    "/images/percussions.png",
-                    "/images/percussions.png"
-                ],
-                address: "Rhythm Road, Dhaka",
-                phone: "+880177777777",
-                email: "rhythm@strings.com",
-                website: "https://rhythmstrings.com",
-                description: "Description of Rhythm & Strings",
-                rating: 0,
-                reviewsCount: 0,
-                status: "Rejected"
-            },
-            {
-                _id: "4",
-                name: "Melody Makers",
-                image: [
-                    "/images/percussions.png",
-                    "/images/percussions.png",
-                    "/images/percussions.png"
-                ],
-                address: "Melody Lane, Dhaka",
-                phone: "+880166666666",
-                email: "melody@makers.com",
-                website: "https://melodymakers.com",
-                description: "Description of Melody Makers",
-                rating: 4.3,
-                reviewsCount: 90,
-                status: "Published"
-            },
-            {
-                _id: "5",
-                name: "Updated Melody Hub",
-                image: [
-                    "/images/percussions.png",
-                    "/images/percussions.png",
-                    "/images/percussions.png"
-                ],
-                address: "New Address, Dhaka",
-                phone: "+880199999999",
-                email: "new@melodyhub.com",
-                website: "https://melodyhub-updated.com",
-                description: "Updated description of the business",
-                rating: 4.5,
-                reviewsCount: 150,
-                status: "Published"
-            }
-        ]
-    }
-
-
     const { data: myReviews } = useQuery({
         queryKey: ["myReviews"],
         queryFn: getUserReview,
@@ -271,9 +37,16 @@ export default function ContributionTabs() {
     const { data: myPhotos } = useQuery({
         queryKey: ["myPhotos"],
         queryFn: getUserPhotos,
+        select: (data) => data?.data
     })
 
-    console.log(myPhotos)
+    const { data: myBusinesses } = useQuery({
+        queryKey: ["myBusinesses"],
+        queryFn: getUserBusinesses,
+        select: (data) => data?.data
+    })
+
+    console.log(myBusinesses);
 
     return (
         <div>
@@ -283,26 +56,26 @@ export default function ContributionTabs() {
                         value="reviews"
                         className="data-[state=active]:bg-[#00998E] data-[state=active]:text-white bg-[#E0E0E0] px-5 py-2"
                     >
-                        Reviews ({reviewsData.reviews.length})
+                        Reviews ({myReviews?.length})
                     </TabsTrigger>
                     <TabsTrigger
                         value="photos"
                         className="data-[state=active]:bg-[#00998E] data-[state=active]:text-white bg-[#E0E0E0] px-5 py-2"
                     >
-                        Photos ({reviewsData.photos.length})
+                        Photos ({myPhotos?.length})
                     </TabsTrigger>
                     <TabsTrigger
                         value="businesses"
                         className="data-[state=active]:bg-[#00998E] data-[state=active]:text-white bg-[#E0E0E0] px-5 py-2"
                     >
-                        Businesses ({reviewsData.businesses.length})
+                        Businesses ({myBusinesses?.length})
                     </TabsTrigger>
                 </TabsList>
                 <TabsContent value="reviews">
                     <div className="py-4 flex justify-between items-center">
-                        <h3 className="text-lg font-semibold">Reviews <span className='text-[#8D9A99]'>({reviewsData.reviews.length})</span></h3>
+                        <h3 className="text-lg font-semibold">Reviews <span className='text-[#8D9A99]'>({myReviews?.length})</span></h3>
                         {
-                            reviewsData?.reviews?.length > 0 && (
+                            myReviews?.length > 0 && (
                                 <Button>Write a Review</Button>
                             )
                         }
@@ -312,7 +85,7 @@ export default function ContributionTabs() {
                             (
                                 <div className="space-y-5">
                                     {
-                                        myReviews.map((review: Review) => (
+                                        myReviews?.map((review: Review) => (
                                             <div key={review._id} className="p-6 border rounded-md shadow-md">
                                                 <div className="space-y-4">
                                                     <div className="flex justify-between">
@@ -406,19 +179,19 @@ export default function ContributionTabs() {
                 </TabsContent>
                 <TabsContent value="photos">
                     <div className="py-4 flex justify-between items-center">
-                        <h3 className="text-lg font-semibold mb-2">Photos <span className="text-[#8D9A99]">({reviewsData?.photos?.length || 0})</span></h3>
+                        <h3 className="text-lg font-semibold mb-2">Photos <span className="text-[#8D9A99]">({myPhotos?.length})</span></h3>
                         {
-                            reviewsData?.photos?.length > 0 && (
+                            myPhotos?.length > 0 && (
                                 <Button>Add a Photo</Button>
                             )
                         }
                     </div>
                     {
-                        reviewsData?.photos?.length > 0 ?
+                        myPhotos?.length > 0 ?
                             (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {
-                                        reviewsData?.photos?.map((photo) => (
+                                        myPhotos?.map((photo: { business: { name: string; logo: string; price: number }; images: { url: string; status: string }[] }) => (
                                             <div key={photo?.business.name} className="p-4 space-y-4 border shadow-md rounded-md">
                                                 <div className="flex gap-2 items-center">
                                                     <Image
@@ -464,7 +237,7 @@ export default function ContributionTabs() {
                                 <div className="flex justify-between items-center bg-[#F7F8F8] p-6 rounded-md">
                                     <div className="flex items-center gap-4">
                                         <Image
-                                            src="/images/percussions.png"
+                                            src="/images/photo.png"
                                             alt='No photos yet'
                                             width={300}
                                             height={300}
@@ -475,7 +248,7 @@ export default function ContributionTabs() {
                                             <p>Help other musicians by sharing pictures of your repair experience and favorite shops</p>
                                         </div>
                                     </div>
-                                    <Link href="/review- " className="flex-shrink-0">
+                                    <Link href="/review-business" className="flex-shrink-0">
                                         <Button>
                                             Upload Photos
                                         </Button>
@@ -486,18 +259,18 @@ export default function ContributionTabs() {
                 </TabsContent>
                 <TabsContent value="businesses">
                     <div className="py-4 flex justify-between items-center">
-                        <h3 className="text-lg font-semibold mb-2">Businesses <span className="text-[#8D9A99]">({reviewsData?.businesses?.length || 0})</span></h3>
+                        <h3 className="text-lg font-semibold mb-2">Businesses <span className="text-[#8D9A99]">({myBusinesses?.length})</span></h3>
                         {
-                            reviewsData?.businesses?.length > 0 && (
+                            myBusinesses?.length > 0 && (
                                 <Button>Add a Business</Button>
                             )
                         }
                     </div>
                     {
-                        reviewsData?.businesses?.length > 0 ?
+                        myBusinesses?.length > 0 ?
                             (
                                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                    {reviewsData?.businesses.map((business) => (
+                                    {myBusinesses.map((business: { _id: string; name: string; image: string[]; status?: string; rating: number | null; reviewsCount: number; address: string; }) => (
                                         <BusinessCard key={business._id} business={business} />
                                     ))}
                                 </div>

@@ -13,50 +13,45 @@ export async function middleware(request: NextRequest) {
 
     const isStatic = pathname.startsWith("/_next") || pathname.includes(".");
 
-    // Only these routes are protected:
+    // Protected routes
     const isProtectedRoute =
         pathname.startsWith("/admin-dashboard") ||
         pathname.startsWith("/business-dashboard") ||
         pathname.startsWith("/customer-dashboard");
 
-    // 🔒 If accessing a protected route without a token → redirect to login
+    // 🔒 Not authenticated → redirect to login
     if (!token && isProtectedRoute && !isStatic) {
         return NextResponse.redirect(new URL("/auth/login", request.url));
     }
 
-    // ✅ Role-based access for protected routes
-    if (pathname.startsWith("/admin-dashboard")) {
-        if (!token || token.userType !== "admin") {
-            return NextResponse.redirect(new URL("/403", request.url));
-        }
-    }
+    // ✅ If authenticated, check role and avoid infinite redirects
+    if (token && isProtectedRoute) {
+        const userType = token.userType as string;
 
-    if (pathname.startsWith("/business-dashboard")) {
-        if (!token || token.userType !== "businessMan") {
-            return NextResponse.redirect(new URL("/403", request.url));
-        }
-    }
-
-    if (pathname.startsWith("/customer-dashboard")) {
-        if (!token || token.userType !== "businessMan") {
-            return NextResponse.redirect(new URL("/business-dashboard", request.url));
-        }
-    }
-
-    console.log(token)
-
-    // ✅ If logged in & visiting auth routes → redirect to dashboard
-    if (
-        token &&
-        ["/auth/login", "/auth/register"].includes(pathname)
-    ) {
-        if (token.userType === "admin") {
+        if (userType === "admin" && !pathname.startsWith("/admin-dashboard")) {
             return NextResponse.redirect(new URL("/admin-dashboard", request.url));
         }
-        if (token.userType === "businessMan") {
+
+        if (userType === "businessMan" && !pathname.startsWith("/business-dashboard")) {
             return NextResponse.redirect(new URL("/business-dashboard", request.url));
         }
-        if (token.userType === "user") {
+
+        if (userType === "user" && !pathname.startsWith("/customer-dashboard")) {
+            return NextResponse.redirect(new URL("/customer-dashboard", request.url));
+        }
+    }
+
+    // ✅ If authenticated & visiting auth routes → redirect to role dashboard
+    if (token && ["/auth/login", "/auth/register"].includes(pathname)) {
+        const userType = token.userType as string;
+
+        if (userType === "admin") {
+            return NextResponse.redirect(new URL("/admin-dashboard", request.url));
+        }
+        if (userType === "businessMan") {
+            return NextResponse.redirect(new URL("/business-dashboard", request.url));
+        }
+        if (userType === "user") {
             return NextResponse.redirect(new URL("/customer-dashboard", request.url));
         }
         return NextResponse.redirect(new URL("/", request.url));

@@ -95,6 +95,18 @@ export async function getUserPhotos() {
 }
 
 
+// Get user businesses
+export async function getUserBusinesses() {
+  try {
+    const response = await api.get(`/business/my-add-business`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user businesses:", error);
+    return error;
+  }
+}
+
+
 
 // Message API
 
@@ -152,6 +164,41 @@ export async function getSingleBusiness(params: string | string[]) {
     return error;
   }
 }
+
+
+
+
+// Admin claim business api
+
+export async function getAllBusinessClaims(query?: {
+  claimType?: string;
+  time?: string;
+  sortBy?: string;
+}) {
+  try {
+    const response = await api.get("/claim-bussiness", {
+      params: query,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching business claims:", error);
+    throw error; // Better to throw, so React Query can handle it properly
+  }
+}
+
+
+export async function updateBusinessClaimStatus(claimId: string, status: string) {
+  try {
+    const response = await api.put(`/claim-bussiness/claim/${claimId}`, { status });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating business claim status:", error);
+    throw error; // Better to throw, so React Query can handle it properly
+  }
+}
+
+
+// Approve business claim
 
 
 
