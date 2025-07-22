@@ -1,5 +1,11 @@
+import SearchComponent from "./_component/SearchComponent";
+
 const page = () => {
-  return <div>this is search result page</div>;
+  return (
+    <div className="container py-12">
+      <SearchComponent />
+    </div>
+  );
 };
 
 export default page;

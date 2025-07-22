@@ -1,9 +1,10 @@
-import React from 'react'
+import AddBusiness from "@/components/business/common/AddBusiness";
+import React from "react";
 
 export default function page() {
   return (
-    <div>
-      Business Dashboard Profile
+    <div className="container">
+      <AddBusiness />
     </div>
-  )
+  );
 }
