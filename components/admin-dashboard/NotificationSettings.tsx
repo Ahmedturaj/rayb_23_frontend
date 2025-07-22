@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch"
 
 export function NotificationSettings() {
   return (
-    <Card className="w-full max-w-2xl">
+    <Card className="w-full ">
       <CardHeader>
         <CardTitle>Notification Settings</CardTitle>
       </CardHeader>
