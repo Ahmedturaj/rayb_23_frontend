@@ -1,5 +1,5 @@
+import AdminDashboardLayout from "@/components/admin-dashboard/ad-layout";
 import React from "react";
-import AdminDashboardLayout from "@/components/business-dashboard/bd-layout";
 
 export default function layout({
     children,

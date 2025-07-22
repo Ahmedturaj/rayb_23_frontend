@@ -91,8 +91,6 @@ export default function SearchComponent() {
     },
   });
 
-  console.log(allBusiness);
-
   return (
     <div className="flex">
       {/* Sidebar Filters */}
