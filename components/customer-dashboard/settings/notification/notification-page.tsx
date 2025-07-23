@@ -5,37 +5,35 @@ import React from 'react'
 
 export default function NotificationsPage() {
     return (
-        <div>
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-lg font-semibold border-b pb-4">Notifications</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-6">
-                        {/* Email Notifications */}
-                        <div className="flex items-center justify-between">
-                            <div className="flex flex-col space-y-1">
-                                <Label htmlFor="email-notifications" className="text-base font-semibold">
-                                    Email Notifications
-                                </Label>
-                                <p className="text-sm text-gray-500">Receive notifications on your email</p>
-                            </div>
-                            <Switch id="email-notifications" />
+        <Card className='p-0'>
+            <CardHeader>
+                <CardTitle className="text-lg font-semibold border-b pb-4">Notifications</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-6">
+                    {/* Email Notifications */}
+                    <div className="flex items-center justify-between">
+                        <div className="flex flex-col space-y-1">
+                            <Label htmlFor="email-notifications" className="text-base font-semibold">
+                                Email Notifications
+                            </Label>
+                            <p className="text-sm text-gray-500">Receive notifications on your email</p>
                         </div>
-
-                        {/* Mobile Notifications */}
-                        <div className="flex items-center justify-between">
-                            <div className="flex flex-col space-y-1">
-                                <Label htmlFor="mobile-notifications" className="text-base font-semibold">
-                                    Mobile Notifications
-                                </Label>
-                                <p className="text-sm text-gray-500">Receive notifications on your phone number</p>
-                            </div>
-                            <Switch id="mobile-notifications" />
-                        </div>
+                        <Switch id="email-notifications" />
                     </div>
-                </CardContent>
-            </Card>
-        </div>
+
+                    {/* Mobile Notifications */}
+                    <div className="flex items-center justify-between">
+                        <div className="flex flex-col space-y-1">
+                            <Label htmlFor="mobile-notifications" className="text-base font-semibold">
+                                Mobile Notifications
+                            </Label>
+                            <p className="text-sm text-gray-500">Receive notifications on your phone number</p>
+                        </div>
+                        <Switch id="mobile-notifications" />
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
     )
 }

@@ -84,18 +84,18 @@ export default function ManageUsersPage() {
   return (
     <div className="flex flex-col gap-6 p-6 md:p-10">
       <div className="grid gap-2">
-        <h1 className="text-2xl font-bold">Manage Users</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-[28px] text-[#1D2020] font-bold">Manage Users</h1>
+        <p className="text-base text-[#485150] font-normal mt-3">
           Monitor platform activity, manage submissions, and keep your community running smoothly.
         </p>
       </div>
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-start">
-        <div className="grid gap-1.5">
-          <label htmlFor="user-type" className="text-sm font-medium">
+      <div className="flex flex-col justify-between md:flex-row md:items-end ">
+        <div className="w-[30%]">
+          <label htmlFor="user-type" className="text-base text-[#485150] font-medium">
             User Type
           </label>
           <Select defaultValue="all">
-            <SelectTrigger id="user-type" className="w-[180px]">
+            <SelectTrigger id="user-type" className="w-full">
               <SelectValue placeholder="All" />
             </SelectTrigger>
             <SelectContent>
@@ -105,12 +105,12 @@ export default function ManageUsersPage() {
             </SelectContent>
           </Select>
         </div>
-        <div className="grid gap-1.5">
-          <label htmlFor="sort-by" className="text-sm font-medium">
+        <div className="w-[30%]">
+          <label htmlFor="sort-by" className="text-base text-[#485150] font-medium">
             Sort By
           </label>
           <Select defaultValue="latest">
-            <SelectTrigger id="sort-by" className="w-[180px]">
+            <SelectTrigger id="sort-by" className="w-full">
               <SelectValue placeholder="Latest" />
             </SelectTrigger>
             <SelectContent>
@@ -121,12 +121,12 @@ export default function ManageUsersPage() {
             </SelectContent>
           </Select>
         </div>
-        <div className="grid gap-1.5">
-          <label htmlFor="time-range" className="text-sm font-medium">
+        <div className="w-[30%]">
+          <label htmlFor="time-range" className="text-base text-[#485150] font-medium">
             Time Range
           </label>
           <Select defaultValue="all">
-            <SelectTrigger id="time-range" className="w-[180px]">
+            <SelectTrigger id="time-range" className="w-full">
               <SelectValue placeholder="All" />
             </SelectTrigger>
             <SelectContent>
@@ -142,22 +142,22 @@ export default function ManageUsersPage() {
         <table className="w-full caption-bottom text-sm">
           <thead className="[&_tr]:border-b">
             <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-              <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">
+              <th className="h-12 px-4 text-left align-middle text-base text-[#252525] font-semibold [&:has([role=checkbox])]:pr-0">
                 Name
               </th>
-              <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">
+              <th className="h-12 px-4 text-left align-middle text-base text-[#252525] font-semibold [&:has([role=checkbox])]:pr-0">
                 Email
               </th>
-              <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">
+               <th className="h-12 px-4 text-left align-middle text-base text-[#252525] font-semibold [&:has([role=checkbox])]:pr-0">
                 Phone Number
               </th>
-              <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">
+              <th className="h-12 px-4 text-left align-middle text-base text-[#252525] font-semibold [&:has([role=checkbox])]:pr-0">
                 Date join
               </th>
-              <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">
+              <th className="h-12 px-4 text-left align-middle text-base text-[#252525] font-semibold [&:has([role=checkbox])]:pr-0">
                 Designation
               </th>
-              <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">
+              <th className="h-12 px-4 text-right align-middle text-base text-[#252525] font-semibold [&:has([role=checkbox])]:pr-0">
                 Action
               </th>
             </tr>
@@ -168,18 +168,18 @@ export default function ManageUsersPage() {
                 key={user.id}
                 className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted even:bg-muted/50"
               >
-                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 flex items-center gap-3">
+                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 flex items-center gap-3 text-base font-medium text-[#252525]">
                   <Avatar className="w-9 h-9 border">
                     <AvatarImage src={user.avatarSrc || "/placeholder.svg"} alt={user.name} />
                     <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   {user.name}
                 </td>
-                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{user.email}</td>
-                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{user.phoneNumber}</td>
-                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{user.dateJoin}</td>
-                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">{user.designation}</td>
-                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right">
+                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-base font-medium text-[#252525]">{user.email}</td>
+                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-base font-medium text-[#252525]">{user.phoneNumber}</td>
+                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-base font-medium text-[#252525]">{user.dateJoin}</td>
+                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-base font-medium text-[#252525]">{user.designation}</td>
+                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-right text-base font-medium text-[#252525]">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8">

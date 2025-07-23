@@ -37,17 +37,17 @@ export function SettingsPage() {
 
   return (
     <>
-      <Sidebar className="hidden md:flex" collapsible="none">
+      <Sidebar className="hidden md:flex h-[400px] bg-transparent " collapsible="none">
         <SidebarHeader className="p-4"></SidebarHeader>
-        <SidebarContent>
+        <SidebarContent className="">
           <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
+            <SidebarGroupContent >
+              <SidebarMenu className="space-y-[40px]"> {/* Changed from space-y-10 to space-y-[40px] */}
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     onClick={() => setActiveTab("account")}
                     isActive={activeTab === "account"}
-                    className={cn("justify-start gap-3", activeTab === "account" && "bg-accent text-accent-foreground")}
+                    className={cn("justify-start gap-3 py-7", activeTab === "account" && "bg-accent text-accent-foreground")}
                   >
                     <User className="h-5 w-5" />
                     <div className="flex flex-col items-start">
@@ -61,7 +61,7 @@ export function SettingsPage() {
                     onClick={() => setActiveTab("security")}
                     isActive={activeTab === "security"}
                     className={cn(
-                      "justify-start gap-3",
+                      "justify-start gap-3 py-7",
                       activeTab === "security" && "bg-accent text-accent-foreground",
                     )}
                   >
@@ -77,7 +77,7 @@ export function SettingsPage() {
                     onClick={() => setActiveTab("notifications")}
                     isActive={activeTab === "notifications"}
                     className={cn(
-                      "justify-start gap-3",
+                      "justify-start gap-3 py-7",
                       activeTab === "notifications" && "bg-accent text-accent-foreground",
                     )}
                   >
@@ -95,7 +95,7 @@ export function SettingsPage() {
       </Sidebar>
 
       {/* Main content area - adjusted padding for static sidebar */}
-      <main className="flex-1 p-4 md:p-8 flex justify-center items-start pt-4 md:pt-8">{renderContent()}</main>
+      <main className="w-full pt-4 md:p">{renderContent()}</main>
     </>
   )
 }
