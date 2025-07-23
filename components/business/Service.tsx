@@ -2,6 +2,15 @@ import React, { useState } from "react";
 import InstrumentModal from "./modal/InstrumentModal";
 import { Plus } from "lucide-react";
 import ServiceModal from "./modal/ServiceModal";
+import { useQuery } from "@tanstack/react-query";
+import { getAllInstrument } from "@/lib/api";
+
+
+interface Instruments {
+  _id: string;
+  instrumentFamily : string;
+  instrumentTypes: string[];
+}
 
 const Service = () => {
   const [instrumentModalOpen, setInstrumentModalOpen] = useState(false);
@@ -11,33 +20,18 @@ const Service = () => {
   const [pricingType, setPricingType] = useState("exact");
   const [price, setPrice] = useState("");
 
+  const { data: allInstrument } = useQuery({
+    queryKey: ["get-all-instrument"],
+    queryFn: async () => {
+      const res = await getAllInstrument();
+      return res?.data;
+    },
+  });
+
   const serviceGroup = ["Guitar", "Ukulele", "Flute", "Drums", "Bass"];
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selected, setSelected] = useState<string[]>([
-    "Guitar",
-    "Violin",
-    "Cello",
-    "Harp",
-    "Saxophone",
-    "Clarinet",
-    "Flute",
-    "Trumpet",
-    "Trombone",
-    "Tuba",
-    "French Horn",
-    "Drums",
-    "Symbol",
-    "Xylophone",
-  ]);
-
-  const toggleInstrument = (instrument: string) => {
-    setSelected((prev) =>
-      prev.includes(instrument)
-        ? prev.filter((item) => item !== instrument)
-        : [...prev, instrument]
-    );
-  };
+  const [selected, setSelected] = useState<string[]>();
 
   const handleAddInstrument = () => {
     if (!newInstrumentName.trim()) return;
@@ -140,19 +134,19 @@ const Service = () => {
 
           {/* Instrument Groups */}
           <div className="grid grid-cols-2 gap-8 mt-5">
-            {Object.entries(instrumentGroups).map(([group, instruments]) => (
-              <div key={group}>
-                <h4 className="font-medium text-gray-900 mb-3">{group}</h4>
+            {allInstrument?.map((instruments: Instruments) => (
+              <div key={instruments?._id}>
+                <h4 className="font-medium text-gray-900 mb-3">
+                  {instruments?.instrumentFamily}
+                </h4>
                 <div className="space-y-2">
-                  {instruments.map((instrument) => (
+                  {instruments?.instrumentTypes.map((instrument) => (
                     <label
                       key={instrument}
                       className="flex items-center gap-2 text-sm text-gray-800 cursor-pointer"
                     >
                       <input
                         type="checkbox"
-                        // checked={selected.includes(instrument)}
-                        onChange={() => toggleInstrument(instrument)}
                         className="form-checkbox w-4 h-4 text-teal-600 rounded accent-[#139a8e]"
                       />
                       {instrument}
@@ -415,8 +409,6 @@ const Service = () => {
                             >
                               <input
                                 type="checkbox"
-                                // checked={selected.includes(instrument)}
-                                onChange={() => toggleInstrument(instrument)}
                                 className="form-checkbox w-4 h-4 text-teal-600 rounded accent-[#139a8e]"
                               />
                               {instrument}
@@ -610,6 +602,7 @@ const Service = () => {
           setSelectedFamily={setSelectedFamily}
           handleAddInstrument={handleAddInstrument}
           setInstrumentModalOpen={setInstrumentModalOpen}
+          instruments={allInstrument}
         />
       )}
 
