@@ -259,3 +259,15 @@ export async function addReview(data: ReviewType) {
     throw error;
   }
 }
+
+
+//get all instrument
+export async function getAllInstrument() {
+  try {
+    const response = await api.get(`/instrument-family`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching saved business:", error);
+    return error;
+  }
+}
