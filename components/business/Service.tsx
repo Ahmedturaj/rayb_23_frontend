@@ -7,11 +7,23 @@ import InstrumentGroups from "./InstrumentGroups";
 import BuySellGroup from "./BuySellGroup";
 import ControlMusicLessons from "./ControlMusicLessons";
 import InstrumentGroupsMusic from "./InstrumentGroupsMusic";
+import { toast } from "sonner";
+import ServiceModalMusic from "./modal/ServiceModalMusic";
 
 interface Instruments {
   _id: string;
   instrumentFamily: string;
   instrumentTypes: string[];
+}
+
+interface Service {
+  newInstrumentName: string;
+  pricingType: string;
+  minPrice: string;
+  maxPrice: string;
+  price: string;
+  selectedInstrumentsGroup?: string;
+  selectedInstrumentsGroupMusic?: string;
 }
 
 interface PropsTypes {
@@ -24,6 +36,26 @@ interface PropsTypes {
   setSelectedInstrumentsGroup: (instrument: string) => void;
   selectedInstrumentsGroupMusic: string;
   setSelectedInstrumentsGroupMusic: (instrument: string) => void;
+  newInstrumentName: string;
+  setNewInstrumentName: (name: string) => void;
+  pricingType: string;
+  setPricingType: (type: string) => void;
+  price: string;
+  setPrice: (price: string) => void;
+  handleAddInstrument: () => void;
+  handleAddInstrumentMusic: () => void;
+  minPrice: string;
+  setMinPrice: (value: string) => void;
+  maxPrice: string;
+  setMaxPrice: (value: string) => void;
+  selected: Service[];
+  setSelected: (value: Service[]) => void;
+  selectedMusic: Service[];
+  setSelectedMusic: (value: Service[]) => void;
+  serviceModal: boolean;
+  setServiceModal: (value: boolean) => void;
+  serviceModalMusic: boolean;
+  setServiceModalMusic: (value: boolean) => void;
 }
 
 const Service = ({
@@ -36,22 +68,45 @@ const Service = ({
   setSelectedInstrumentsGroup,
   selectedInstrumentsGroupMusic,
   setSelectedInstrumentsGroupMusic,
+  newInstrumentName,
+  setNewInstrumentName,
+  pricingType,
+  setPricingType,
+  price,
+  setPrice,
+  handleAddInstrument,
+  handleAddInstrumentMusic,
+  minPrice,
+  setMinPrice,
+  maxPrice,
+  setMaxPrice,
+  selected,
+  serviceModal,
+  setServiceModal,
+  serviceModalMusic,
+  setServiceModalMusic,
+  selectedMusic,
 }: PropsTypes) => {
-  const [serviceModal, setServiceModal] = useState(false);
-  const [newInstrumentName, setNewInstrumentName] = useState("");
-  const [pricingType, setPricingType] = useState("exact");
-  const [price, setPrice] = useState("");
+  const [value, setValue] = useState("");
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selected, setSelected] = useState<string[]>([]);
-
-  const handleAddInstrument = () => {
-    if (!newInstrumentName.trim()) return;
-    setSelected((prev) => [...prev, newInstrumentName.trim()]);
-    setNewInstrumentName("");
+  const handleService = () => {
+    if (selectedInstruments.length === 0 || !selectedInstrumentsGroup) {
+      return toast.error("Please select an instrument!");
+    } else {
+      setServiceModal(true);
+    }
   };
 
-  const [value, setValue] = useState("");
+  const handleServiceMusic = () => {
+    if (
+      selectedInstrumentsMusic.length === 0 ||
+      !selectedInstrumentsGroupMusic
+    ) {
+      return toast.error("Please select an instrument!");
+    } else {
+      setServiceModalMusic(true);
+    }
+  };
 
   return (
     <div>
@@ -102,11 +157,85 @@ const Service = ({
             )}
           </div>
 
+          {/* instrument pricing list */}
+          <div className="grid grid-cols-3 gap-8 mt-8">
+            {selected.length > 0 &&
+              selected.map(
+                (select, index) =>
+                  selectedInstrumentsGroup ===
+                    select.selectedInstrumentsGroup && (
+                    <div key={index} className="max-w-md rounded-lg">
+                      {/* Service Name Input */}
+                      <div>
+                        <label className="block font-medium text-gray-700 text-xl">
+                          {select.newInstrumentName}
+                        </label>
+                      </div>
+
+                      {/* Service Pricing Input */}
+                      <div className="lg:col-span-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4 mb-3">
+                            {["Exact", "Range", "Hourly"].map((type) => (
+                              <label
+                                key={type}
+                                className="flex items-center space-x-1 text-sm text-gray-600"
+                              >
+                                <input
+                                  type="radio"
+                                  checked={
+                                    select.pricingType === type.toLowerCase()
+                                  }
+                                  readOnly
+                                  className="accent-teal-500 cursor-not-allowed"
+                                />
+                                <span>{type}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Conditional Pricing Inputs */}
+                        {select.pricingType === "range" ? (
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="Min Price"
+                              value={select.minPrice}
+                              disabled
+                              className="w-1/2 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none h-[48px] bg-gray-50 disabled:cursor-not-allowed"
+                            />
+                            <input
+                              type="text"
+                              placeholder="Max Price"
+                              value={select.maxPrice}
+                              disabled
+                              className="w-1/2 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none h-[48px] bg-gray-50 disabled:cursor-not-allowed"
+                            />
+                          </div>
+                        ) : (
+                          <input
+                            type="text"
+                            placeholder="$  Service Price"
+                            value={select.price}
+                            disabled
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none h-[48px] bg-gray-50 disabled:cursor-not-allowed"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  )
+              )}
+          </div>
+
           {/* Add Instrument Button */}
           <button
             type="button"
-            className="mt-10 inline-flex items-center gap-2 px-4 py-2 border border-teal-600 text-teal-700 rounded-md text-sm hover:bg-teal-50 transition-colors w-[100%] md:w-[580px] h-[48px]"
-            onClick={() => setServiceModal(true)}
+            disabled={
+              selectedInstruments.length === 0 || !selectedInstrumentsGroup
+            }
+            className="mt-10 inline-flex items-center gap-2 px-4 py-2 border border-teal-600 text-teal-700 rounded-md text-sm hover:bg-teal-50 transition-colors w-[100%] md:w-[580px] h-[48px] disabled:bg-gray-100 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-600"
+            onClick={handleService}
           >
             <Plus className="w-4 h-4" />
             Add a Service
@@ -169,11 +298,87 @@ const Service = ({
                   )}
                 </div>
 
+                {/* instrument pricing list */}
+                <div className="grid grid-cols-3 gap-8 mt-8">
+                  {selectedMusic.length > 0 &&
+                    selectedMusic.map(
+                      (select, index) =>
+                        selectedInstrumentsGroupMusic ===
+                          select.selectedInstrumentsGroupMusic && (
+                          <div key={index} className="max-w-md rounded-lg">
+                            {/* Service Name Input */}
+                            <div>
+                              <label className="block font-medium text-gray-700 text-xl">
+                                {select.newInstrumentName}
+                              </label>
+                            </div>
+
+                            {/* Service Pricing Input */}
+                            <div className="lg:col-span-2">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-4 mb-3">
+                                  {["Exact", "Range", "Hourly"].map((type) => (
+                                    <label
+                                      key={type}
+                                      className="flex items-center space-x-1 text-sm text-gray-600"
+                                    >
+                                      <input
+                                        type="radio"
+                                        checked={
+                                          select.pricingType ===
+                                          type.toLowerCase()
+                                        }
+                                        readOnly
+                                        className="accent-teal-500 cursor-not-allowed"
+                                      />
+                                      <span>{type}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Conditional Pricing Inputs */}
+                              {select.pricingType === "range" ? (
+                                <div className="flex gap-2">
+                                  <input
+                                    type="text"
+                                    placeholder="Min Price"
+                                    value={select.minPrice}
+                                    disabled
+                                    className="w-1/2 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none h-[48px] bg-gray-50 disabled:cursor-not-allowed"
+                                  />
+                                  <input
+                                    type="text"
+                                    placeholder="Max Price"
+                                    value={select.maxPrice}
+                                    disabled
+                                    className="w-1/2 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none h-[48px] bg-gray-50 disabled:cursor-not-allowed"
+                                  />
+                                </div>
+                              ) : (
+                                <input
+                                  type="text"
+                                  placeholder="$  Service Price"
+                                  value={select.price}
+                                  disabled
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none h-[48px] bg-gray-50 disabled:cursor-not-allowed"
+                                />
+                              )}
+                            </div>
+                          </div>
+                        )
+                    )}
+                </div>
+
                 {/* Add Instrument Button */}
                 <button
                   type="button"
-                  className="mt-10 inline-flex items-center gap-2 px-4 py-2 border border-teal-600 text-teal-700 rounded-md text-sm hover:bg-teal-50 transition-colors w-[100%] md:w-[580px] h-[48px]"
-                  onClick={() => setServiceModal(true)}
+                  disabled={
+                    selectedInstrumentsMusic.length === 0 ||
+                    !selectedInstrumentsGroupMusic
+                  }
+                  className="mt-10 inline-flex items-center gap-2 px-4 py-2 border border-teal-600 text-teal-700 rounded-md text-sm hover:bg-teal-50 transition-colors w-[100%] md:w-[580px] h-[48px] disabled:bg-gray-100 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-600"
+                  onClick={handleServiceMusic}
                 >
                   <Plus className="w-4 h-4" />
                   Add a Service
@@ -195,6 +400,28 @@ const Service = ({
           setPricingType={setPricingType}
           price={price}
           setPrice={setPrice}
+          minPrice={minPrice}
+          setMinPrice={setMinPrice}
+          maxPrice={maxPrice}
+          setMaxPrice={setMaxPrice}
+        />
+      )}
+
+      {/* services music modal */}
+      {serviceModalMusic && (
+        <ServiceModalMusic
+          newInstrumentName={newInstrumentName}
+          setNewInstrumentName={setNewInstrumentName}
+          handleAddInstrumentMusic={handleAddInstrumentMusic}
+          setServiceModalMusic={setServiceModalMusic}
+          pricingType={pricingType}
+          setPricingType={setPricingType}
+          price={price}
+          setPrice={setPrice}
+          minPrice={minPrice}
+          setMinPrice={setMinPrice}
+          maxPrice={maxPrice}
+          setMaxPrice={setMaxPrice}
         />
       )}
     </div>
