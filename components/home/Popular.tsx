@@ -29,8 +29,6 @@ const Popular = () => {
     },
   });
 
-  console.log(allBusiness);
-
   return (
     <section className="py-20">
       <div className="container">
@@ -45,7 +43,7 @@ const Popular = () => {
         </div>
 
         <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {allBusiness?.map((business: Business) => (
+          {allBusiness?.slice(0, 4)?.map((business: Business) => (
             <div
               key={business?.businessInfo?.email}
               className="bg-white rounded-lg shadow-[0px_2px_12px_0px_#003d3924] p-6"
