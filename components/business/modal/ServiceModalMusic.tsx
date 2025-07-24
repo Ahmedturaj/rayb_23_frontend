@@ -3,8 +3,8 @@ import React from "react";
 interface ServiceModalProps {
   newInstrumentName: string;
   setNewInstrumentName: (value: string) => void;
-  handleAddInstrument: () => void;
-  setServiceModal: (value: boolean) => void;
+  handleAddInstrumentMusic: () => void;
+  setServiceModalMusic: (value: boolean) => void;
   pricingType: string;
   setPricingType: (value: string) => void;
   price: string;
@@ -15,11 +15,11 @@ interface ServiceModalProps {
   setMaxPrice: (value: string) => void;
 }
 
-const ServiceModal: React.FC<ServiceModalProps> = ({
+const ServiceModalMusic: React.FC<ServiceModalProps> = ({
   newInstrumentName,
   setNewInstrumentName,
-  handleAddInstrument,
-  setServiceModal,
+  handleAddInstrumentMusic,
+  setServiceModalMusic,
   pricingType,
   setPricingType,
   price,
@@ -107,13 +107,13 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
         {/* Action Buttons */}
         <div className="flex gap-3">
           <button
-            onClick={handleAddInstrument}
+            onClick={handleAddInstrumentMusic}
             className="flex-1 bg-teal-600 text-white py-2 rounded-md hover:bg-teal-700 transition"
           >
             Add Instrument
           </button>
           <button
-            onClick={() => setServiceModal(false)}
+            onClick={() => setServiceModalMusic(false)}
             className="flex-1 border border-gray-300 py-2 rounded-md text-gray-700 hover:bg-gray-100"
           >
             Cancel
@@ -124,4 +124,4 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
   );
 };
 
-export default ServiceModal;
+export default ServiceModalMusic;

@@ -6,16 +6,84 @@ import Service from "../Service";
 import { useQuery } from "@tanstack/react-query";
 import { getAllInstrument } from "@/lib/api";
 
+interface ServiceType {
+  newInstrumentName: string;
+  pricingType: string;
+  minPrice: string;
+  maxPrice: string;
+  price: string;
+}
+
 const AddBusiness = () => {
   const [images, setImages] = useState<string[]>([]);
 
+  // modal control
+  const [serviceModal, setServiceModal] = useState(false);
+  const [ServiceModalMusic, setServiceModalMusic] = useState(false);
+
   // control instrument family
   const [selectedInstruments, setSelectedInstruments] = useState<string[]>([]);
-  const [selectedInstrumentsMusic, setSelectedInstrumentsMusic] = useState<string[]>([]);
+  const [selectedInstrumentsMusic, setSelectedInstrumentsMusic] = useState<
+    string[]
+  >([]);
 
   //control selected instrument group
-  const [selectedInstrumentsGroup, setSelectedInstrumentsGroup] = useState('');
-  const [selectedInstrumentsGroupMusic, setSelectedInstrumentsGroupMusic] = useState<string>('');
+  const [selectedInstrumentsGroup, setSelectedInstrumentsGroup] = useState("");
+  const [selectedInstrumentsGroupMusic, setSelectedInstrumentsGroupMusic] =
+    useState<string>("");
+
+  //service Modal related
+  const [newInstrumentName, setNewInstrumentName] = useState("");
+  const [pricingType, setPricingType] = useState("exact");
+  const [price, setPrice] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [selected, setSelected] = useState<ServiceType[]>([]);
+  const [selectedMusic, setSelectedMusic] = useState<ServiceType[]>([]);
+
+  const handleAddInstrument = () => {
+    setSelected((prev) => [
+      ...prev,
+      {
+        newInstrumentName: newInstrumentName,
+        pricingType: pricingType,
+        price: price,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+        selectedInstrumentsGroup: selectedInstrumentsGroup,
+      },
+    ]);
+    setNewInstrumentName("");
+    setPricingType("");
+    setPrice("");
+    setMinPrice("");
+    setMaxPrice("");
+
+    setServiceModal(false);
+  };
+
+  const handleAddInstrumentMusic = () => {
+    setSelectedMusic((prev) => [
+      ...prev,
+      {
+        newInstrumentName: newInstrumentName,
+        pricingType: pricingType,
+        price: price,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+        selectedInstrumentsGroupMusic: selectedInstrumentsGroupMusic,
+      },
+    ]);
+    setNewInstrumentName("");
+    setPricingType("");
+    setPrice("");
+    setMinPrice("");
+    setMaxPrice("");
+
+    setServiceModalMusic(false);
+  };
 
   const { data: allInstrument } = useQuery({
     queryKey: ["get-all-instrument"],
@@ -50,7 +118,6 @@ const AddBusiness = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("clicked");
   };
 
   return (
@@ -82,6 +149,11 @@ const AddBusiness = () => {
         {/* services offered */}
         <div className="pt-10">
           <Service
+            allInstrument={allInstrument}
+            serviceModal={serviceModal}
+            setServiceModal={setServiceModal}
+            serviceModalMusic={ServiceModalMusic}
+            setServiceModalMusic={setServiceModalMusic}
             selectedInstruments={selectedInstruments}
             setSelectedInstruments={setSelectedInstruments}
             selectedInstrumentsMusic={selectedInstrumentsMusic}
@@ -90,7 +162,22 @@ const AddBusiness = () => {
             setSelectedInstrumentsGroup={setSelectedInstrumentsGroup}
             selectedInstrumentsGroupMusic={selectedInstrumentsGroupMusic}
             setSelectedInstrumentsGroupMusic={setSelectedInstrumentsGroupMusic}
-            allInstrument={allInstrument}
+            newInstrumentName={newInstrumentName}
+            setNewInstrumentName={setNewInstrumentName}
+            pricingType={pricingType}
+            setPricingType={setPricingType}
+            price={price}
+            setPrice={setPrice}
+            handleAddInstrument={handleAddInstrument}
+            handleAddInstrumentMusic={handleAddInstrumentMusic}
+            minPrice={minPrice}
+            setMinPrice={setMinPrice}
+            maxPrice={maxPrice}
+            setMaxPrice={setMaxPrice}
+            selected={selected}
+            setSelected={setSelected}
+            selectedMusic={selectedMusic}
+            setSelectedMusic={setSelectedMusic}
           />
         </div>
 
