@@ -3,9 +3,27 @@ import React, { useState } from "react";
 import BusinessHours from "../BusinessHours";
 import BusinessInform from "../BusinessInform";
 import Service from "../Service";
+import { useQuery } from "@tanstack/react-query";
+import { getAllInstrument } from "@/lib/api";
 
 const AddBusiness = () => {
   const [images, setImages] = useState<string[]>([]);
+
+  // control instrument family
+  const [selectedInstruments, setSelectedInstruments] = useState<string[]>([]);
+  const [selectedInstrumentsMusic, setSelectedInstrumentsMusic] = useState<string[]>([]);
+
+  //control selected instrument group
+  const [selectedInstrumentsGroup, setSelectedInstrumentsGroup] = useState('');
+  const [selectedInstrumentsGroupMusic, setSelectedInstrumentsGroupMusic] = useState<string>('');
+
+  const { data: allInstrument } = useQuery({
+    queryKey: ["get-all-instrument"],
+    queryFn: async () => {
+      const res = await getAllInstrument();
+      return res?.data;
+    },
+  });
 
   const handleUploadImage = () => {
     const input = document.getElementById("image_input");
@@ -33,7 +51,7 @@ const AddBusiness = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("clicked");
-  }
+  };
 
   return (
     <div>
@@ -63,7 +81,17 @@ const AddBusiness = () => {
 
         {/* services offered */}
         <div className="pt-10">
-          <Service />
+          <Service
+            selectedInstruments={selectedInstruments}
+            setSelectedInstruments={setSelectedInstruments}
+            selectedInstrumentsMusic={selectedInstrumentsMusic}
+            setSelectedInstrumentsMusic={setSelectedInstrumentsMusic}
+            selectedInstrumentsGroup={selectedInstrumentsGroup}
+            setSelectedInstrumentsGroup={setSelectedInstrumentsGroup}
+            selectedInstrumentsGroupMusic={selectedInstrumentsGroupMusic}
+            setSelectedInstrumentsGroupMusic={setSelectedInstrumentsGroupMusic}
+            allInstrument={allInstrument}
+          />
         </div>
 
         {/* divider */}
@@ -114,7 +142,10 @@ const AddBusiness = () => {
 
         {/* submit button */}
         <div className="pt-10 text-center">
-          <button type="submit" className="py-3 h-[48px] w-[288px] rounded-lg bg-[#139a8e] text-white">
+          <button
+            type="submit"
+            className="py-3 h-[48px] w-[288px] rounded-lg bg-[#139a8e] text-white"
+          >
             Submit
           </button>
         </div>
