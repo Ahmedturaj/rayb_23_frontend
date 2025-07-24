@@ -31,7 +31,7 @@ const Service = () => {
   const serviceGroup = ["Guitar", "Ukulele", "Flute", "Drums", "Bass"];
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selected, setSelected] = useState<string[]>();
+  const [selected, setSelected] = useState<string[]>([]);
 
   const handleAddInstrument = () => {
     if (!newInstrumentName.trim()) return;
