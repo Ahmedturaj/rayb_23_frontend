@@ -1,12 +1,15 @@
 "use client"
 
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import InboxComponent from "@/components/shared/inbox"
 import { getMyChat } from "@/lib/api"
 
 export default function CustomerInboxPage() {
     const customerInboxConfig = {
         // Data fetching
-        fetchChats: (userId: string) => getMyChat(userId).then((res) => res.data),
+        fetchChats: (userId: string) => getMyChat(userId as string).then((res) => res.data),
         queryKey: ["chats"],
 
         // Chat display - for customer inbox, we show business info

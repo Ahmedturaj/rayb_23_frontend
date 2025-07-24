@@ -1,5 +1,8 @@
 "use client"
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+
 import type React from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState, useEffect, useRef } from "react"
@@ -24,7 +27,7 @@ interface Message {
 
 interface InboxConfig {
     // Data fetching
-    fetchChats: (userId: string, businessId?: string) => Promise<any>
+    fetchChats: (userId?: string, businessId?: string) => Promise<any>
     queryKey: string[]
 
     // Chat display
@@ -76,11 +79,11 @@ export default function InboxComponent({ config }: InboxComponentProps) {
     }, [config.additionalData, refetch])
 
     // Get messages for selected chat
-    const { data: messages = [] } = useQuery({
-        queryKey: ["messages", selectedChat?._id],
-        queryFn: () => (selectedChat ? getMessages(config.getChatId(selectedChat)).then((res) => res.data) : []),
-        enabled: !!selectedChat,
-    })
+    // const { data: messages = [] } = useQuery({
+    //     queryKey: ["messages", selectedChat?._id],
+    //     queryFn: () => (selectedChat ? getMessages(config.getChatId(selectedChat)).then((res) => res.data) : []),
+    //     enabled: !!selectedChat,
+    // })
 
     // Initialize socket connection
     useEffect(() => {
@@ -156,6 +159,7 @@ export default function InboxComponent({ config }: InboxComponentProps) {
         currentChatRef.current = chatId
 
         // Join the new chat room
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         socket.emit("joinChat", chatId, (response: any) => {
             console.log("Join chat response:", response)
         })
@@ -247,6 +251,7 @@ export default function InboxComponent({ config }: InboxComponentProps) {
             .slice(0, 2)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleChatSelect = (chat: any) => {
         setSelectedChat(chat)
         setShowChatList(false)
@@ -295,6 +300,7 @@ export default function InboxComponent({ config }: InboxComponentProps) {
                 <ScrollArea className="flex-1">
                     <div className="divide-y divide-gray-100">
                         {chats?.length > 0 ? (
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             chats.map((chat: any) => (
                                 <div
                                     key={config.getChatId(chat)}
@@ -370,7 +376,10 @@ export default function InboxComponent({ config }: InboxComponentProps) {
                         <ScrollArea className="flex-1 p-4" ref={messagesScrollAreaRef}>
                             <div className="space-y-4">
                                 {liveMessages?.map((msg: Message) => {
-                                    const isMyMessage = String(msg?.senderId?._id || msg?.senderId) === String(myUserId)
+                                    const isMyMessage =
+                                        (typeof msg.senderId === "object"
+                                            ? String(msg.senderId._id)
+                                            : String(msg.senderId)) === String(myUserId)
                                     const senderName = typeof msg.senderId === "object" ? msg.senderId.name : null
                                     const senderImage = typeof msg.senderId === "object" ? msg.senderId.image : null
 

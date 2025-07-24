@@ -1,5 +1,8 @@
 "use client"
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+
 import InboxComponent from "@/components/shared/inbox"
 import { getChatByBusinessMan } from "@/lib/api"
 import { useBusinessContext } from "@/lib/business-context"
@@ -9,7 +12,7 @@ export default function BusinessInboxPage() {
 
     const businessInboxConfig = {
         // Data fetching
-        fetchChats: (userId: string, businessId: string) => getChatByBusinessMan(businessId).then((res) => res.data),
+        fetchChats: (userId: string, businessId: string) => getChatByBusinessMan(businessId as string).then((res) => res.data),
         queryKey: ["business-chats", selectedBusinessId],
 
         // Chat display - for business inbox, we show customer info
@@ -27,8 +30,8 @@ export default function BusinessInboxPage() {
         emptyStateLinkText: "Go to Search Results",
 
         // Additional data
-        additionalData: selectedBusinessId,
+        additionalData: selectedBusinessId as string,
     }
-
+    
     return <InboxComponent config={businessInboxConfig} />
 }
