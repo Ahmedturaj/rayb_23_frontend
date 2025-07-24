@@ -1,26 +1,56 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import { getMyBusinesses } from "./api";
+
 
 interface BusinessContextProps {
   selectedBusinessId: string | undefined;
   setSelectedBusinessId: (id: string | undefined) => void;
 }
 
-const BusinessContext = createContext<BusinessContextProps | undefined>(undefined);
+const BusinessContext = createContext<BusinessContextProps | undefined>(
+  undefined
+);
 
 interface BusinessContextProviderProps {
   children: ReactNode;
 }
 
-export function BusinessContextProvider({ children }: BusinessContextProviderProps): JSX.Element {
-  const [selectedBusinessId, setBusinessId] = useState<string | undefined>(undefined);
+// --------- Provider ---------
+export function BusinessContextProvider({
+  children,
+}: BusinessContextProviderProps): JSX.Element {
+  const [selectedBusinessId, setBusinessId] = useState<string | undefined>(
+    undefined
+  );
 
   useEffect(() => {
-    const storedId = localStorage.getItem("selectedBusinessId");
-    if (storedId) {
-      setBusinessId(storedId);
-    }
+    const initialize = async () => {
+      const storedId = localStorage.getItem("selectedBusinessId");
+      if (storedId) {
+        setBusinessId(storedId);
+      } else {
+        try {
+          const businesses = await getMyBusinesses();
+          if (businesses.length > 0) {
+            const firstId = businesses[0]._id;
+            localStorage.setItem("selectedBusinessId", firstId);
+            setBusinessId(firstId);
+          }
+        } catch (error) {
+          console.error("Error initializing businesses:", error);
+        }
+      }
+    };
+
+    initialize();
   }, []);
 
   const setSelectedBusinessId = (id: string | undefined) => {
@@ -33,16 +63,21 @@ export function BusinessContextProvider({ children }: BusinessContextProviderPro
   };
 
   return (
-    <BusinessContext.Provider value={{ selectedBusinessId, setSelectedBusinessId }}>
+    <BusinessContext.Provider
+      value={{ selectedBusinessId, setSelectedBusinessId }}
+    >
       {children}
     </BusinessContext.Provider>
   );
 }
 
+// --------- Hook ---------
 export const useBusinessContext = (): BusinessContextProps => {
   const context = useContext(BusinessContext);
   if (!context) {
-    throw new Error("useBusinessContext must be used within a BusinessContextProvider");
+    throw new Error(
+      "useBusinessContext must be used within a BusinessContextProvider"
+    );
   }
   return context;
 };

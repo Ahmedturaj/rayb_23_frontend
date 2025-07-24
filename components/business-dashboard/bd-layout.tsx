@@ -1,9 +1,18 @@
 "use client";
 
-// import { getMyBusinesses } from "@/lib/api";
-// import { useQuery } from "@tanstack/react-query";
+import { getMyBusinesses } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useBusinessContext } from "@/lib/business-context";
+
 
 export default function BusinessDashboardLayout() {
   const pathname = usePathname();
@@ -16,11 +25,15 @@ export default function BusinessDashboardLayout() {
     { name: "Settings", href: "/business-dashboard/settings" },
   ];
 
-  // const myBusinesses = useQuery({
-  //   queryKey: ["myBusinesses"],
-  //   queryFn: getMyBusinesses,
-  //   select: (data) => data?.data,
-  // })
+  const { data: myBusinesses } = useQuery({
+    queryKey: ["myBusinesses"],
+    queryFn: getMyBusinesses,
+    select: (data) => data?.data,
+  })
+
+  const { selectedBusinessId, setSelectedBusinessId } = useBusinessContext()
+
+  console.log("My selected Businesses: ", selectedBusinessId);
 
   return (
     <section className="border-b py-4">
@@ -44,7 +57,21 @@ export default function BusinessDashboardLayout() {
           })}
         </nav>
         <div className="">
-          Hello
+          <Select
+            value={selectedBusinessId}
+            onValueChange={(value) => setSelectedBusinessId(value)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select Business" />
+            </SelectTrigger>
+            <SelectContent>
+              {myBusinesses?.map((business: { _id: string, name: string, businessInfo: { name: string, } }) => (
+                <SelectItem key={business._id} value={business._id}>
+                  {business.businessInfo.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </section>

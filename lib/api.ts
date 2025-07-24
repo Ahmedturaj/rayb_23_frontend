@@ -122,7 +122,7 @@ export async function getMyBusinesses() {
 
 // Message API
 
-// Get my chat
+// Get my chat (for user/customer)
 export async function getMyChat(userId: string) {
   try {
     const response = await api.get(`/chat/my-chat/${userId}`);
@@ -132,6 +132,19 @@ export async function getMyChat(userId: string) {
     return error;
   }
 }
+
+
+// get chat by businessMan
+export async function getChatByBusinessMan(businessId: string) {
+  try {
+    const response = await api.get(`/chat/business-chat/${businessId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching chat by business man:", error);
+    return error;
+  }
+}
+
 
 // get messages
 export async function getMessages(chatId: string) {
