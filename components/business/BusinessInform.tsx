@@ -38,7 +38,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({
           <div className="w-[200px] h-[200px]">
             <input
               type="file"
-              name="images"
+              name="image"
               id="image_input"
               className="hidden"
               multiple
