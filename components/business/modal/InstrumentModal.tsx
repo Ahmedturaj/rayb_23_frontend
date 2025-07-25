@@ -12,9 +12,6 @@ interface Instruments {
   instrumentFamily: string;
   instrumentTypes: string[];
   serviceType: string;
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
 }
 
 type InstrumentModalProps = {

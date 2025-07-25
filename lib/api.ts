@@ -36,7 +36,6 @@ export const getUserProfile = async () => {
   }
 };
 
-
 // Update user profile
 export async function updateUserProfile(data: any) {
   try {
@@ -49,7 +48,11 @@ export async function updateUserProfile(data: any) {
 }
 
 // Deactivate account
-export async function deactivateAccount({ deactivedReason }: { deactivedReason: string }) {
+export async function deactivateAccount({
+  deactivedReason,
+}: {
+  deactivedReason: string;
+}) {
   try {
     const response = await api.put(`/user/deactive-account`, deactivedReason);
     return response.data;
@@ -70,7 +73,6 @@ export async function changePassword(data: any) {
   }
 }
 
-
 // Get user review
 export async function getUserReview() {
   try {
@@ -81,7 +83,6 @@ export async function getUserReview() {
     return error;
   }
 }
-
 
 // Get user photos
 export async function getUserPhotos() {
@@ -94,7 +95,6 @@ export async function getUserPhotos() {
   }
 }
 
-
 // Get user businesses
 export async function getUserBusinesses() {
   try {
@@ -105,8 +105,6 @@ export async function getUserBusinesses() {
     return error;
   }
 }
-
-
 
 // Business API
 export async function getMyBusinesses() {
@@ -119,10 +117,9 @@ export async function getMyBusinesses() {
   }
 }
 
-
 // Message API
 
-// Get my chat
+// Get my chat (for user/customer)
 export async function getMyChat(userId: string) {
   try {
     const response = await api.get(`/chat/my-chat/${userId}`);
@@ -132,6 +129,19 @@ export async function getMyChat(userId: string) {
     return error;
   }
 }
+
+
+// get chat by businessMan
+export async function getChatByBusinessMan(businessId: string) {
+  try {
+    const response = await api.get(`/chat/business-chat/${businessId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching chat by business man:", error);
+    return error;
+  }
+}
+
 
 // get messages
 export async function getMessages(chatId: string) {
@@ -148,6 +158,17 @@ export async function getMessages(chatId: string) {
 export async function sendMessage({ data }: any) {
   try {
     const response = await api.post(`/message/send-message`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error sending message:", error);
+    return error;
+  }
+}
+
+//add a business
+export async function addBusiness(payload: any) {
+  try {
+    const response = await api.post(`/business/create`, payload);
     return response.data;
   } catch (error) {
     console.error("Error sending message:", error);
@@ -178,7 +199,16 @@ export async function getSingleBusiness(params: string | string[]) {
 }
 
 
-
+// get business stats
+export async function getBusinessStats() {
+  try {
+    const response = await api.get(`/business/my-Dashboard`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching business stats:", error);
+    return error;
+  }
+}
 
 // Admin claim business api
 
@@ -198,21 +228,20 @@ export async function getAllBusinessClaims(query?: {
   }
 }
 
-
-export async function updateBusinessClaimStatus(claimId: string, status: string) {
+export async function updateBusinessClaimStatus(
+  claimId: string,
+  status: string
+) {
   try {
-    const response = await api.put(`/claim-bussiness/claim/${claimId}`, { status });
+    const response = await api.put(`/claim-bussiness/claim/${claimId}`, {
+      status,
+    });
     return response.data;
   } catch (error) {
     console.error("Error updating business claim status:", error);
     throw error; // Better to throw, so React Query can handle it properly
   }
 }
-
-
-// Approve business claim
-
-
 
 // Saved API
 
@@ -225,7 +254,6 @@ export async function getSavedBusiness() {
     return error;
   }
 }
-
 
 //post a review
 export async function addReview(data: ReviewType) {
@@ -259,7 +287,6 @@ export async function addReview(data: ReviewType) {
     throw error;
   }
 }
-
 
 //get all instrument
 export async function getAllInstrument() {
