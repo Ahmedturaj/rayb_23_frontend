@@ -62,6 +62,7 @@ interface PropsTypes {
   setSelectedOptions: React.Dispatch<
     React.SetStateAction<Record<OptionKey, boolean>>
   >;
+  setInstrumentFamily: (family: string) => void;
 }
 
 const Service = ({
@@ -94,6 +95,7 @@ const Service = ({
   selectedMusic,
   selectedOptions,
   setSelectedOptions,
+  setInstrumentFamily,
 }: PropsTypes) => {
   const [value, setValue] = useState("");
 
@@ -128,6 +130,7 @@ const Service = ({
 
           {/* Instrument Groups */}
           <InstrumentGroups
+            setInstrumentFamily={setInstrumentFamily}
             selectedInstruments={selectedInstruments}
             setSelectedInstruments={setSelectedInstruments}
             allInstrument={allInstrument}
@@ -150,7 +153,17 @@ const Service = ({
                       selectedInstrumentsGroup === service &&
                       "bg-teal-600 text-white"
                     }`}
-                    onClick={() => setSelectedInstrumentsGroup(service)}
+                    onClick={() => {
+                      setSelectedInstrumentsGroup(service);
+
+                      const foundFamily = allInstrument.find((group) =>
+                        group.instrumentTypes.includes(service)
+                      )?.instrumentFamily;
+
+                      if (foundFamily) {
+                        setInstrumentFamily(foundFamily);
+                      }
+                    }}
                   >
                     {service}
                   </button>
@@ -287,14 +300,23 @@ const Service = ({
                     <div className="my-5 grid grid-cols-3 lg:grid-cols-5 gap-2 max-w-[800px]">
                       {selectedInstrumentsMusic.map((service, index) => (
                         <button
+                          type="button"
                           key={index}
                           className={`border border-gray-200 py-3 px-5 rounded-lg ${
                             selectedInstrumentsGroupMusic === service &&
                             "bg-teal-600 text-white"
                           }`}
-                          onClick={() =>
-                            setSelectedInstrumentsGroupMusic(service)
-                          }
+                          onClick={() => {
+                            setSelectedInstrumentsGroupMusic(service);
+
+                            const foundFamily = allInstrument.find((group) =>
+                              group.instrumentTypes.includes(service)
+                            )?.instrumentFamily;
+
+                            if (foundFamily) {
+                              setInstrumentFamily(foundFamily);
+                            }
+                          }}
                         >
                           {service}
                         </button>
