@@ -1,47 +1,19 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Star,
-  Eye,
-  MessageSquare,
-  ImageIcon,
-  Bookmark,
-  ChevronRight,
-} from "lucide-react";
 import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
+import { getBusinessStats, getChatByBusinessMan } from "@/lib/api";
+import { useBusinessContext } from "@/lib/business-context";
+import Link from "next/link";
+import { ChevronRight, Loader, Star } from "lucide-react";
+import { useEffect } from "react";
 
 export default function BdDashComponent() {
-  const metrics = [
-    {
-      title: "Views",
-      value: "1,243",
-      change: "+31 new",
-      icon: Eye,
-      bgColor: "bg-teal-500",
-    },
-    {
-      title: "Reviews",
-      value: "64",
-      change: "+21 new",
-      icon: MessageSquare,
-      bgColor: "bg-yellow-500",
-    },
-    {
-      title: "Photos",
-      value: "120",
-      change: "+12 new",
-      icon: ImageIcon,
-      bgColor: "bg-purple-500",
-    },
-    {
-      title: "Saved",
-      value: "13",
-      change: "+2 new",
-      icon: Bookmark,
-      bgColor: "bg-blue-500",
-    },
-  ];
+
+  const { selectedBusinessId } = useBusinessContext();
 
   const reviews = [
     {
@@ -120,51 +92,29 @@ export default function BdDashComponent() {
     },
   ];
 
-  const messages = [
-    {
-      name: "Susan Mae",
-      message: "Sure, I'll let you know.",
-      avatar: "/placeholder.svg?height=40&width=40&text=SM",
-      time: "1h",
-      bgColor: "bg-teal-50",
-    },
-    {
-      name: "Kristin Watson",
-      message: "Sure, I'll let you know.",
-      avatar: "/placeholder.svg?height=40&width=40&text=KW",
-      time: "1 week",
-    },
-    {
-      name: "Darrell Steward",
-      message: "Sure, I'll let you know.",
-      avatar: "/placeholder.svg?height=40&width=40&text=DS",
-      time: "1 week",
-    },
-    {
-      name: "Jenny Wilson",
-      message: "Sure, I'll let you know.",
-      avatar: "/placeholder.svg?height=40&width=40&text=JW",
-      time: "1 week",
-    },
-    {
-      name: "Eleanor Pena",
-      message: "Sure, I'll let you know.",
-      avatar: "/placeholder.svg?height=40&width=40&text=EP",
-      time: "1 month",
-    },
-    {
-      name: "Esther Howard",
-      message: "Sure, I'll let you know.",
-      avatar: "/placeholder.svg?height=40&width=40&text=EH",
-      time: "2 months",
-    },
-    {
-      name: "Marvin McKinney",
-      message: "Sure, I'll let you know.",
-      avatar: "/placeholder.svg?height=40&width=40&text=MM",
-      time: "2 months",
-    },
-  ];
+
+
+  const { data: newMessages, isLoading: isNewMessagesLoading, refetch: refetchNewMessages } = useQuery({
+    queryKey: ["newMessages"],
+    queryFn: () => getChatByBusinessMan(selectedBusinessId as string),
+    select: (data) => data?.data
+  })
+
+
+  const { data: businessStats, isLoading: isBusinessStatsLoading, refetch: refetchBusinessStats } = useQuery({
+    queryKey: ["stats"],
+    queryFn: () => getBusinessStats(),
+    select: (data) => data?.data
+  })
+
+  useEffect(() => {
+    if (selectedBusinessId) {
+      refetchBusinessStats()
+      refetchNewMessages()
+    }
+  }, [selectedBusinessId, refetchBusinessStats, refetchNewMessages])
+
+  console.log(businessStats)
 
   return (
     <div className="space-y-8 min-h-screen">
@@ -205,26 +155,42 @@ export default function BdDashComponent() {
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {metrics.map((metric, index) => (
+        {["Views", "Reviews", "Photos", "Saves"].map((metric, index) => (
           <Card
             key={index}
-            className={`${metric.bgColor} border-0 text-white rounded-xl`}
+            className={`${index === 0 ? "bg-teal-500" : index === 1 ? "bg-yellow-500" : index === 2 ? "bg-purple-500" : "bg-blue-500"} border-0 text-white rounded-xl`}
           >
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-3">
                   <p className="text-white/80 text-sm font-medium">
-                    {metric.title}
+                    {metric}
                   </p>
                   <div className="space-y-1">
                     <p className="text-3xl font-bold text-white">
-                      {metric.value}
+                      {metric === "Views"
+                        ? businessStats?.views
+                        : metric === "Reviews"
+                          ? businessStats?.reviews
+                          : metric === "Photos"
+                            ? businessStats?.photos
+                            : metric === "Saves"
+                              ? businessStats?.saves
+                              : 0}
                     </p>
-                    <p className="text-white/80 text-sm">{metric.change}</p>
+                    <p className="text-white/80 text-sm">
+                      {
+                        isBusinessStatsLoading
+                          ?
+                          <Loader className="animate-spin h-4 w-4 text-white" />
+                          :
+                          metric
+                      }
+                    </p>
                   </div>
                 </div>
                 <div className="bg-white/20 p-2 rounded-lg">
-                  <metric.icon className="h-5 w-5 text-white" />
+                  {/* <metric.icon className="h-5 w-5 text-white" /> */}
                 </div>
               </div>
             </CardContent>
@@ -317,42 +283,60 @@ export default function BdDashComponent() {
             <ChevronRight className="h-5 w-5 text-gray-400" />
           </div>
 
-          <div className="space-y-6 h-[800px] overflow-y-auto scrollbar-hide">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className="space-y-3 shadow-[0px_2px_12px_0px_#003D3914] p-4 rounded-lg"
-              >
-                <div className="flex items-start gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={message.avatar || "/placeholder.svg"} />
-                    <AvatarFallback className="bg-gray-500 text-white text-xs">
-                      {message.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
+          {
+            isNewMessagesLoading
+              ?
+              <Loader className="animate-spin h-7 w-7" />
+              :
+              <div className="space-y-6 h-[800px] overflow-y-auto scrollbar-hide">
+                {newMessages?.map((message: { userId: { name: string; imageLink: string; }, lastMessage: { date: string; message: string } }, index: number) => (
+                  <div
+                    key={index}
+                    className="space-y-3 shadow-[0px_2px_12px_0px_#003D3914] p-4 rounded-lg"
+                  >
+                    <Link href={`/business-dashboard/messages`}>
+                      <div className="flex items-start gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={message.userId.imageLink || "/placeholder.svg"} />
+                          <AvatarFallback className="bg-gray-500 text-white text-xs uppercase">
+                            {message.userId.name
+                              .split(" ")
+                              .map((n: string) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
 
-                  <div className="flex-1 space-y-2">
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-semibold text-gray-900 text-sm truncate">
-                          {message.name}
-                        </h4>
-                        <span className="text-xs text-gray-500 ml-2">
-                          {message.time}
-                        </span>
+                        <div className="flex-1 space-y-2">
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-semibold text-gray-900 text-sm truncate">
+                                {message.userId.name}
+                              </h4>
+                              <span className="text-xs text-gray-500 ml-2">
+                                {new Date(message.lastMessage.date).toLocaleString(
+                                  "en-US",
+                                  {
+                                    hour: "numeric",
+                                    minute: "numeric",
+                                    hour12: true,
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                  }
+                                )}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-700 leading-relaxed">
+                              {message.lastMessage.message}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-sm text-gray-700 leading-relaxed">
-                        {message.message}
-                      </p>
-                    </div>
+                    </Link>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+          }
         </div>
       </div>
     </div>
