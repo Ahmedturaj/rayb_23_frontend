@@ -10,6 +10,8 @@ import InstrumentGroupsMusic from "./InstrumentGroupsMusic";
 import { toast } from "sonner";
 import ServiceModalMusic from "./modal/ServiceModalMusic";
 
+type OptionKey = "buy" | "sell" | "trade" | "rent";
+
 interface Instruments {
   _id: string;
   instrumentFamily: string;
@@ -56,6 +58,10 @@ interface PropsTypes {
   setServiceModal: (value: boolean) => void;
   serviceModalMusic: boolean;
   setServiceModalMusic: (value: boolean) => void;
+  selectedOptions: Record<OptionKey, boolean>;
+  setSelectedOptions: React.Dispatch<
+    React.SetStateAction<Record<OptionKey, boolean>>
+  >;
 }
 
 const Service = ({
@@ -86,6 +92,8 @@ const Service = ({
   serviceModalMusic,
   setServiceModalMusic,
   selectedMusic,
+  selectedOptions,
+  setSelectedOptions,
 }: PropsTypes) => {
   const [value, setValue] = useState("");
 
@@ -243,7 +251,10 @@ const Service = ({
         </div>
 
         {/* Buy / Sell / Trade / Rent */}
-        <BuySellGroup />
+        <BuySellGroup
+          selectedOptions={selectedOptions}
+          setSelectedOptions={setSelectedOptions}
+        />
 
         {/* Music Lessons */}
         <div>

@@ -14,9 +14,26 @@ interface ServiceType {
   price: string;
 }
 
-const AddBusiness = () => {
-  const [images, setImages] = useState<string[]>([]);
+type OptionKey = "buy" | "sell" | "trade" | "rent";
 
+const daysOfWeek = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
+const defaultTime = {
+  startTime: "09:00",
+  startMeridiem: "AM",
+  endTime: "05:00",
+  endMeridiem: "PM",
+};
+
+const AddBusiness = () => {
   // modal control
   const [serviceModal, setServiceModal] = useState(false);
   const [ServiceModalMusic, setServiceModalMusic] = useState(false);
@@ -93,6 +110,36 @@ const AddBusiness = () => {
     },
   });
 
+  // buy / cell/ trade / rent related state
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [selectedOptions, setSelectedOptions] = useState<
+    Record<OptionKey, boolean>
+  >({
+    buy: false,
+    sell: false,
+    trade: false,
+    rent: false,
+  });
+
+  //business hour
+  const [businessHours, setBusinessHours] = React.useState(
+    daysOfWeek.map((day) => ({
+      day,
+      enabled: false, // default to false
+      ...defaultTime,
+    }))
+  );
+
+  //business information related
+  const [images, setImages] = useState<string[]>([]);
+  const [businessMan, setBusinessName] = useState("");
+  const [addressName, setAddressName] = useState("");
+  const [description, setDescription] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [website, setWebsite] = useState("");
+
   const handleUploadImage = () => {
     const input = document.getElementById("image_input");
     if (input) {
@@ -118,6 +165,50 @@ const AddBusiness = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const formData = new FormData();
+
+    // Append each image file (not just URLs, need to use real File objects)
+    const inputEl = document.getElementById("image_input") as HTMLInputElement;
+    if (inputEl?.files) {
+      Array.from(inputEl.files).forEach((file) => {
+        formData.append("images", file);
+      });
+    }
+
+    // Business Info
+    formData.append(
+      "businessInfo",
+      JSON.stringify({
+        name: businessMan,
+        address: addressName,
+        phone: phoneNumber,
+        email: email,
+        website: website,
+        description: description,
+      })
+    );
+
+    // Business Hours
+    const formattedHours = businessHours.map((hour) => ({
+      day: hour.day.toLowerCase(),
+      open: `${hour.startTime} ${hour.startMeridiem}`,
+      close: `${hour.endTime} ${hour.endMeridiem}`,
+      closed: !hour.enabled,
+    }));
+    formData.append("businessHours", JSON.stringify(formattedHours));
+
+    // Buy/Sell/Trade/Rent flags
+    formData.append("buyInstruments", JSON.stringify(selectedOptions.buy));
+    formData.append("sellInstruments", JSON.stringify(selectedOptions.sell));
+    formData.append("tradeInstruments", JSON.stringify(selectedOptions.trade));
+    formData.append("rentInstruments", JSON.stringify(selectedOptions.rent));
+
+    // Services (instrument services & music lessons)
+    formData.append("services", JSON.stringify(selected));
+    formData.append("musicLessons", JSON.stringify(selectedMusic));
+
+    console.log("formData");
   };
 
   return (
@@ -140,6 +231,12 @@ const AddBusiness = () => {
             handleUploadImage={handleUploadImage}
             images={images}
             handleRemoveImage={handleRemoveImage}
+            setAddressName={setAddressName}
+            setBusinessName={setBusinessName}
+            setDescription={setDescription}
+            setEmail={setEmail}
+            setPhoneNumber={setPhoneNumber}
+            setWebsite={setWebsite}
           />
         </div>
 
@@ -178,6 +275,8 @@ const AddBusiness = () => {
             setSelected={setSelected}
             selectedMusic={selectedMusic}
             setSelectedMusic={setSelectedMusic}
+            selectedOptions={selectedOptions}
+            setSelectedOptions={setSelectedOptions}
           />
         </div>
 
@@ -194,7 +293,10 @@ const AddBusiness = () => {
           </div>
 
           <div>
-            <BusinessHours />
+            <BusinessHours
+              businessHours={businessHours}
+              setBusinessHours={setBusinessHours}
+            />
           </div>
         </div>
 
