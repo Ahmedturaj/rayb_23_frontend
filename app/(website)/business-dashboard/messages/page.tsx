@@ -11,27 +11,26 @@ export default function BusinessInboxPage() {
     const { selectedBusinessId } = useBusinessContext()
 
     const businessInboxConfig = {
-        // Data fetching
-        fetchChats: (userId: string, businessId: string) => getChatByBusinessMan(businessId as string).then((res) => res.data),
-        queryKey: ["business-chats", selectedBusinessId],
+        fetchChats: (_userId?: string, businessId?: string) =>
+            businessId ? getChatByBusinessMan(businessId).then((res) => res.data) : Promise.resolve([]),
 
-        // Chat display - for business inbox, we show customer info
+        queryKey: selectedBusinessId
+            ? ["business-chats", selectedBusinessId]
+            : ["business-chats"],
+
         getChatName: (chat: any) => chat?.userId?.name || "Unknown User",
         getChatEmail: (chat: any) => chat?.userId?.email || "",
         getChatImage: (chat: any) => chat?.userId?.image,
         getChatId: (chat: any) => chat?._id,
 
-        // Message handling - business sends to customer
         getReceiverId: (chat: any) => chat?.userId?._id,
 
-        // UI
         emptyStateText: "You have no messages yet.",
         emptyStateLink: "/search-result",
         emptyStateLinkText: "Go to Search Results",
 
-        // Additional data
-        additionalData: selectedBusinessId as string,
+        additionalData: selectedBusinessId || "", // If you want to ensure string, fallback to ""
     }
-    
+
     return <InboxComponent config={businessInboxConfig} />
 }
