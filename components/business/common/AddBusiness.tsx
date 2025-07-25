@@ -60,6 +60,9 @@ const AddBusiness = () => {
   const [selected, setSelected] = useState<ServiceType[]>([]);
   const [selectedMusic, setSelectedMusic] = useState<ServiceType[]>([]);
 
+  console.log("selected", selected);
+  console.log("selected Music", selectedMusic);
+
   const handleAddInstrument = () => {
     setSelected((prev) => [
       ...prev,
