@@ -1,17 +1,15 @@
-import React, { useState } from "react";
+type OptionKey = "buy" | "sell" | "trade" | "rent";
 
-const BuySellGroup = () => {
-  type OptionKey = "buy" | "sell" | "trade" | "rent";
+type BuySellGroupProps = {
+  selectedOptions: Record<OptionKey, boolean>;
+  setSelectedOptions: React.Dispatch<
+    React.SetStateAction<Record<OptionKey, boolean>>
+  >;
+};
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedOptions, setSelectedOptions] = useState<
-    Record<OptionKey, boolean>
-  >({
-    buy: true,
-    sell: true,
-    trade: true,
-    rent: true,
-  });
+const BuySellGroup: React.FC<BuySellGroupProps> = ({
+  setSelectedOptions,
+}) => {
 
   const options = [
     {

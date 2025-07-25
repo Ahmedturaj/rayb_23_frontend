@@ -3,15 +3,31 @@ import Image from "next/image";
 import React from "react";
 import { MdDelete } from "react-icons/md";
 
-
 interface BusinessInformProps {
   handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleUploadImage: () => void;
   images: string[];
   handleRemoveImage: (index: number) => void;
+  setBusinessName: (name: string) => void;
+  setAddressName: (address: string) => void;
+  setDescription: (description: string) => void;
+  setPhoneNumber: (phone: string) => void;
+  setEmail: (email: string) => void;
+  setWebsite: (website: string) => void;
 }
 
-const BusinessInform: React.FC<BusinessInformProps> = ({handleFileChange, handleUploadImage, images, handleRemoveImage}) => {
+const BusinessInform: React.FC<BusinessInformProps> = ({
+  handleFileChange,
+  handleUploadImage,
+  images,
+  handleRemoveImage,
+  setBusinessName,
+  setAddressName,
+  setDescription,
+  setPhoneNumber,
+  setEmail,
+  setWebsite,
+}) => {
   return (
     <div>
       {/* upload photos */}
@@ -75,6 +91,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({handleFileChange, handle
                 type="text"
                 placeholder="Business name"
                 className="mt-1 w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:outline-none h-[48px]"
+                onChange={(e) => setBusinessName(e.target.value)}
               />
             </div>
 
@@ -88,6 +105,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({handleFileChange, handle
                   type="text"
                   placeholder="Business address"
                   className="mt-1 w-full rounded-md border border-gray-300 bg-gray-50 px-10 py-2 text-sm focus:outline-none h-[48px]"
+                  onChange={(e) => setAddressName(e.target.value)}
                 />
                 <MapPin
                   className="absolute top-[50%] left-3 -translate-y-1/2 text-gray-400"
@@ -106,6 +124,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({handleFileChange, handle
               rows={3}
               placeholder="Business description"
               className="mt-1 w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:outline-none h-[100px]"
+              onChange={(e) => setDescription(e.target.value)}
             />
           </div>
 
@@ -119,6 +138,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({handleFileChange, handle
                 type="text"
                 placeholder="Business phone number"
                 className="mt-1 w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:outline-none h-[48px]"
+                onChange={(e) => setPhoneNumber(e.target.value)}
               />
             </div>
 
@@ -130,6 +150,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({handleFileChange, handle
                 type="email"
                 placeholder="Business email"
                 className="mt-1 w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:outline-none h-[48px]"
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
           </div>
@@ -143,6 +164,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({handleFileChange, handle
               type="url"
               placeholder="Business website"
               className="mt-1 w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:outline-none h-[48px]"
+              onChange={(e) => setWebsite(e.target.value)}
             />
           </div>
         </div>
