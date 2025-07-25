@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Send, Paperclip, ArrowLeft } from "lucide-react"
 
-interface Message {
+export interface Message {
     _id: string
     senderId: string | { _id: string; name?: string; image?: string }
     receiverId: string

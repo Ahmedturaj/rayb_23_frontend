@@ -198,6 +198,18 @@ export async function getSingleBusiness(params: string | string[]) {
   }
 }
 
+
+// get business stats
+export async function getBusinessStats() {
+  try {
+    const response = await api.get(`/business/my-Dashboard`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching business stats:", error);
+    return error;
+  }
+}
+
 // Admin claim business api
 
 export async function getAllBusinessClaims(query?: {
