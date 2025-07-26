@@ -180,7 +180,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
                 {isPending ? (
                   <span className="flex items-center justify-center">
                     <Loader className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting
+                    Submitting...
                   </span>
                 ) : (
                   "Submit"
