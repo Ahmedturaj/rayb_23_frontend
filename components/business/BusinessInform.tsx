@@ -14,6 +14,12 @@ interface BusinessInformProps {
   setPhoneNumber: (phone: string) => void;
   setEmail: (email: string) => void;
   setWebsite: (website: string) => void;
+  businessMan: string;
+  addressName: string;
+  description: string;
+  phoneNumber: string;
+  email: string;
+  website: string;
 }
 
 const BusinessInform: React.FC<BusinessInformProps> = ({
@@ -27,6 +33,12 @@ const BusinessInform: React.FC<BusinessInformProps> = ({
   setPhoneNumber,
   setEmail,
   setWebsite,
+  businessMan,
+  addressName,
+  description,
+  phoneNumber,
+  email,
+  website,
 }) => {
   return (
     <div>
@@ -91,6 +103,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({
                 type="text"
                 placeholder="Business name"
                 className="mt-1 w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:outline-none h-[48px]"
+                value={businessMan}
                 onChange={(e) => setBusinessName(e.target.value)}
               />
             </div>
@@ -105,6 +118,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({
                   type="text"
                   placeholder="Business address"
                   className="mt-1 w-full rounded-md border border-gray-300 bg-gray-50 px-10 py-2 text-sm focus:outline-none h-[48px]"
+                  value={addressName}
                   onChange={(e) => setAddressName(e.target.value)}
                 />
                 <MapPin
@@ -124,6 +138,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({
               rows={3}
               placeholder="Business description"
               className="mt-1 w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:outline-none h-[100px]"
+              value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
@@ -138,6 +153,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({
                 type="text"
                 placeholder="Business phone number"
                 className="mt-1 w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:outline-none h-[48px]"
+                value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
               />
             </div>
@@ -150,6 +166,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({
                 type="email"
                 placeholder="Business email"
                 className="mt-1 w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:outline-none h-[48px]"
+                value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
@@ -164,6 +181,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({
               type="url"
               placeholder="Business website"
               className="mt-1 w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:outline-none h-[48px]"
+              value={website}
               onChange={(e) => setWebsite(e.target.value)}
             />
           </div>
