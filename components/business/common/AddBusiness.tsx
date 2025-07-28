@@ -235,6 +235,44 @@ const AddBusiness = () => {
 
         setBusinessHours(updatedHours);
       }
+
+      if (singleBusiness) {
+        setSelectedOptions({
+          buy: singleBusiness?.buyInstruments || false,
+          sell: singleBusiness?.sellInstruments || false,
+          trade: singleBusiness?.tradeInstruments || false,
+          rent: singleBusiness?.rentInstruments || false,
+        });
+      }
+
+      // Set services for instrument pricing list
+      if (singleBusiness?.services?.length > 0) {
+        setSelected(singleBusiness.services);
+
+        // Extract all unique instrument group names from services
+        const instrumentGroups = singleBusiness.services.map(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (s: any) => s.selectedInstrumentsGroup
+        );
+
+        // Prefill selected instruments
+        setSelectedInstruments(instrumentGroups);
+
+        // Set the first instrument group as selected for pricing list view
+        setSelectedInstrumentsGroup(instrumentGroups[0]);
+      }
+
+      if (singleBusiness?.musicLessons?.length > 0) {
+        setSelectedMusic(singleBusiness.musicLessons);
+
+        const musicGroups = singleBusiness.musicLessons.map(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (s: any) => s.selectedInstrumentsGroupMusic
+        );
+
+        setSelectedInstrumentsMusic(musicGroups);
+        setSelectedInstrumentsGroupMusic(musicGroups[0]);
+      }
     }
   }, [
     singleBusiness,
