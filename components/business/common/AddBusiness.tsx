@@ -169,6 +169,8 @@ const AddBusiness = () => {
 
   const musicLessons = singleBusiness?.musicLessons;
 
+  const businessHoursEnables = singleBusiness?.businessHours;
+
   //business information related
   const [images, setImages] = useState<string[]>([]);
   const [businessMan, setBusinessName] = useState("");
@@ -208,8 +210,77 @@ const AddBusiness = () => {
         .map((item: any) => item?.selectedInstrumentsGroupMusic)
         .filter(Boolean);
       setSelectedInstrumentsMusic(selectedMusicGroups);
+
+      if (businessHoursEnables && Array.isArray(businessHoursEnables)) {
+        const updatedHours = daysOfWeek.map((day) => {
+          const found = businessHoursEnables.find(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (item: any) => item.day === day
+          );
+          return found
+            ? {
+                day: found.day,
+                enabled: found.enabled,
+                startTime: found.startTime || defaultTime.startTime,
+                startMeridiem: found.startMeridiem || defaultTime.startMeridiem,
+                endTime: found.endTime || defaultTime.endTime,
+                endMeridiem: found.endMeridiem || defaultTime.endMeridiem,
+              }
+            : {
+                day,
+                enabled: false,
+                ...defaultTime,
+              };
+        });
+
+        setBusinessHours(updatedHours);
+      }
+
+      if (singleBusiness) {
+        setSelectedOptions({
+          buy: singleBusiness?.buyInstruments || false,
+          sell: singleBusiness?.sellInstruments || false,
+          trade: singleBusiness?.tradeInstruments || false,
+          rent: singleBusiness?.rentInstruments || false,
+        });
+      }
+
+      // Set services for instrument pricing list
+      if (singleBusiness?.services?.length > 0) {
+        setSelected(singleBusiness.services);
+
+        // Extract all unique instrument group names from services
+        const instrumentGroups = singleBusiness.services.map(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (s: any) => s.selectedInstrumentsGroup
+        );
+
+        // Prefill selected instruments
+        setSelectedInstruments(instrumentGroups);
+
+        // Set the first instrument group as selected for pricing list view
+        setSelectedInstrumentsGroup(instrumentGroups[0]);
+      }
+
+      if (singleBusiness?.musicLessons?.length > 0) {
+        setSelectedMusic(singleBusiness.musicLessons);
+
+        const musicGroups = singleBusiness.musicLessons.map(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (s: any) => s.selectedInstrumentsGroupMusic
+        );
+
+        setSelectedInstrumentsMusic(musicGroups);
+        setSelectedInstrumentsGroupMusic(musicGroups[0]);
+      }
     }
-  }, [singleBusiness, pathName, allServices, musicLessons]);
+  }, [
+    singleBusiness,
+    pathName,
+    allServices,
+    musicLessons,
+    businessHoursEnables,
+  ]);
 
   const handleUploadImage = () => {
     const input = document.getElementById("image_input");

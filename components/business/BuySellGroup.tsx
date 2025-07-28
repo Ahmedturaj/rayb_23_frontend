@@ -9,6 +9,7 @@ type BuySellGroupProps = {
 
 const BuySellGroup: React.FC<BuySellGroupProps> = ({
   setSelectedOptions,
+  selectedOptions
 }) => {
 
   const options = [
@@ -57,7 +58,7 @@ const BuySellGroup: React.FC<BuySellGroupProps> = ({
           >
             <input
               type="checkbox"
-              // checked={selectedOptions[option.id]}
+              checked={selectedOptions[option.id as OptionKey]}
               onChange={() => toggleOption(option.id as OptionKey)}
               className="mt-1 accent-teal-600 w-4 h-4"
             />
