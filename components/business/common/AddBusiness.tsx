@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BusinessHours from "../BusinessHours";
 import BusinessInform from "../BusinessInform";
 import Service from "../Service";
@@ -8,7 +8,9 @@ import { addBusiness, getAllInstrument } from "@/lib/api";
 import { Loader } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useBusinessContext } from "@/lib/business-context";
+import axios from "axios";
 
 interface ServiceType {
   newInstrumentName: string;
@@ -43,8 +45,11 @@ const defaultTime = {
 const AddBusiness = () => {
   const session = useSession();
   const isLoggedIn = session?.status;
+  const pathName = usePathname();
 
   const router = useRouter();
+
+  const { selectedBusinessId } = useBusinessContext();
 
   // modal control
   const [serviceModal, setServiceModal] = useState(false);
@@ -146,6 +151,17 @@ const AddBusiness = () => {
     }))
   );
 
+  //get single Business by selected ID
+  const { data: singleBusiness = {}, isLoading } = useQuery({
+    queryKey: ["get-single-business", selectedBusinessId],
+    queryFn: async () => {
+      const res = await axios(
+        `${process.env.NEXT_PUBLIC_API_URL}/business/${selectedBusinessId}`
+      );
+      return res?.data?.data;
+    },
+  });
+
   //business information related
   const [images, setImages] = useState<string[]>([]);
   const [businessMan, setBusinessName] = useState("");
@@ -154,6 +170,24 @@ const AddBusiness = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [website, setWebsite] = useState("");
+
+  // show all data initially
+  useEffect(() => {
+    if (
+      pathName === "/business-dashboard/profile" &&
+      singleBusiness?.businessInfo
+    ) {
+      setBusinessName(singleBusiness.businessInfo.name || "");
+      setAddressName(singleBusiness.businessInfo.address || "");
+      setDescription(singleBusiness.businessInfo.description || "");
+      setPhoneNumber(singleBusiness.businessInfo.phone || "");
+      setEmail(singleBusiness.businessInfo.email || "");
+      setWebsite(singleBusiness.businessInfo.website || "");
+      if (singleBusiness.businessInfo.image) {
+        setImages(singleBusiness.businessInfo.image);
+      }
+    }
+  }, [singleBusiness, pathName]);
 
   const handleUploadImage = () => {
     const input = document.getElementById("image_input");
@@ -363,6 +397,15 @@ const AddBusiness = () => {
     await addBusinessData(formData);
   };
 
+  console.log("singleBusiness", singleBusiness);
+
+  if (isLoading)
+    return (
+      <div className="min-h-[calc(100vh-500px)] flex flex-col items-center justify-center">
+        Loading...
+      </div>
+    );
+
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -379,6 +422,12 @@ const AddBusiness = () => {
           </div>
 
           <BusinessInform
+            website={website}
+            email={email}
+            phoneNumber={phoneNumber}
+            description={description}
+            addressName={addressName}
+            businessMan={businessMan}
             handleFileChange={handleFileChange}
             handleUploadImage={handleUploadImage}
             images={images}

@@ -5,6 +5,7 @@ import LayoutVisibilityWrapper from "@/providers/layout-provider";
 import QueryProvider from "@/providers/query-provider";
 import SessionWrapper from "@/providers/session-provider";
 import { Toaster } from "sonner";
+import { BusinessContextProvider } from "@/lib/business-context";
 
 const font = DM_Sans({
   subsets: ["latin"],
@@ -26,10 +27,12 @@ export default function RootLayout({
       <body className={`${font.className} antialiased`}>
         <SessionWrapper>
           <QueryProvider>
-            <LayoutVisibilityWrapper>
-              <main className="min-h-[calc(100vh-510px)]">{children}</main>
-              <Toaster position="top-right" />
-            </LayoutVisibilityWrapper>
+            <BusinessContextProvider>
+              <LayoutVisibilityWrapper>
+                <main className="min-h-[calc(100vh-510px)]">{children}</main>
+                <Toaster position="top-right" />
+              </LayoutVisibilityWrapper>
+            </BusinessContextProvider>
           </QueryProvider>
         </SessionWrapper>
       </body>
