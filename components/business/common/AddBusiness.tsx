@@ -7,6 +7,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { addBusiness, getAllInstrument } from "@/lib/api";
 import { Loader } from "lucide-react";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface ServiceType {
   newInstrumentName: string;
@@ -39,6 +41,11 @@ const defaultTime = {
 };
 
 const AddBusiness = () => {
+  const session = useSession();
+  const isLoggedIn = session?.status;
+
+  const router = useRouter();
+
   // modal control
   const [serviceModal, setServiceModal] = useState(false);
   const [instrumentFamily, setInstrumentFamily] = useState<string>("");
@@ -65,9 +72,6 @@ const AddBusiness = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selected, setSelected] = useState<ServiceType[]>([]);
   const [selectedMusic, setSelectedMusic] = useState<ServiceType[]>([]);
-
-  console.log("selected", selected);
-  console.log("selected Music", selectedMusic);
 
   const handleAddInstrument = () => {
     setSelected((prev) => [
@@ -177,13 +181,18 @@ const AddBusiness = () => {
   const { mutateAsync: addBusinessData, isPending } = useMutation({
     mutationKey: ["add-business"],
     mutationFn: async (data: FormData) => {
-      await addBusiness(data);
+      const res = await addBusiness(data);
+      if (!res.success) {
+        throw new Error(res.error || "Business creation failed");
+      }
+      return res;
     },
     onSuccess: () => {
       toast.success("Business added successfully!");
     },
-    onError: () => {
-      toast.error("Failed to add business!");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onError: (error: any) => {
+      toast.error(error?.message || "Failed to add business!");
     },
   });
 
@@ -292,13 +301,17 @@ const AddBusiness = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    if (isLoggedIn === "unauthenticated") {
+      return router.push("/auth/login");
+    }
+
     const formData = new FormData();
     const imageInput = document.getElementById(
       "image_input"
     ) as HTMLInputElement;
     const imageFiles = imageInput?.files ? Array.from(imageInput.files) : [];
 
-    console.log(imageFiles)
+    console.log(imageFiles);
 
     imageFiles.forEach((file) => {
       formData.append("image", file);
@@ -346,11 +359,6 @@ const AddBusiness = () => {
     };
 
     formData.append("data", JSON.stringify(businessData));
-
-    console.log("Submitting:", {
-      images: imageFiles.map((f) => f.name),
-      businessData,
-    });
 
     await addBusinessData(formData);
   };
@@ -478,7 +486,7 @@ const AddBusiness = () => {
         <div className="pt-10 text-center">
           <button
             type="submit"
-            className={`flex-1 bg-teal-600 text-white py-2 rounded-md hover:bg-teal-700 transition ${
+            className={`flex-1 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition w-[228px] h-[48px] ${
               isPending && "opacity-70"
             }`}
           >
