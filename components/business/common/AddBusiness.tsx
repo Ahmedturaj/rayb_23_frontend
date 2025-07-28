@@ -169,6 +169,8 @@ const AddBusiness = () => {
 
   const musicLessons = singleBusiness?.musicLessons;
 
+  const businessHoursEnables = singleBusiness?.businessHours;
+
   //business information related
   const [images, setImages] = useState<string[]>([]);
   const [businessMan, setBusinessName] = useState("");
@@ -208,8 +210,39 @@ const AddBusiness = () => {
         .map((item: any) => item?.selectedInstrumentsGroupMusic)
         .filter(Boolean);
       setSelectedInstrumentsMusic(selectedMusicGroups);
+
+      if (businessHoursEnables && Array.isArray(businessHoursEnables)) {
+        const updatedHours = daysOfWeek.map((day) => {
+          const found = businessHoursEnables.find(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (item: any) => item.day === day
+          );
+          return found
+            ? {
+                day: found.day,
+                enabled: found.enabled,
+                startTime: found.startTime || defaultTime.startTime,
+                startMeridiem: found.startMeridiem || defaultTime.startMeridiem,
+                endTime: found.endTime || defaultTime.endTime,
+                endMeridiem: found.endMeridiem || defaultTime.endMeridiem,
+              }
+            : {
+                day,
+                enabled: false,
+                ...defaultTime,
+              };
+        });
+
+        setBusinessHours(updatedHours);
+      }
     }
-  }, [singleBusiness, pathName, allServices, musicLessons]);
+  }, [
+    singleBusiness,
+    pathName,
+    allServices,
+    musicLessons,
+    businessHoursEnables,
+  ]);
 
   const handleUploadImage = () => {
     const input = document.getElementById("image_input");
