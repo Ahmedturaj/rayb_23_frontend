@@ -130,6 +130,8 @@ const AddBusiness = () => {
     },
   });
 
+  console.log(allInstrument);
+
   // buy / cell/ trade / rent related state
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -162,6 +164,11 @@ const AddBusiness = () => {
     },
   });
 
+  //all services here
+  const allServices = singleBusiness?.services;
+
+  const musicLessons = singleBusiness?.musicLessons;
+
   //business information related
   const [images, setImages] = useState<string[]>([]);
   const [businessMan, setBusinessName] = useState("");
@@ -177,6 +184,7 @@ const AddBusiness = () => {
       pathName === "/business-dashboard/profile" &&
       singleBusiness?.businessInfo
     ) {
+      //business info
       setBusinessName(singleBusiness.businessInfo.name || "");
       setAddressName(singleBusiness.businessInfo.address || "");
       setDescription(singleBusiness.businessInfo.description || "");
@@ -186,8 +194,22 @@ const AddBusiness = () => {
       if (singleBusiness.businessInfo.image) {
         setImages(singleBusiness.businessInfo.image);
       }
+
+      // Set selected instruments from services
+      const selectedGroups = allServices
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .map((item: any) => item?.selectedInstrumentsGroup)
+        .filter(Boolean);
+
+      setSelectedInstruments(selectedGroups);
+
+      const selectedMusicGroups = musicLessons
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .map((item: any) => item?.selectedInstrumentsGroupMusic)
+        .filter(Boolean);
+      setSelectedInstrumentsMusic(selectedMusicGroups);
     }
-  }, [singleBusiness, pathName]);
+  }, [singleBusiness, pathName, allServices, musicLessons]);
 
   const handleUploadImage = () => {
     const input = document.getElementById("image_input");
@@ -396,8 +418,6 @@ const AddBusiness = () => {
 
     await addBusinessData(formData);
   };
-
-  console.log("singleBusiness", singleBusiness);
 
   if (isLoading)
     return (

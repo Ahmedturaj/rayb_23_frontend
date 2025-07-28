@@ -15,7 +15,7 @@ const InstrumentGroups = ({
   allInstrument,
   selectedInstruments,
   setSelectedInstruments,
-  setInstrumentFamily
+  setInstrumentFamily,
 }: PropsTypes) => {
   const toggleInstrument = (instrument: string, instrumentFamily: string) => {
     if (selectedInstruments.includes(instrument)) {
