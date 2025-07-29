@@ -4,7 +4,7 @@ import BusinessHours from "../BusinessHours";
 import BusinessInform from "../BusinessInform";
 import Service from "../Service";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { addBusiness, getAllInstrument } from "@/lib/api";
+import { addBusiness, getAllInstrument, updateBusiness } from "@/lib/api";
 import { Loader } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
@@ -130,8 +130,6 @@ const AddBusiness = () => {
     },
   });
 
-  console.log(allInstrument);
-
   // buy / cell/ trade / rent related state
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -154,7 +152,11 @@ const AddBusiness = () => {
   );
 
   //get single Business by selected ID
-  const { data: singleBusiness = {}, isLoading } = useQuery({
+  const {
+    data: singleBusiness = {},
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["get-single-business", selectedBusinessId],
     queryFn: async () => {
       const res = await axios(
@@ -305,6 +307,7 @@ const AddBusiness = () => {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  //post form data
   const { mutateAsync: addBusinessData, isPending } = useMutation({
     mutationKey: ["add-business"],
     mutationFn: async (data: FormData) => {
@@ -323,108 +326,7 @@ const AddBusiness = () => {
     },
   });
 
-  // const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-
-  //   // Create FormData object
-  //   const formData = new FormData();
-
-  //   // Business Information
-  //   formData.append("businessInfo[name]", businessMan);
-  //   formData.append("businessInfo[address]", addressName);
-  //   formData.append("businessInfo[description]", description);
-  //   if (phoneNumber) formData.append("businessInfo[phone]", phoneNumber);
-  //   if (email) formData.append("businessInfo[email]", email);
-  //   if (website) formData.append("businessInfo[website]", website);
-
-  //   // Add images (assuming you want to upload actual files, not just URLs)
-  //   const imageInput = document.getElementById(
-  //     "image_input"
-  //   ) as HTMLInputElement;
-  //   if (imageInput?.files) {
-  //     for (let i = 0; i < imageInput.files.length; i++) {
-  //       formData.append("businessInfo[image]", imageInput.files[i]);
-  //     }
-  //   }
-
-  //   // Services
-  //   selected.forEach((service, index) => {
-  //     formData.append(
-  //       `services[${index}][serviceName]`,
-  //       service.newInstrumentName
-  //     );
-  //     formData.append(`services[${index}][pricingType]`, service.pricingType);
-  //     formData.append(
-  //       `services[${index}][instrumentName]`,
-  //       service.newInstrumentName
-  //     );
-  //     formData.append(
-  //       `services[${index}][instrumentFamily]`,
-  //       selectedInstrumentsGroup
-  //     );
-
-  //     if (service.price)
-  //       formData.append(`services[${index}][price]`, service.price);
-  //     if (service.minPrice)
-  //       formData.append(`services[${index}][minPrice]`, service.minPrice);
-  //     if (service.maxPrice)
-  //       formData.append(`services[${index}][maxPrice]`, service.maxPrice);
-  //   });
-
-  //   // Music Lessons
-  //   selectedMusic.forEach((lesson, index) => {
-  //     formData.append(
-  //       `musicLessons[${index}][newInstrumentName]`,
-  //       lesson.newInstrumentName
-  //     );
-  //     formData.append(
-  //       `musicLessons[${index}][pricingType]`,
-  //       lesson.pricingType
-  //     );
-  //     formData.append(
-  //       `musicLessons[${index}][selectedInstrumentsGroupMusic]`,
-  //       selectedInstrumentsGroupMusic
-  //     );
-
-  //     if (lesson.price)
-  //       formData.append(`musicLessons[${index}][price]`, lesson.price);
-  //     if (lesson.minPrice)
-  //       formData.append(`musicLessons[${index}][minPrice]`, lesson.minPrice);
-  //     if (lesson.maxPrice)
-  //       formData.append(`musicLessons[${index}][maxPrice]`, lesson.maxPrice);
-  //   });
-
-  //   // Business Hours
-  //   businessHours.forEach((hour, index) => {
-  //     if (hour.enabled) {
-  //       formData.append(`businessHours[${index}][day]`, hour.day.toLowerCase());
-  //       formData.append(
-  //         `businessHours[${index}][open]`,
-  //         `${hour.startTime} ${hour.startMeridiem}`
-  //       );
-  //       formData.append(
-  //         `businessHours[${index}][close]`,
-  //         `${hour.endTime} ${hour.endMeridiem}`
-  //       );
-  //       formData.append(`businessHours[${index}][closed]`, "false");
-  //     } else {
-  //       formData.append(`businessHours[${index}][day]`, hour.day.toLowerCase());
-  //       formData.append(`businessHours[${index}][closed]`, "true");
-  //     }
-  //   });
-
-  //   // Service options
-  //   formData.append("buyInstruments", selectedOptions.buy.toString());
-  //   formData.append("sellInstruments", selectedOptions.sell.toString());
-  //   formData.append("offerMusicLessons", (selectedMusic.length > 0).toString());
-
-  //   // Add other fields that might be required
-  //   formData.append("status", "pending");
-  //   formData.append("isVerified", "false");
-
-  //   await addBusinessData(formData);
-  // };
-
+  //post form data
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -490,6 +392,98 @@ const AddBusiness = () => {
     await addBusinessData(formData);
   };
 
+  //update form data
+  const { mutateAsync: updateBusinessData, isPending: isUpdating } =
+    useMutation({
+      mutationKey: ["update-business"],
+      mutationFn: async ({
+        id,
+        formData,
+      }: {
+        id: string;
+        formData: FormData;
+      }) => {
+        const res = await updateBusiness(id, formData);
+        if (!res.success) {
+          throw new Error(res.error || "Business update failed");
+        }
+        return res;
+      },
+      onSuccess: () => {
+        toast.success("Business updated successfully!");
+        refetch();
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onError: (error: any) => {
+        toast.error(error?.message || "Failed to update business!");
+      },
+    });
+
+  const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!selectedBusinessId) return toast.error("Business ID missing!");
+
+    const formData = new FormData();
+
+    // Add newly selected image files from input
+    const imageInput = document.getElementById(
+      "image_input"
+    ) as HTMLInputElement;
+    const imageFiles = imageInput?.files ? Array.from(imageInput.files) : [];
+
+    imageFiles.forEach((file) => {
+      formData.append("image", file);
+    });
+
+    // ✅ Keep existing image URLs when updating
+    const businessData = {
+      businessInfo: {
+        name: businessMan,
+        address: addressName,
+        description,
+        phone: phoneNumber,
+        email,
+        website,
+        image: images, // 👈 include existing image URLs
+      },
+      services: selected.map((service) => ({
+        newInstrumentName: service.newInstrumentName,
+        pricingType: service.pricingType,
+        price: service.price,
+        minPrice: service.minPrice,
+        maxPrice: service.maxPrice,
+        selectedInstrumentsGroup: service.selectedInstrumentsGroup,
+        instrumentFamily: service.instrumentFamily,
+      })),
+      musicLessons: selectedMusic.map((lesson) => ({
+        newInstrumentName: lesson.newInstrumentName,
+        pricingType: lesson.pricingType,
+        price: lesson.price,
+        minPrice: lesson.minPrice,
+        maxPrice: lesson.maxPrice,
+        selectedInstrumentsGroupMusic: lesson.selectedInstrumentsGroupMusic,
+      })),
+      businessHours: businessHours.map((hour) => ({
+        day: hour.day,
+        startTime: hour.startTime,
+        startMeridiem: hour.startMeridiem,
+        endTime: hour.endTime,
+        endMeridiem: hour.endMeridiem,
+        enabled: hour.enabled,
+      })),
+      buyInstruments: selectedOptions.buy,
+      sellInstruments: selectedOptions.sell,
+      offerMusicLessons: selectedMusic.length > 0,
+      status: "pending",
+      isVerified: false,
+    };
+
+    formData.append("data", JSON.stringify(businessData));
+
+    await updateBusinessData({ id: selectedBusinessId, formData });
+  };
+
   if (isLoading)
     return (
       <div className="min-h-[calc(100vh-500px)] flex flex-col items-center justify-center">
@@ -499,7 +493,13 @@ const AddBusiness = () => {
 
   return (
     <div>
-      <form onSubmit={handleSubmit}>
+      <form
+        onSubmit={
+          pathName === "/business-dashboard/profile"
+            ? handleUpdate
+            : handleSubmit
+        }
+      >
         {/* business information */}
         <div>
           <div>
@@ -624,21 +624,39 @@ const AddBusiness = () => {
 
         {/* submit button */}
         <div className="pt-10 text-center">
-          <button
-            type="submit"
-            className={`flex-1 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition w-[228px] h-[48px] ${
-              isPending && "opacity-70"
-            }`}
-          >
-            {isPending ? (
-              <span className="flex items-center justify-center">
-                <Loader className="mr-2 h-4 w-4 animate-spin" />
-                Submitting...
-              </span>
-            ) : (
-              "Submit"
-            )}
-          </button>
+          {pathName === "/business-dashboard/profile" ? (
+            <button
+              type="submit"
+              className={`flex-1 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition w-[228px] h-[48px] ${
+                isUpdating && "opacity-70"
+              }`}
+            >
+              {isUpdating ? (
+                <span className="flex items-center justify-center">
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  Updating...
+                </span>
+              ) : (
+                "Update"
+              )}
+            </button>
+          ) : (
+            <button
+              type="submit"
+              className={`flex-1 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition w-[228px] h-[48px] ${
+                isPending && "opacity-70"
+              }`}
+            >
+              {isPending ? (
+                <span className="flex items-center justify-center">
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
+                </span>
+              ) : (
+                "Submit"
+              )}
+            </button>
+          )}
         </div>
       </form>
     </div>

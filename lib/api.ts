@@ -130,7 +130,6 @@ export async function getMyChat(userId: string) {
   }
 }
 
-
 // get chat by businessMan
 export async function getChatByBusinessMan(businessId: string) {
   try {
@@ -141,7 +140,6 @@ export async function getChatByBusinessMan(businessId: string) {
     return error;
   }
 }
-
 
 // get messages
 export async function getMessages(chatId: string) {
@@ -198,6 +196,23 @@ export async function getSingleBusiness(params: string | string[]) {
   }
 }
 
+// update a business
+export async function updateBusiness(id: string, formData: FormData) {
+  try {
+    const response = await api.patch(`/business/update/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating business:", error);
+    return {
+      success: false,
+      error: "Failed to update business",
+    };
+  }
+}
 
 // get business stats
 export async function getBusinessStats() {
