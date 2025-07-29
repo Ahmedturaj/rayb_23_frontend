@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -11,26 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, Star, X, Filter } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Filter } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getAllbusiness } from "@/lib/api";
 import Link from "next/link";
-
-interface BusinessItem {
-  email: string;
-  name: string;
-  image: string;
-}
-
-interface Service {
-  serviceName: string;
-}
-
-interface Business {
-  _id: string;
-  businessInfo: BusinessItem;
-  instrumentInfo: Service[];
-}
+import BusinessCard from "./BusinessCard";
+import { getPageNumbers, paginate, PaginationResult } from "@/utils/paginate";
 
 export default function SearchComponent() {
   const [priceRange, setPriceRange] = useState([20, 80]);
@@ -43,6 +30,22 @@ export default function SearchComponent() {
   );
   const [openNow, setOpenNow] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const { data: allBusiness = [] } = useQuery({
+    queryKey: ["all-business-search-result"],
+    queryFn: async () => {
+      const response = await getAllbusiness();
+      return response.data;
+    },
+  });
+
+  const paginationResult: PaginationResult<any> = paginate(
+    allBusiness || [],
+    currentPage,
+    itemsPerPage
+  );
 
   const instrumentFamilies = [
     { name: "Guitar", count: 45 },
@@ -71,13 +74,11 @@ export default function SearchComponent() {
     "Setup and Adjustments",
   ];
 
-  const { data: allBusiness = [] } = useQuery({
-    queryKey: ["all-business-search-result"],
-    queryFn: async () => {
-      const response = await getAllbusiness();
-      return response.data;
-    },
-  });
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= paginationResult.totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   return (
     <div className="flex flex-col lg:flex-row">
@@ -346,7 +347,6 @@ export default function SearchComponent() {
             </Select>
           </div>
         </div>
-
         {/* Tags Section */}
         <div className="mb-6 lg:mb-8 flex flex-wrap gap-2 items-center justify-between">
           <div className="flex flex-wrap gap-2">
@@ -400,7 +400,6 @@ export default function SearchComponent() {
             </label>
           </div>
         </div>
-
         {/* Open Now - Mobile */}
         <div className="lg:hidden flex items-center space-x-2 mb-4">
           <input
@@ -414,7 +413,6 @@ export default function SearchComponent() {
             Open Now
           </label>
         </div>
-
         {/* Sort - Mobile */}
         <div className="lg:hidden mb-6">
           <Select defaultValue="price-low">
@@ -429,84 +427,49 @@ export default function SearchComponent() {
             </SelectContent>
           </Select>
         </div>
-
         {/* Business List */}
         <div className="space-y-4 lg:space-y-8">
-          {allBusiness?.map((business: Business) => (
-            <div
-              key={business?.businessInfo?.email}
-              className="bg-white rounded-lg shadow-[0px_2px_12px_0px_#003d3924] p-4 lg:p-6"
-            >
-              <div className="flex flex-col sm:flex-row items-start gap-4 lg:gap-5">
-                <div className="flex-shrink-0 overflow-hidden rounded-lg w-full sm:w-auto">
-                  <Image
-                    src={business?.businessInfo?.image[0] || "/placeholder.svg"}
-                    alt={"business.png"}
-                    width={1000}
-                    height={1000}
-                    className="rounded-lg object-cover w-full sm:w-[200px] h-[160px] sm:h-[200px] hover:scale-105 transition"
-                  />
-                </div>
-                <div className="flex-1 w-full">
-                  <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {business?.businessInfo?.name}
-                      </h3>
-                      <div className="flex items-center gap-1 my-2 lg:my-3">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-medium">{"3.7"}</span>
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <div className="flex flex-wrap items-center gap-2 mb-2">
-                          {business?.instrumentInfo?.map((service, index) => (
-                            <button
-                              className="h-[40px] lg:h-[48px] px-4 lg:px-5 rounded-lg bg-[#F8F8F8] text-sm lg:text-base"
-                              key={index}
-                            >
-                              {service?.serviceName}
-                            </button>
-                          ))}
-                        </div>
-                        <div>
-                          <Link href={`/business/${business?._id}`}>
-                            <button className="text-teal-500 text-sm lg:text-base">
-                              See More
-                            </button>
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {paginationResult.currentItems?.map((business: any) => (
+            <BusinessCard key={business?._id} business={business} />
           ))}
         </div>
 
-        {/* Pagination */}
+        {/* pagination here */}
         <div className="flex items-center justify-center space-x-2 my-6 lg:my-8">
-          <Button variant="outline" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
             <ChevronLeft className="w-4 h-4" />
           </Button>
+
+          {getPageNumbers(currentPage, paginationResult.totalPages).map(
+            (page, index) =>
+              typeof page === "number" ? (
+                <button
+                  key={index}
+                  className={`${
+                    currentPage === page ? "bg-teal-600 hover:bg-teal-700 text-white" : ""
+                  } h-10 w-10 rounded-md font-medium`}
+                  onClick={() => handlePageChange(page)}
+                >
+                  {page}
+                </button>
+              ) : (
+                <span key={index} className="text-gray-400 px-2">
+                  {page}
+                </span>
+              )
+          )}
+
           <Button
-            variant="default"
+            variant="outline"
             size="sm"
-            className="bg-teal-600 hover:bg-teal-700"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === paginationResult.totalPages}
           >
-            1
-          </Button>
-          <Button variant="outline" size="sm">
-            2
-          </Button>
-          <Button variant="outline" size="sm">
-            3
-          </Button>
-          <Button variant="outline" size="sm">
-            4
-          </Button>
-          <span className="text-gray-400 hidden sm:inline">...</span>
-          <Button variant="outline" size="sm">
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
