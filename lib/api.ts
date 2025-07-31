@@ -313,3 +313,25 @@ export async function getAllInstrument() {
     return error;
   }
 }
+
+//get all notification
+export async function getAllNotification() {
+  try {
+    const response = await api.get(`/notification`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching notification:", error);
+    return error;
+  }
+}
+
+//delete notification
+export async function deleteNotification(id: string) {
+  try {
+    const response = await api.delete(`/notification/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching notification:", error);
+    return error;
+  }
+}
