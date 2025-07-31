@@ -1,24 +1,49 @@
-"use client"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Search, ChevronDown, Menu, Bell, Inbox, Bookmark, User2Icon, Settings, LogOut } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
-import { signOut, useSession } from "next-auth/react"
-import { useQuery } from "@tanstack/react-query"
-import { getUserProfile } from "@/lib/api"
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
+"use client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Search,
+  ChevronDown,
+  Menu,
+  Bell,
+  Inbox,
+  Bookmark,
+  User2Icon,
+  Settings,
+  LogOut,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { signOut, useSession } from "next-auth/react";
+import { useQuery } from "@tanstack/react-query";
+import { getAllNotification, getUserProfile } from "@/lib/api";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 const Navbar = () => {
-  const { data: session, status: sessionStatus } = useSession()
+  const { data: session, status: sessionStatus } = useSession();
   const { data: userData } = useQuery({
     queryKey: ["userData", session?.user?.email],
     queryFn: getUserProfile,
     select: (data) => data.data,
     enabled: sessionStatus === "authenticated",
-  })
+  });
+
+  const { data: notifications = [] } = useQuery({
+    queryKey: ["all-notifications"],
+    queryFn: async () => {
+      const res = await getAllNotification();
+      return res?.notify || [];
+    },
+  });
+
+  const notificationCount = notifications.length;
 
   return (
     <nav className="p-4 shadow-md sticky top-0 z-50 bg-white">
@@ -57,7 +82,13 @@ const Navbar = () => {
             <div className="flex items-center gap-2">
               <div className="flex items-center justify-center h-10 w-10 bg-[#F7F8F8] rounded-full">
                 <Link
-                  href={`${session?.user?.userType === "user" ? "/customer-dashboard/settings/notifications" : session?.user?.userType === "admin" ? "/admin-dashboard/settings" : "/business-dashboard/settings/notifications"}`}
+                  href={`${
+                    session?.user?.userType === "user"
+                      ? "/customer-dashboard/settings/notifications"
+                      : session?.user?.userType === "admin"
+                      ? "/admin-dashboard/settings"
+                      : "/business-dashboard/settings/notifications"
+                  }`}
                 >
                   <Bell className="h-5 w-5" />
                 </Link>
@@ -69,7 +100,10 @@ const Navbar = () => {
             <SheetTrigger>
               <Menu className="h-6 w-6 text-gray-700" />
             </SheetTrigger>
-            <SheetContent side="right" className="bg-white text-gray-900 border-gray-200 w-80">
+            <SheetContent
+              side="right"
+              className="bg-white text-gray-900 border-gray-200 w-80"
+            >
               <div className="flex flex-col space-y-6 p-4">
                 {/* Mobile Search Bar */}
                 <div className="flex items-center bg-[#F7F8F8] rounded-xl shadow-inner overflow-hidden">
@@ -88,16 +122,18 @@ const Navbar = () => {
                   <div className="flex flex-col space-y-4 border-b border-gray-200 pb-4">
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        <AvatarImage src={userData?.imageLink || "/placeholder.svg"} />
+                        <AvatarImage
+                          src={userData?.imageLink || "/placeholder.svg"}
+                        />
                         <AvatarFallback className="uppercase">
                           {(() => {
-                            const name = userData?.name?.trim()
-                            if (!name) return ""
-                            const parts = name.split(" ")
+                            const name = userData?.name?.trim();
+                            if (!name) return "";
+                            const parts = name.split(" ");
                             if (parts.length === 1) {
-                              return parts[0][0]
+                              return parts[0][0];
                             } else {
-                              return `${parts[0][0]}${parts[1][0]}`
+                              return `${parts[0][0]}${parts[1][0]}`;
                             }
                           })()}
                         </AvatarFallback>
@@ -122,8 +158,12 @@ const Navbar = () => {
                     For Customer <ChevronDown className="h-4 w-4" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-white text-gray-900 border-gray-200 w-full">
-                    <DropdownMenuItem className="hover:bg-gray-100 cursor-pointer">Write a Review</DropdownMenuItem>
-                    <DropdownMenuItem className="hover:bg-gray-100 cursor-pointer">Add a Business</DropdownMenuItem>
+                    <DropdownMenuItem className="hover:bg-gray-100 cursor-pointer">
+                      Write a Review
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="hover:bg-gray-100 cursor-pointer">
+                      Add a Business
+                    </DropdownMenuItem>
                     {sessionStatus === "unauthenticated" && (
                       <DropdownMenuItem className="hover:bg-gray-100 cursor-pointer">
                         <Link href="/auth/login">Log In</Link>
@@ -137,8 +177,12 @@ const Navbar = () => {
                     For Business <ChevronDown className="h-4 w-4" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-white text-gray-900 border-gray-200 w-full">
-                    <DropdownMenuItem className="hover:bg-gray-100 cursor-pointer">Add My Business</DropdownMenuItem>
-                    <DropdownMenuItem className="hover:bg-gray-100 cursor-pointer">Claim My Business</DropdownMenuItem>
+                    <DropdownMenuItem className="hover:bg-gray-100 cursor-pointer">
+                      Add My Business
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="hover:bg-gray-100 cursor-pointer">
+                      Claim My Business
+                    </DropdownMenuItem>
                     {sessionStatus === "unauthenticated" && (
                       <DropdownMenuItem className="hover:bg-gray-100 cursor-pointer">
                         <Link href="/auth/login">Log In</Link>
@@ -206,8 +250,12 @@ const Navbar = () => {
                   For Customer <ChevronDown className="ml-1 h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white border-gray-700 border-none">
-                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">Write a Review</DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">Add a Business</DropdownMenuItem>
+                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                    Write a Review
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                    Add a Business
+                  </DropdownMenuItem>
                   <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
                     <Link href="/auth/login">Log In</Link>
                   </DropdownMenuItem>
@@ -218,8 +266,12 @@ const Navbar = () => {
                   For Business <ChevronDown className="ml-1 h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white border-gray-700 border-none">
-                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">Add My Business</DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">Claim My Business</DropdownMenuItem>
+                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                    Add My Business
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                    Claim My Business
+                  </DropdownMenuItem>
                   <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
                     <Link href="/auth/login">Log In</Link>
                   </DropdownMenuItem>
@@ -249,12 +301,19 @@ const Navbar = () => {
             </div>
           ) : (
             <div className="flex gap-3">
-              <div className="flex items-center justify-center h-12 w-12 bg-[#F7F8F8] rounded-full">
-                <Link
-                  href={`${session?.user?.userType === "user" ? "/customer-dashboard/settings/notifications" : session?.user?.userType === "admin" ? "/admin-dashboard/settings" : "/business-dashboard/settings/notifications"}`}
-                >
+              <div className="flex items-center justify-center h-12 w-12 bg-[#F7F8F8] rounded-full relative">
+                <Link href={"/notifications"}>
                   <Bell className="h-6 w-6" />
                 </Link>
+
+                {notificationCount > 0 && (
+                  <span
+                    className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full"
+                    style={{ transform: "translate(50%, -50%)" }}
+                  >
+                    {notificationCount > 99 ? "99+" : notificationCount}
+                  </span>
+                )}
               </div>
               <div className="flex items-center justify-center h-12 w-12 bg-[#F7F8F8] rounded-full">
                 <Inbox className="h-6 w-6" />
@@ -265,16 +324,18 @@ const Navbar = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger className="hover:text-teal-400 flex gap-1 items-center outline-none">
                   <Avatar>
-                    <AvatarImage src={userData?.imageLink || "/placeholder.svg"} />
+                    <AvatarImage
+                      src={userData?.imageLink || "/placeholder.svg"}
+                    />
                     <AvatarFallback className="uppercase">
                       {(() => {
-                        const name = userData?.name?.trim()
-                        if (!name) return ""
-                        const parts = name.split(" ")
+                        const name = userData?.name?.trim();
+                        if (!name) return "";
+                        const parts = name.split(" ");
                         if (parts.length === 1) {
-                          return parts[0][0]
+                          return parts[0][0];
                         } else {
-                          return `${parts[0][0]}${parts[1][0]}`
+                          return `${parts[0][0]}${parts[1][0]}`;
                         }
                       })()}
                     </AvatarFallback>
@@ -284,19 +345,34 @@ const Navbar = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white border-gray-700 border-none">
                   <DropdownMenuItem className="hover:bg-[#F7F8F8] cursor-pointer">
-                    <Link href={userData?.userType === "user" ? "customer-dashboard/profile" : userData?.userType === "admin" ? "admin-dashboard/settings" : "business-dashboard/profile"} className="flex gap-2 items-center">
+                    <Link
+                      href={
+                        userData?.userType === "user"
+                          ? "customer-dashboard/profile"
+                          : userData?.userType === "admin"
+                          ? "admin-dashboard/settings"
+                          : "business-dashboard/profile"
+                      }
+                      className="flex gap-2 items-center"
+                    >
                       <User2Icon className="h-6 w-6" />
                       {"View Profile"}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
-                    <Link href="/customer-dashboard/settings" className="flex gap-2 items-center">
+                    <Link
+                      href="/customer-dashboard/settings"
+                      className="flex gap-2 items-center"
+                    >
                       <Settings className="h-6 w-6" />
                       {"Settings"}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
-                    <div className="flex gap-2 items-center" onClick={() => signOut()}>
+                    <div
+                      className="flex gap-2 items-center"
+                      onClick={() => signOut()}
+                    >
                       <LogOut className="h-6 w-6" />
                       {"Log Out"}
                     </div>
@@ -308,7 +384,7 @@ const Navbar = () => {
         </div>
       </div>
     </nav>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;
