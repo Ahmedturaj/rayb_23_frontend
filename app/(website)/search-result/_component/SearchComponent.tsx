@@ -4,7 +4,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -12,15 +11,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, X, Filter } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Filter,
+  ChevronDown,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { getAllbusiness } from "@/lib/api";
+import { getAllbusiness, getAllInstrument } from "@/lib/api";
 import Link from "next/link";
 import BusinessCard from "./BusinessCard";
 import { getPageNumbers, paginate, PaginationResult } from "@/utils/paginate";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+
+interface Instruments {
+  _id: string;
+  instrumentFamily: string;
+  instrumentTypes: string[];
+  serviceType: string;
+}
 
 export default function SearchComponent() {
-  const [priceRange, setPriceRange] = useState([20, 80]);
+  //collapse related state
+  const [priceRangeOpen, setPriceRangeOpen] = useState(true);
+  const [alsoOffersOpen, setAlsoOffersOpen] = useState(true);
+  const [selectedOffers, setSelectedOffers] = useState<string[]>(["trade"]);
+  const [instrumentFamilyOpen, setInstrumentFamilyOpen] = useState(true);
+  const [selectInstrumentsOpen, setSelectInstrumentsOpen] = useState(true);
+  const [serviceTypeOpen, setServiceTypeOpen] = useState(true);
+
   const [selectedFamily, setSelectedFamily] = useState<string | null>(null);
   const [selectedInstrument, setSelectedInstrument] = useState<string | null>(
     null
@@ -33,6 +60,14 @@ export default function SearchComponent() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  const handleOfferChange = (offer: string, checked: boolean) => {
+    if (checked) {
+      setSelectedOffers([...selectedOffers, offer]);
+    } else {
+      setSelectedOffers(selectedOffers.filter((item) => item !== offer));
+    }
+  };
+
   const { data: allBusiness = [] } = useQuery({
     queryKey: ["all-business-search-result"],
     queryFn: async () => {
@@ -41,38 +76,19 @@ export default function SearchComponent() {
     },
   });
 
+  const { data: instrumentFamilies } = useQuery({
+    queryKey: ["all-instrument"],
+    queryFn: async () => {
+      const res = await getAllInstrument();
+      return res?.data;
+    },
+  });
+
   const paginationResult: PaginationResult<any> = paginate(
     allBusiness || [],
     currentPage,
     itemsPerPage
   );
-
-  const instrumentFamilies = [
-    { name: "Guitar", count: 45 },
-    { name: "Saxophone", count: 23 },
-    { name: "Piano", count: 67 },
-    { name: "Keyboard", count: 34 },
-    { name: "Other", count: 89 },
-  ];
-
-  const instruments = [
-    "Violin",
-    "Guitar",
-    "Piano",
-    "Harp",
-    "Singing",
-    "Bass",
-    "Vocals",
-  ];
-
-  const serviceTypes = [
-    "All",
-    "Recording",
-    "Lessons",
-    "Tuning",
-    "Repairs",
-    "Setup and Adjustments",
-  ];
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= paginationResult.totalPages) {
@@ -112,119 +128,228 @@ export default function SearchComponent() {
                 </div>
 
                 {/* Instrument Family */}
-                <div className="mb-8">
-                  <h3 className="font-medium mb-4">Instrument Family</h3>
-                  <div className="space-y-3">
-                    {instrumentFamilies.map((family) => (
+                <Collapsible
+                  open={instrumentFamilyOpen}
+                  onOpenChange={setInstrumentFamilyOpen}
+                >
+                  <CollapsibleTrigger className="flex justify-between w-full text-left">
+                    <h3 className="font-medium mb-4">Instrument Family</h3>
+                    <ChevronDown
+                      className={`h-4 w-4 mt-1 transition-transform ${
+                        instrumentFamilyOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-3 border-b border-gray-200 pb-5">
+                    {instrumentFamilies?.map((family: Instruments) => (
                       <div
-                        key={family.name}
+                        key={family._id}
                         className="flex items-center space-x-2"
                       >
                         <input
                           type="radio"
-                          id={`family-${family.name}`}
+                          id={`family-${family.instrumentFamily}`}
                           name="instrumentFamily"
-                          value={family.name}
-                          checked={selectedFamily === family.name}
-                          onChange={() => setSelectedFamily(family.name)}
+                          value={family.instrumentFamily}
+                          checked={selectedFamily === family.instrumentFamily}
+                          onChange={() =>
+                            setSelectedFamily(family.instrumentFamily)
+                          }
                           className="w-4 h-4 text-teal-600 border-gray-300"
                         />
                         <label
-                          htmlFor={`family-${family.name}`}
+                          htmlFor={`family-${family.instrumentFamily}`}
                           className="text-sm"
                         >
-                          {family.name}
+                          {family?.instrumentFamily}
                         </label>
                       </div>
                     ))}
-                  </div>
-                </div>
+                  </CollapsibleContent>
+                </Collapsible>
 
                 {/* Select Instruments */}
-                <div className="mb-8">
-                  <h3 className="font-medium mb-4">Select Instruments</h3>
-                  <div className="space-y-3">
-                    {instruments.map((instrument) => (
+                <Collapsible
+                  open={selectInstrumentsOpen}
+                  onOpenChange={setSelectInstrumentsOpen}
+                >
+                  <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
+                    <h3 className="font-medium mb-4">Select Instruments</h3>
+                    <ChevronDown
+                      className={`h-4 w-4 mt-1 transition-transform ${
+                        selectInstrumentsOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="border-b border-gray-200 pb-2">
+                    {instrumentFamilies?.map((family: Instruments) => (
                       <div
-                        key={instrument}
-                        className="flex items-center space-x-2"
+                        className="flex flex-col gap-3 mb-3"
+                        key={family.instrumentFamily}
                       >
-                        <input
-                          type="radio"
-                          id={`instrument-${instrument}`}
-                          name="selectedInstrument"
-                          value={instrument}
-                          checked={selectedInstrument === instrument}
-                          onChange={() => setSelectedInstrument(instrument)}
-                          className="w-4 h-4 text-teal-600 border-gray-300"
-                        />
-                        <label
-                          htmlFor={`instrument-${instrument}`}
-                          className="text-sm"
-                        >
-                          {instrument}
-                        </label>
+                        {family?.instrumentTypes?.map((instrument) => (
+                          <div
+                            key={instrument}
+                            className="flex items-center space-x-2 "
+                          >
+                            <input
+                              type="radio"
+                              id={`family-${instrument}`}
+                              name="instrumentFamily"
+                              value={instrument}
+                              checked={selectedFamily === instrument}
+                              onChange={() => setSelectedFamily(instrument)}
+                              className="w-4 h-4 text-teal-600 border-gray-300"
+                            />
+                            <label
+                              htmlFor={`family-${instrument}`}
+                              className="text-sm"
+                            >
+                              {instrument}
+                            </label>
+                          </div>
+                        ))}
                       </div>
                     ))}
-                  </div>
-                </div>
+                  </CollapsibleContent>
+                </Collapsible>
 
                 {/* Service Type */}
-                <div className="mb-8">
-                  <h3 className="font-medium mb-4">Service Type</h3>
-                  <div className="space-y-3">
-                    {serviceTypes.map((service) => (
+                <Collapsible
+                  open={serviceTypeOpen}
+                  onOpenChange={setServiceTypeOpen}
+                >
+                  <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
+                    <h3 className="font-medium mb-4">Service Type</h3>
+                    <ChevronDown
+                      className={`h-4 w-4 mt-1 transition-transform ${
+                        serviceTypeOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-3 border-b border-gray-200 pb-5">
+                    {instrumentFamilies?.map((family: Instruments) => (
                       <div
-                        key={service}
+                        key={family.serviceType}
                         className="flex items-center space-x-2"
                       >
                         <input
                           type="radio"
-                          id={`service-${service}`}
-                          name="serviceType"
-                          value={service}
-                          checked={selectedServiceType === service}
-                          onChange={() => setSelectedServiceType(service)}
+                          id={`family-${family.serviceType}`}
+                          name="instrumentFamily"
+                          value={family.serviceType}
+                          checked={selectedFamily === family.serviceType}
+                          onChange={() => setSelectedFamily(family.serviceType)}
                           className="w-4 h-4 text-teal-600 border-gray-300"
                         />
                         <label
-                          htmlFor={`service-${service}`}
+                          htmlFor={`family-${family.serviceType}`}
                           className="text-sm"
                         >
-                          {service}
+                          {family?.serviceType}
                         </label>
                       </div>
                     ))}
-                  </div>
-                </div>
+                  </CollapsibleContent>
+                </Collapsible>
 
                 {/* Price Range */}
-                <div className="mb-8">
-                  <h3 className="font-medium mb-4">Price Range</h3>
-                  <div className="px-2">
-                    <Slider
-                      value={priceRange}
-                      onValueChange={setPriceRange}
-                      max={100}
-                      min={0}
-                      step={5}
-                      className="mb-4"
+                <Collapsible
+                  open={priceRangeOpen}
+                  onOpenChange={setPriceRangeOpen}
+                >
+                  <CollapsibleTrigger className="flex items-center justify-between w-full text-left pt-5">
+                    <h3 className="text-lg font-medium text-gray-900">
+                      Price Range
+                    </h3>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${
+                        priceRangeOpen ? "rotate-180" : ""
+                      }`}
                     />
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <span>${priceRange[0]}</span>
-                      <span>${priceRange[1]}</span>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-4 mt-4">
+                    <p className="text-sm text-gray-600">
+                      Pricing is an estimate and subject to change. Contact the
+                      shop for an accurate quote.
+                    </p>
+                    <div className="flex gap-3">
+                      <div className="flex-1">
+                        <Label
+                          htmlFor="min-price"
+                          className="text-sm text-gray-600"
+                        >
+                          Min
+                        </Label>
+                        <Input
+                          id="min-price"
+                          type="number"
+                          placeholder="0"
+                          className="mt-1"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <Label
+                          htmlFor="max-price"
+                          className="text-sm text-gray-600"
+                        >
+                          Max
+                        </Label>
+                        <Input
+                          id="max-price"
+                          type="number"
+                          placeholder="1000"
+                          className="mt-1"
+                        />
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </CollapsibleContent>
+                </Collapsible>
 
-                <div className="sticky bottom-0 bg-white pt-4 pb-6 border-t">
-                  <Button
-                    onClick={() => setMobileFiltersOpen(false)}
-                    className="w-full bg-teal-600 hover:bg-teal-700"
-                  >
-                    Show Results
-                  </Button>
-                </div>
+                <Collapsible
+                  open={alsoOffersOpen}
+                  onOpenChange={setAlsoOffersOpen}
+                >
+                  <CollapsibleTrigger className="flex items-center justify-between w-full text-left mt-5">
+                    <h3 className="text-lg font-medium text-gray-900">
+                      Also Offers
+                    </h3>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${
+                        alsoOffersOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-3 mt-4">
+                    <div className="space-y-3">
+                      {[
+                        { id: "sell", label: "Sell" },
+                        { id: "trade", label: "Trade" },
+                        { id: "rental", label: "Rental" },
+                        { id: "lessons", label: "Lessons" },
+                      ].map((offer) => (
+                        <div
+                          key={offer.id}
+                          className="flex items-center space-x-2"
+                        >
+                          <Checkbox
+                            id={offer.id}
+                            checked={selectedOffers.includes(offer.id)}
+                            onCheckedChange={(checked) =>
+                              handleOfferChange(offer.id, checked as boolean)
+                            }
+                          />
+                          <Label
+                            htmlFor={offer.id}
+                            className="text-sm font-normal text-gray-700 cursor-pointer"
+                          >
+                            {offer.label}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
               </div>
             </div>
           </div>
@@ -236,92 +361,199 @@ export default function SearchComponent() {
         <h2 className="text-2xl font-bold mb-6">Filters</h2>
 
         {/* Instrument Family */}
-        <div className="mb-8">
-          <h3 className="font-medium mb-4">Instrument Family</h3>
-          <div className="space-y-3">
-            {instrumentFamilies.map((family) => (
-              <div key={family.name} className="flex items-center space-x-2">
+        <Collapsible
+          open={instrumentFamilyOpen}
+          onOpenChange={setInstrumentFamilyOpen}
+        >
+          <CollapsibleTrigger className="flex justify-between w-full text-left">
+            <h3 className="font-medium mb-4">Instrument Family</h3>
+            <ChevronDown
+              className={`h-4 w-4 mt-1 transition-transform ${
+                instrumentFamilyOpen ? "rotate-180" : ""
+              }`}
+            />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-3 border-b border-gray-200 pb-5">
+            {instrumentFamilies?.map((family: Instruments) => (
+              <div key={family._id} className="flex items-center space-x-2">
                 <input
                   type="radio"
-                  id={`family-${family.name}`}
+                  id={`family-${family.instrumentFamily}`}
                   name="instrumentFamily"
-                  value={family.name}
-                  checked={selectedFamily === family.name}
-                  onChange={() => setSelectedFamily(family.name)}
+                  value={family.instrumentFamily}
+                  checked={selectedFamily === family.instrumentFamily}
+                  onChange={() => setSelectedFamily(family.instrumentFamily)}
                   className="w-4 h-4 text-teal-600 border-gray-300"
                 />
-                <label htmlFor={`family-${family.name}`} className="text-sm">
-                  {family.name}
+                <label
+                  htmlFor={`family-${family.instrumentFamily}`}
+                  className="text-sm"
+                >
+                  {family?.instrumentFamily}
                 </label>
               </div>
             ))}
-          </div>
-        </div>
+          </CollapsibleContent>
+        </Collapsible>
 
         {/* Select Instruments */}
-        <div className="mb-8">
-          <h3 className="font-medium mb-4">Select Instruments</h3>
-          <div className="space-y-3">
-            {instruments.map((instrument) => (
-              <div key={instrument} className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  id={`instrument-${instrument}`}
-                  name="selectedInstrument"
-                  value={instrument}
-                  checked={selectedInstrument === instrument}
-                  onChange={() => setSelectedInstrument(instrument)}
-                  className="w-4 h-4 text-teal-600 border-gray-300"
-                />
-                <label htmlFor={`instrument-${instrument}`} className="text-sm">
-                  {instrument}
-                </label>
+        <Collapsible
+          open={selectInstrumentsOpen}
+          onOpenChange={setSelectInstrumentsOpen}
+        >
+          <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
+            <h3 className="font-medium mb-4">Select Instruments</h3>
+            <ChevronDown
+              className={`h-4 w-4 mt-1 transition-transform ${
+                selectInstrumentsOpen ? "rotate-180" : ""
+              }`}
+            />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="border-b border-gray-200 pb-2">
+            {instrumentFamilies?.map((family: Instruments) => (
+              <div
+                className="flex flex-col gap-3 mb-3"
+                key={family.instrumentFamily}
+              >
+                {family?.instrumentTypes?.map((instrument) => (
+                  <div
+                    key={instrument}
+                    className="flex items-center space-x-2 "
+                  >
+                    <input
+                      type="radio"
+                      id={`family-${instrument}`}
+                      name="instrumentFamily"
+                      value={instrument}
+                      checked={selectedFamily === instrument}
+                      onChange={() => setSelectedFamily(instrument)}
+                      className="w-4 h-4 text-teal-600 border-gray-300"
+                    />
+                    <label htmlFor={`family-${instrument}`} className="text-sm">
+                      {instrument}
+                    </label>
+                  </div>
+                ))}
               </div>
             ))}
-          </div>
-        </div>
+          </CollapsibleContent>
+        </Collapsible>
 
         {/* Service Type */}
-        <div className="mb-8">
-          <h3 className="font-medium mb-4">Service Type</h3>
-          <div className="space-y-3">
-            {serviceTypes.map((service) => (
-              <div key={service} className="flex items-center space-x-2">
+        <Collapsible open={serviceTypeOpen} onOpenChange={setServiceTypeOpen}>
+          <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
+            <h3 className="font-medium mb-4">Service Type</h3>
+            <ChevronDown
+              className={`h-4 w-4 mt-1 transition-transform ${
+                serviceTypeOpen ? "rotate-180" : ""
+              }`}
+            />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-3 border-b border-gray-200 pb-5">
+            {instrumentFamilies?.map((family: Instruments) => (
+              <div
+                key={family.serviceType}
+                className="flex items-center space-x-2"
+              >
                 <input
                   type="radio"
-                  id={`service-${service}`}
-                  name="serviceType"
-                  value={service}
-                  checked={selectedServiceType === service}
-                  onChange={() => setSelectedServiceType(service)}
+                  id={`family-${family.serviceType}`}
+                  name="instrumentFamily"
+                  value={family.serviceType}
+                  checked={selectedFamily === family.serviceType}
+                  onChange={() => setSelectedFamily(family.serviceType)}
                   className="w-4 h-4 text-teal-600 border-gray-300"
                 />
-                <label htmlFor={`service-${service}`} className="text-sm">
-                  {service}
+                <label
+                  htmlFor={`family-${family.serviceType}`}
+                  className="text-sm"
+                >
+                  {family?.serviceType}
                 </label>
               </div>
             ))}
-          </div>
-        </div>
+          </CollapsibleContent>
+        </Collapsible>
 
-        {/* Price Range */}
-        <div className="mb-8">
-          <h3 className="font-medium mb-4">Price Range</h3>
-          <div className="px-2">
-            <Slider
-              value={priceRange}
-              onValueChange={setPriceRange}
-              max={100}
-              min={0}
-              step={5}
-              className="mb-4"
+        {/* Price Range Section */}
+        <Collapsible open={priceRangeOpen} onOpenChange={setPriceRangeOpen}>
+          <CollapsibleTrigger className="flex items-center justify-between w-full text-left pt-5">
+            <h3 className="text-lg font-medium text-gray-900">Price Range</h3>
+            <ChevronDown
+              className={`h-4 w-4 transition-transform ${
+                priceRangeOpen ? "rotate-180" : ""
+              }`}
             />
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>${priceRange[0]}</span>
-              <span>${priceRange[1]}</span>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-4 mt-4">
+            <p className="text-sm text-gray-600">
+              Pricing is an estimate and subject to change. Contact the shop for
+              an accurate quote.
+            </p>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <Label htmlFor="min-price" className="text-sm text-gray-600">
+                  Min
+                </Label>
+                <Input
+                  id="min-price"
+                  type="number"
+                  placeholder="0"
+                  className="mt-1"
+                />
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="max-price" className="text-sm text-gray-600">
+                  Max
+                </Label>
+                <Input
+                  id="max-price"
+                  type="number"
+                  placeholder="1000"
+                  className="mt-1"
+                />
+              </div>
             </div>
-          </div>
-        </div>
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Also Offers Section */}
+        <Collapsible open={alsoOffersOpen} onOpenChange={setAlsoOffersOpen}>
+          <CollapsibleTrigger className="flex items-center justify-between w-full text-left mt-5">
+            <h3 className="text-lg font-medium text-gray-900">Also Offers</h3>
+            <ChevronDown
+              className={`h-4 w-4 transition-transform ${
+                alsoOffersOpen ? "rotate-180" : ""
+              }`}
+            />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-3 mt-4">
+            <div className="space-y-3">
+              {[
+                { id: "sell", label: "Sell" },
+                { id: "trade", label: "Trade" },
+                { id: "rental", label: "Rental" },
+                { id: "lessons", label: "Lessons" },
+              ].map((offer) => (
+                <div key={offer.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={offer.id}
+                    checked={selectedOffers.includes(offer.id)}
+                    onCheckedChange={(checked) =>
+                      handleOfferChange(offer.id, checked as boolean)
+                    }
+                  />
+                  <Label
+                    htmlFor={offer.id}
+                    className="text-sm font-normal text-gray-700 cursor-pointer"
+                  >
+                    {offer.label}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
 
       {/* Main Content */}
@@ -451,7 +683,9 @@ export default function SearchComponent() {
                 <button
                   key={index}
                   className={`${
-                    currentPage === page ? "bg-teal-600 hover:bg-teal-700 text-white" : ""
+                    currentPage === page
+                      ? "bg-teal-600 hover:bg-teal-700 text-white"
+                      : ""
                   } h-10 w-10 rounded-md font-medium`}
                   onClick={() => handlePageChange(page)}
                 >
