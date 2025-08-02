@@ -40,34 +40,23 @@ interface Instruments {
 }
 
 export default function SearchComponent() {
-  //collapse related state
+  // State management
   const [priceRangeOpen, setPriceRangeOpen] = useState(true);
   const [alsoOffersOpen, setAlsoOffersOpen] = useState(true);
   const [selectedOffers, setSelectedOffers] = useState<string[]>(["trade"]);
   const [instrumentFamilyOpen, setInstrumentFamilyOpen] = useState(true);
-  const [selectInstrumentsOpen, setSelectInstrumentsOpen] = useState(true);
-  const [serviceTypeOpen, setServiceTypeOpen] = useState(true);
+  const [selectInstrumentsOpen, setSelectInstrumentsOpen] = useState(false);
+  const [serviceTypeOpen, setServiceTypeOpen] = useState(false);
 
   const [selectedFamily, setSelectedFamily] = useState<string | null>(null);
-  const [selectedInstrument, setSelectedInstrument] = useState<string | null>(
-    null
-  );
-  const [selectedServiceType, setSelectedServiceType] = useState<string | null>(
-    "All"
-  );
+  const [selectedInstrument, setSelectedInstrument] = useState<string | null>(null);
+  const [selectedServiceType, setSelectedServiceType] = useState<string | null>(null);
   const [openNow, setOpenNow] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const handleOfferChange = (offer: string, checked: boolean) => {
-    if (checked) {
-      setSelectedOffers([...selectedOffers, offer]);
-    } else {
-      setSelectedOffers(selectedOffers.filter((item) => item !== offer));
-    }
-  };
-
+  // Query hooks
   const { data: allBusiness = [] } = useQuery({
     queryKey: ["all-business-search-result"],
     queryFn: async () => {
@@ -84,6 +73,72 @@ export default function SearchComponent() {
     },
   });
 
+  // Handler functions
+  const handleOfferChange = (offer: string, checked: boolean) => {
+    if (checked) {
+      setSelectedOffers([...selectedOffers, offer]);
+    } else {
+      setSelectedOffers(selectedOffers.filter((item) => item !== offer));
+    }
+  };
+
+  const handleFamilySelect = (family: string) => {
+    setSelectedFamily(family);
+    setSelectedInstrument(null);
+    setSelectedServiceType(null); // Don't set service type here anymore
+    setSelectInstrumentsOpen(true);
+    setServiceTypeOpen(false);
+  };
+
+  const handleInstrumentSelect = (instrument: string) => {
+    setSelectedInstrument(instrument);
+    setServiceTypeOpen(true);
+    
+    // Find and set the service type only when instrument is selected
+    const selectedFamilyData = instrumentFamilies?.find(
+      (item: Instruments) => item.instrumentFamily === selectedFamily
+    );
+    if (selectedFamilyData) {
+      setSelectedServiceType(selectedFamilyData.serviceType);
+    }
+  };
+
+  const handleClearFamily = () => {
+    setSelectedFamily(null);
+    setSelectedInstrument(null);
+    setSelectedServiceType(null);
+    setSelectInstrumentsOpen(false);
+    setServiceTypeOpen(false);
+  };
+
+  const handleClearInstrument = () => {
+    setSelectedInstrument(null);
+    setSelectedServiceType(null);
+    setServiceTypeOpen(false);
+  };
+
+  const handleClearServiceType = () => {
+    setSelectedServiceType(null);
+  };
+
+  // Utility functions
+  const getInstrumentsForFamily = () => {
+    if (!selectedFamily) return [];
+    const family = instrumentFamilies?.find(
+      (f: Instruments) => f.instrumentFamily === selectedFamily
+    );
+    return family?.instrumentTypes || [];
+  };
+
+  const getServiceTypeForFamily = () => {
+    if (!selectedFamily) return null;
+    const family = instrumentFamilies?.find(
+      (f: Instruments) => f.instrumentFamily === selectedFamily
+    );
+    return family?.serviceType || null;
+  };
+
+  // Pagination
   const paginationResult: PaginationResult<any> = paginate(
     allBusiness || [],
     currentPage,
@@ -95,6 +150,9 @@ export default function SearchComponent() {
       setCurrentPage(page);
     }
   };
+
+  // Accent color variable
+  const accentColor = "#139A8E";
 
   return (
     <div className="flex flex-col lg:flex-row">
@@ -152,10 +210,9 @@ export default function SearchComponent() {
                           name="instrumentFamily"
                           value={family.instrumentFamily}
                           checked={selectedFamily === family.instrumentFamily}
-                          onChange={() =>
-                            setSelectedFamily(family.instrumentFamily)
-                          }
-                          className="w-4 h-4 text-teal-600 border-gray-300"
+                          onChange={() => handleFamilySelect(family.instrumentFamily)}
+                          className="w-4 h-4 border-gray-300"
+                          style={{ accentColor }}
                         />
                         <label
                           htmlFor={`family-${family.instrumentFamily}`}
@@ -169,89 +226,83 @@ export default function SearchComponent() {
                 </Collapsible>
 
                 {/* Select Instruments */}
-                <Collapsible
-                  open={selectInstrumentsOpen}
-                  onOpenChange={setSelectInstrumentsOpen}
-                >
-                  <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
-                    <h3 className="font-medium mb-4">Select Instruments</h3>
-                    <ChevronDown
-                      className={`h-4 w-4 mt-1 transition-transform ${
-                        selectInstrumentsOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="border-b border-gray-200 pb-2">
-                    {instrumentFamilies?.map((family: Instruments) => (
-                      <div
-                        className="flex flex-col gap-3 mb-3"
-                        key={family.instrumentFamily}
-                      >
-                        {family?.instrumentTypes?.map((instrument) => (
-                          <div
-                            key={instrument}
-                            className="flex items-center space-x-2 "
+                {selectedFamily && (
+                  <Collapsible
+                    open={selectInstrumentsOpen}
+                    onOpenChange={setSelectInstrumentsOpen}
+                  >
+                    <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
+                      <h3 className="font-medium mb-4">Select Instruments</h3>
+                      <ChevronDown
+                        className={`h-4 w-4 mt-1 transition-transform ${
+                          selectInstrumentsOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="border-b border-gray-200 pb-2">
+                      {getInstrumentsForFamily().map((instrument: string) => (
+                        <div
+                          key={instrument}
+                          className="flex items-center space-x-2 mb-3"
+                        >
+                          <input
+                            type="radio"
+                            id={`instrument-${instrument}`}
+                            name="instrument"
+                            value={instrument}
+                            checked={selectedInstrument === instrument}
+                            onChange={() => handleInstrumentSelect(instrument)}
+                            className="w-4 h-4 border-gray-300"
+                            style={{ accentColor }}
+                          />
+                          <label
+                            htmlFor={`instrument-${instrument}`}
+                            className="text-sm"
                           >
-                            <input
-                              type="radio"
-                              id={`family-${instrument}`}
-                              name="instrumentFamily"
-                              value={instrument}
-                              checked={selectedFamily === instrument}
-                              onChange={() => setSelectedFamily(instrument)}
-                              className="w-4 h-4 text-teal-600 border-gray-300"
-                            />
-                            <label
-                              htmlFor={`family-${instrument}`}
-                              className="text-sm"
-                            >
-                              {instrument}
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    ))}
-                  </CollapsibleContent>
-                </Collapsible>
+                            {instrument}
+                          </label>
+                        </div>
+                      ))}
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
 
                 {/* Service Type */}
-                <Collapsible
-                  open={serviceTypeOpen}
-                  onOpenChange={setServiceTypeOpen}
-                >
-                  <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
-                    <h3 className="font-medium mb-4">Service Type</h3>
-                    <ChevronDown
-                      className={`h-4 w-4 mt-1 transition-transform ${
-                        serviceTypeOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-3 border-b border-gray-200 pb-5">
-                    {instrumentFamilies?.map((family: Instruments) => (
-                      <div
-                        key={family.serviceType}
-                        className="flex items-center space-x-2"
-                      >
+                {selectedInstrument && (
+                  <Collapsible
+                    open={serviceTypeOpen}
+                    onOpenChange={setServiceTypeOpen}
+                  >
+                    <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
+                      <h3 className="font-medium mb-4">Service Type</h3>
+                      <ChevronDown
+                        className={`h-4 w-4 mt-1 transition-transform ${
+                          serviceTypeOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-3 border-b border-gray-200 pb-5">
+                      <div className="flex items-center space-x-2">
                         <input
                           type="radio"
-                          id={`family-${family.serviceType}`}
-                          name="instrumentFamily"
-                          value={family.serviceType}
-                          checked={selectedFamily === family.serviceType}
-                          onChange={() => setSelectedFamily(family.serviceType)}
-                          className="w-4 h-4 text-teal-600 border-gray-300"
+                          id={`service-${getServiceTypeForFamily()}`}
+                          name="serviceType"
+                          value={getServiceTypeForFamily() || ''}
+                          checked={true}
+                          onChange={() => {}}
+                          className="w-4 h-4 border-gray-300"
+                          style={{ accentColor }}
                         />
                         <label
-                          htmlFor={`family-${family.serviceType}`}
+                          htmlFor={`service-${getServiceTypeForFamily()}`}
                           className="text-sm"
                         >
-                          {family?.serviceType}
+                          {getServiceTypeForFamily()}
                         </label>
                       </div>
-                    ))}
-                  </CollapsibleContent>
-                </Collapsible>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
 
                 {/* Price Range */}
                 <Collapsible
@@ -306,6 +357,7 @@ export default function SearchComponent() {
                   </CollapsibleContent>
                 </Collapsible>
 
+                {/* Also Offers */}
                 <Collapsible
                   open={alsoOffersOpen}
                   onOpenChange={setAlsoOffersOpen}
@@ -338,6 +390,7 @@ export default function SearchComponent() {
                             onCheckedChange={(checked) =>
                               handleOfferChange(offer.id, checked as boolean)
                             }
+                            style={{ accentColor }}
                           />
                           <Label
                             htmlFor={offer.id}
@@ -382,8 +435,9 @@ export default function SearchComponent() {
                   name="instrumentFamily"
                   value={family.instrumentFamily}
                   checked={selectedFamily === family.instrumentFamily}
-                  onChange={() => setSelectedFamily(family.instrumentFamily)}
-                  className="w-4 h-4 text-teal-600 border-gray-300"
+                  onChange={() => handleFamilySelect(family.instrumentFamily)}
+                  className="w-4 h-4 border-gray-300"
+                  style={{ accentColor }}
                 />
                 <label
                   htmlFor={`family-${family.instrumentFamily}`}
@@ -397,85 +451,85 @@ export default function SearchComponent() {
         </Collapsible>
 
         {/* Select Instruments */}
-        <Collapsible
-          open={selectInstrumentsOpen}
-          onOpenChange={setSelectInstrumentsOpen}
-        >
-          <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
-            <h3 className="font-medium mb-4">Select Instruments</h3>
-            <ChevronDown
-              className={`h-4 w-4 mt-1 transition-transform ${
-                selectInstrumentsOpen ? "rotate-180" : ""
-              }`}
-            />
-          </CollapsibleTrigger>
-          <CollapsibleContent className="border-b border-gray-200 pb-2">
-            {instrumentFamilies?.map((family: Instruments) => (
-              <div
-                className="flex flex-col gap-3 mb-3"
-                key={family.instrumentFamily}
-              >
-                {family?.instrumentTypes?.map((instrument) => (
-                  <div
-                    key={instrument}
-                    className="flex items-center space-x-2 "
+        {selectedFamily && (
+          <Collapsible
+            open={selectInstrumentsOpen}
+            onOpenChange={setSelectInstrumentsOpen}
+          >
+            <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
+              <h3 className="font-medium mb-4">Select Instruments</h3>
+              <ChevronDown
+                className={`h-4 w-4 mt-1 transition-transform ${
+                  selectInstrumentsOpen ? "rotate-180" : ""
+                }`}
+              />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="border-b border-gray-200 pb-2">
+              {getInstrumentsForFamily().map((instrument: string) => (
+                <div
+                  key={instrument}
+                  className="flex items-center space-x-2 mb-3"
+                >
+                  <input
+                    type="radio"
+                    id={`instrument-${instrument}`}
+                    name="instrument"
+                    value={instrument}
+                    checked={selectedInstrument === instrument}
+                    onChange={() => handleInstrumentSelect(instrument)}
+                    className="w-4 h-4 border-gray-300"
+                    style={{ accentColor }}
+                  />
+                  <label
+                    htmlFor={`instrument-${instrument}`}
+                    className="text-sm"
                   >
-                    <input
-                      type="radio"
-                      id={`family-${instrument}`}
-                      name="instrumentFamily"
-                      value={instrument}
-                      checked={selectedFamily === instrument}
-                      onChange={() => setSelectedFamily(instrument)}
-                      className="w-4 h-4 text-teal-600 border-gray-300"
-                    />
-                    <label htmlFor={`family-${instrument}`} className="text-sm">
-                      {instrument}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </CollapsibleContent>
-        </Collapsible>
+                    {instrument}
+                  </label>
+                </div>
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
+        )}
 
         {/* Service Type */}
-        <Collapsible open={serviceTypeOpen} onOpenChange={setServiceTypeOpen}>
-          <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
-            <h3 className="font-medium mb-4">Service Type</h3>
-            <ChevronDown
-              className={`h-4 w-4 mt-1 transition-transform ${
-                serviceTypeOpen ? "rotate-180" : ""
-              }`}
-            />
-          </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-3 border-b border-gray-200 pb-5">
-            {instrumentFamilies?.map((family: Instruments) => (
-              <div
-                key={family.serviceType}
-                className="flex items-center space-x-2"
-              >
+        {selectedInstrument && (
+          <Collapsible
+            open={serviceTypeOpen}
+            onOpenChange={setServiceTypeOpen}
+          >
+            <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
+              <h3 className="font-medium mb-4">Service Type</h3>
+              <ChevronDown
+                className={`h-4 w-4 mt-1 transition-transform ${
+                  serviceTypeOpen ? "rotate-180" : ""
+                }`}
+              />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-3 border-b border-gray-200 pb-5">
+              <div className="flex items-center space-x-2">
                 <input
                   type="radio"
-                  id={`family-${family.serviceType}`}
-                  name="instrumentFamily"
-                  value={family.serviceType}
-                  checked={selectedFamily === family.serviceType}
-                  onChange={() => setSelectedFamily(family.serviceType)}
-                  className="w-4 h-4 text-teal-600 border-gray-300"
+                  id={`service-${getServiceTypeForFamily()}`}
+                  name="serviceType"
+                  value={getServiceTypeForFamily() || ''}
+                  checked={true}
+                  onChange={() => {}}
+                  className="w-4 h-4 border-gray-300"
+                  style={{ accentColor }}
                 />
                 <label
-                  htmlFor={`family-${family.serviceType}`}
+                  htmlFor={`service-${getServiceTypeForFamily()}`}
                   className="text-sm"
                 >
-                  {family?.serviceType}
+                  {getServiceTypeForFamily()}
                 </label>
               </div>
-            ))}
-          </CollapsibleContent>
-        </Collapsible>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
 
-        {/* Price Range Section */}
+        {/* Price Range */}
         <Collapsible open={priceRangeOpen} onOpenChange={setPriceRangeOpen}>
           <CollapsibleTrigger className="flex items-center justify-between w-full text-left pt-5">
             <h3 className="text-lg font-medium text-gray-900">Price Range</h3>
@@ -517,7 +571,7 @@ export default function SearchComponent() {
           </CollapsibleContent>
         </Collapsible>
 
-        {/* Also Offers Section */}
+        {/* Also Offers */}
         <Collapsible open={alsoOffersOpen} onOpenChange={setAlsoOffersOpen}>
           <CollapsibleTrigger className="flex items-center justify-between w-full text-left mt-5">
             <h3 className="text-lg font-medium text-gray-900">Also Offers</h3>
@@ -542,6 +596,7 @@ export default function SearchComponent() {
                     onCheckedChange={(checked) =>
                       handleOfferChange(offer.id, checked as boolean)
                     }
+                    style={{ accentColor }}
                   />
                   <Label
                     htmlFor={offer.id}
@@ -579,6 +634,7 @@ export default function SearchComponent() {
             </Select>
           </div>
         </div>
+        
         {/* Tags Section */}
         <div className="mb-6 lg:mb-8 flex flex-wrap gap-2 items-center justify-between">
           <div className="flex flex-wrap gap-2">
@@ -587,7 +643,7 @@ export default function SearchComponent() {
                 {selectedFamily}
                 <button
                   className="ml-2 text-gray-500 hover:text-gray-700"
-                  onClick={() => setSelectedFamily(null)}
+                  onClick={handleClearFamily}
                 >
                   ×
                 </button>
@@ -599,19 +655,19 @@ export default function SearchComponent() {
                 {selectedInstrument}
                 <button
                   className="ml-2 text-gray-500 hover:text-gray-700"
-                  onClick={() => setSelectedInstrument(null)}
+                  onClick={handleClearInstrument}
                 >
                   ×
                 </button>
               </div>
             )}
 
-            {selectedServiceType && selectedServiceType !== "All" && (
+            {selectedServiceType && (
               <div className="flex items-center bg-gray-100 text-sm px-3 py-1 rounded-full">
                 {selectedServiceType}
                 <button
                   className="ml-2 text-gray-500 hover:text-gray-700"
-                  onClick={() => setSelectedServiceType("All")}
+                  onClick={handleClearServiceType}
                 >
                   ×
                 </button>
@@ -626,12 +682,14 @@ export default function SearchComponent() {
               checked={openNow}
               onChange={(e) => setOpenNow(e.target.checked)}
               className="w-4 h-4"
+              style={{ accentColor }}
             />
             <label htmlFor="open-now" className="text-sm">
               Open Now
             </label>
           </div>
         </div>
+
         {/* Open Now - Mobile */}
         <div className="lg:hidden flex items-center space-x-2 mb-4">
           <input
@@ -640,11 +698,13 @@ export default function SearchComponent() {
             checked={openNow}
             onChange={(e) => setOpenNow(e.target.checked)}
             className="w-4 h-4"
+            style={{ accentColor }}
           />
           <label htmlFor="open-now-mobile" className="text-sm">
             Open Now
           </label>
         </div>
+
         {/* Sort - Mobile */}
         <div className="lg:hidden mb-6">
           <Select defaultValue="price-low">
@@ -659,6 +719,7 @@ export default function SearchComponent() {
             </SelectContent>
           </Select>
         </div>
+
         {/* Business List */}
         <div className="space-y-4 lg:space-y-8">
           {paginationResult.currentItems?.map((business: any) => (
@@ -666,13 +727,14 @@ export default function SearchComponent() {
           ))}
         </div>
 
-        {/* pagination here */}
+        {/* Pagination */}
         <div className="flex items-center justify-center space-x-2 my-6 lg:my-8">
           <Button
             variant="outline"
             size="sm"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
+            style={{ borderColor: accentColor, color: accentColor }}
           >
             <ChevronLeft className="w-4 h-4" />
           </Button>
@@ -684,10 +746,14 @@ export default function SearchComponent() {
                   key={index}
                   className={`${
                     currentPage === page
-                      ? "bg-teal-600 hover:bg-teal-700 text-white"
-                      : ""
+                      ? "text-white"
+                      : "text-gray-700"
                   } h-10 w-10 rounded-md font-medium`}
                   onClick={() => handlePageChange(page)}
+                  style={{
+                    backgroundColor: currentPage === page ? accentColor : "transparent",
+                    border: currentPage === page ? "none" : `1px solid ${accentColor}`
+                  }}
                 >
                   {page}
                 </button>
@@ -703,6 +769,7 @@ export default function SearchComponent() {
             size="sm"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === paginationResult.totalPages}
+            style={{ borderColor: accentColor, color: accentColor }}
           >
             <ChevronRight className="w-4 h-4" />
           </Button>
@@ -727,7 +794,7 @@ export default function SearchComponent() {
               <p className="text-[#485150] text-sm lg:text-[16px] mt-1 lg:mt-2">
                 Adding a business to Instrufix is completely free!
               </p>
-              <h1 className="font-medium text-teal-600 mt-3 lg:mt-5 text-sm lg:text-md">
+              <h1 className="font-medium mt-3 lg:mt-5 text-sm lg:text-md" style={{ color: accentColor }}>
                 Got your own business? Add to Instrufix now!
               </h1>
             </div>
@@ -735,7 +802,10 @@ export default function SearchComponent() {
 
           <div className="w-full md:w-auto">
             <Link href={"/add-a-business"}>
-              <Button className="w-full md:w-auto bg-teal-600 hover:bg-teal-700 text-white px-6 lg:px-8 h-[40px] lg:h-[48px] text-sm lg:text-base">
+              <Button 
+                className="w-full md:w-auto text-white px-6 lg:px-8 h-[40px] lg:h-[48px] text-sm lg:text-base"
+                style={{ backgroundColor: accentColor }}
+              >
                 Add Business
               </Button>
             </Link>
