@@ -175,13 +175,13 @@ export async function addBusiness(payload: any) {
 }
 
 //get all business
-export async function getAllbusiness() {
+export async function getAllbusiness(params = {}) {
   try {
-    const res = await api.get("/business");
+    const res = await api.get("/business", { params });
     return res.data;
   } catch (error) {
     console.error("error fetching all business", error);
-    return error;
+    throw error;
   }
 }
 

@@ -22,7 +22,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAllbusiness, getAllInstrument } from "@/lib/api";
 import Link from "next/link";
 import BusinessCard from "./BusinessCard";
-import { getPageNumbers, paginate, PaginationResult } from "@/utils/paginate";
+import { getPageNumbers } from "@/utils/paginate";
 import {
   Collapsible,
   CollapsibleContent,
@@ -39,32 +39,78 @@ interface Instruments {
   serviceType: string;
 }
 
+// interface Business {
+//   _id: string;
+//   name: string;
+//   instrumentFamily: string[];
+//   instruments: string[];
+//   priceRange: {
+//     min: number;
+//     max: number;
+//   };
+//   services: {
+//     buy: boolean;
+//     sell: boolean;
+//     trade: boolean;
+//     rental: boolean;
+//     lessons: boolean;
+//   };
+//   postalCode: string;
+//   openingHours: {
+//     openNow: boolean;
+//   };
+//   rating?: number;
+//   distance?: number;
+// }
+
 export default function SearchComponent() {
-  // State management
+  // Filter states
+  const [selectedFamily, setSelectedFamily] = useState<string | null>(null);
+  const [selectedInstrument, setSelectedInstrument] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [selectedServiceType, setSelectedServiceType] = useState<string | null>(null);
+  const [minPrice, setMinPrice] = useState<number | null>(null);
+  const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  const [buyInstruments, setBuyInstruments] = useState(false);
+  const [sellInstruments, setSellInstruments] = useState(false);
+  const [offerMusicLessons, setOfferMusicLessons] = useState(false);
+  const [sortOption, setSortOption] = useState("low-to-high");
+  const [openNow, setOpenNow] = useState(false);
+  const [postalCode, setPostalCode] = useState("");
+
+  // UI states
   const [priceRangeOpen, setPriceRangeOpen] = useState(true);
   const [alsoOffersOpen, setAlsoOffersOpen] = useState(true);
-  const [selectedOffers, setSelectedOffers] = useState<string[]>(["trade"]);
   const [instrumentFamilyOpen, setInstrumentFamilyOpen] = useState(true);
   const [selectInstrumentsOpen, setSelectInstrumentsOpen] = useState(false);
   const [serviceTypeOpen, setServiceTypeOpen] = useState(false);
-
-  const [selectedFamily, setSelectedFamily] = useState<string | null>(null);
-  const [selectedInstrument, setSelectedInstrument] = useState<string | null>(null);
-  const [selectedServiceType, setSelectedServiceType] = useState<string | null>(null);
-  const [openNow, setOpenNow] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Query hooks
-  const { data: allBusiness = [] } = useQuery({
-    queryKey: ["all-business-search-result"],
-    queryFn: async () => {
-      const response = await getAllbusiness();
-      return response.data;
-    },
+  // Build query params
+  const queryParams = {
+    instrumentFamily: selectedFamily || undefined,
+    selectedInstrumentsGroup: selectedInstrument || undefined,
+    minPrice: minPrice || undefined,
+    maxPrice: maxPrice || undefined,
+    buyInstruments: buyInstruments || undefined,
+    sellInstruments: sellInstruments || undefined,
+    offerMusicLessons: offerMusicLessons || undefined,
+    sort: sortOption,
+    openNow: openNow || undefined,
+    postalCode: postalCode || undefined,
+    page: currentPage,
+    limit: itemsPerPage
+  };
+
+  // Fetch businesses with filters
+  const { data: businessData = { data: [], total: 0 } } = useQuery({
+    queryKey: ["all-business-search-result", queryParams],
+    queryFn: () => getAllbusiness(queryParams),
   });
 
+  // Fetch instrument families
   const { data: instrumentFamilies } = useQuery({
     queryKey: ["all-instrument"],
     queryFn: async () => {
@@ -74,27 +120,21 @@ export default function SearchComponent() {
   });
 
   // Handler functions
-  const handleOfferChange = (offer: string, checked: boolean) => {
-    if (checked) {
-      setSelectedOffers([...selectedOffers, offer]);
-    } else {
-      setSelectedOffers(selectedOffers.filter((item) => item !== offer));
-    }
-  };
-
   const handleFamilySelect = (family: string) => {
     setSelectedFamily(family);
     setSelectedInstrument(null);
-    setSelectedServiceType(null); // Don't set service type here anymore
+    setSelectedServiceType(null);
     setSelectInstrumentsOpen(true);
     setServiceTypeOpen(false);
+    setCurrentPage(1);
   };
 
   const handleInstrumentSelect = (instrument: string) => {
     setSelectedInstrument(instrument);
-    setServiceTypeOpen(true);
+    setServiceTypeOpen(true); // This ensures Service Type section opens
+    setCurrentPage(1);
     
-    // Find and set the service type only when instrument is selected
+    // Find and set the service type for the selected family
     const selectedFamilyData = instrumentFamilies?.find(
       (item: Instruments) => item.instrumentFamily === selectedFamily
     );
@@ -109,16 +149,30 @@ export default function SearchComponent() {
     setSelectedServiceType(null);
     setSelectInstrumentsOpen(false);
     setServiceTypeOpen(false);
+    setCurrentPage(1);
   };
 
   const handleClearInstrument = () => {
     setSelectedInstrument(null);
     setSelectedServiceType(null);
     setServiceTypeOpen(false);
+    setCurrentPage(1);
   };
 
-  const handleClearServiceType = () => {
-    setSelectedServiceType(null);
+  const handlePriceChange = (type: 'min' | 'max', value: string) => {
+    const numValue = value ? parseInt(value) : null;
+    if (type === 'min') {
+      setMinPrice(numValue);
+    } else {
+      setMaxPrice(numValue);
+    }
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= Math.ceil(businessData.total / itemsPerPage)) {
+      setCurrentPage(page);
+    }
   };
 
   // Utility functions
@@ -138,20 +192,7 @@ export default function SearchComponent() {
     return family?.serviceType || null;
   };
 
-  // Pagination
-  const paginationResult: PaginationResult<any> = paginate(
-    allBusiness || [],
-    currentPage,
-    itemsPerPage
-  );
-
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= paginationResult.totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
-  // Accent color variable
+  // Accent color
   const accentColor = "#139A8E";
 
   return (
@@ -218,7 +259,7 @@ export default function SearchComponent() {
                           htmlFor={`family-${family.instrumentFamily}`}
                           className="text-sm"
                         >
-                          {family?.instrumentFamily}
+                          {family.instrumentFamily}
                         </label>
                       </div>
                     ))}
@@ -267,7 +308,7 @@ export default function SearchComponent() {
                   </Collapsible>
                 )}
 
-                {/* Service Type */}
+                {/* Service Type - Only show if instrument is selected */}
                 {selectedInstrument && (
                   <Collapsible
                     open={serviceTypeOpen}
@@ -320,10 +361,6 @@ export default function SearchComponent() {
                     />
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-4 mt-4">
-                    <p className="text-sm text-gray-600">
-                      Pricing is an estimate and subject to change. Contact the
-                      shop for an accurate quote.
-                    </p>
                     <div className="flex gap-3">
                       <div className="flex-1">
                         <Label
@@ -337,6 +374,8 @@ export default function SearchComponent() {
                           type="number"
                           placeholder="0"
                           className="mt-1"
+                          value={minPrice || ''}
+                          onChange={(e) => handlePriceChange('min', e.target.value)}
                         />
                       </div>
                       <div className="flex-1">
@@ -351,6 +390,8 @@ export default function SearchComponent() {
                           type="number"
                           placeholder="1000"
                           className="mt-1"
+                          value={maxPrice || ''}
+                          onChange={(e) => handlePriceChange('max', e.target.value)}
                         />
                       </div>
                     </div>
@@ -374,35 +415,94 @@ export default function SearchComponent() {
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-3 mt-4">
                     <div className="space-y-3">
-                      {[
-                        { id: "sell", label: "Sell" },
-                        { id: "trade", label: "Trade" },
-                        { id: "rental", label: "Rental" },
-                        { id: "lessons", label: "Lessons" },
-                      ].map((offer) => (
-                        <div
-                          key={offer.id}
-                          className="flex items-center space-x-2"
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="buy"
+                          checked={buyInstruments}
+                          onCheckedChange={(checked) => {
+                            setBuyInstruments(checked as boolean);
+                            setCurrentPage(1);
+                          }}
+                          style={{ accentColor }}
+                        />
+                        <Label
+                          htmlFor="buy"
+                          className="text-sm font-normal text-gray-700 cursor-pointer"
                         >
-                          <Checkbox
-                            id={offer.id}
-                            checked={selectedOffers.includes(offer.id)}
-                            onCheckedChange={(checked) =>
-                              handleOfferChange(offer.id, checked as boolean)
-                            }
-                            style={{ accentColor }}
-                          />
-                          <Label
-                            htmlFor={offer.id}
-                            className="text-sm font-normal text-gray-700 cursor-pointer"
-                          >
-                            {offer.label}
-                          </Label>
-                        </div>
-                      ))}
+                          Buy Instruments
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="sell"
+                          checked={sellInstruments}
+                          onCheckedChange={(checked) => {
+                            setSellInstruments(checked as boolean);
+                            setCurrentPage(1);
+                          }}
+                          style={{ accentColor }}
+                        />
+                        <Label
+                          htmlFor="sell"
+                          className="text-sm font-normal text-gray-700 cursor-pointer"
+                        >
+                          Sell Instruments
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="lessons"
+                          checked={offerMusicLessons}
+                          onCheckedChange={(checked) => {
+                            setOfferMusicLessons(checked as boolean);
+                            setCurrentPage(1);
+                          }}
+                          style={{ accentColor }}
+                        />
+                        <Label
+                          htmlFor="lessons"
+                          className="text-sm font-normal text-gray-700 cursor-pointer"
+                        >
+                          Music Lessons
+                        </Label>
+                      </div>
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
+
+                {/* Postal Code */}
+                <div className="mt-5">
+                  <Label htmlFor="postal-code" className="text-sm text-gray-600">
+                    Postal Code
+                  </Label>
+                  <Input
+                    id="postal-code"
+                    type="text"
+                    placeholder="Enter postal code"
+                    className="mt-1"
+                    value={postalCode}
+                    onChange={(e) => {
+                      setPostalCode(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  />
+                </div>
+
+                {/* Open Now */}
+                <div className="flex items-center space-x-2 mt-5">
+                  <Checkbox
+                    id="open-now-mobile"
+                    checked={openNow}
+                    onCheckedChange={(checked) => {
+                      setOpenNow(checked as boolean);
+                      setCurrentPage(1);
+                    }}
+                    style={{ accentColor }}
+                  />
+                  <label htmlFor="open-now-mobile" className="text-sm">
+                    Open Now
+                  </label>
+                </div>
               </div>
             </div>
           </div>
@@ -443,7 +543,7 @@ export default function SearchComponent() {
                   htmlFor={`family-${family.instrumentFamily}`}
                   className="text-sm"
                 >
-                  {family?.instrumentFamily}
+                  {family.instrumentFamily}
                 </label>
               </div>
             ))}
@@ -492,7 +592,7 @@ export default function SearchComponent() {
           </Collapsible>
         )}
 
-        {/* Service Type */}
+        {/* Service Type - Only show if instrument is selected */}
         {selectedInstrument && (
           <Collapsible
             open={serviceTypeOpen}
@@ -540,10 +640,6 @@ export default function SearchComponent() {
             />
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-4 mt-4">
-            <p className="text-sm text-gray-600">
-              Pricing is an estimate and subject to change. Contact the shop for
-              an accurate quote.
-            </p>
             <div className="flex gap-3">
               <div className="flex-1">
                 <Label htmlFor="min-price" className="text-sm text-gray-600">
@@ -554,6 +650,8 @@ export default function SearchComponent() {
                   type="number"
                   placeholder="0"
                   className="mt-1"
+                  value={minPrice || ''}
+                  onChange={(e) => handlePriceChange('min', e.target.value)}
                 />
               </div>
               <div className="flex-1">
@@ -565,6 +663,8 @@ export default function SearchComponent() {
                   type="number"
                   placeholder="1000"
                   className="mt-1"
+                  value={maxPrice || ''}
+                  onChange={(e) => handlePriceChange('max', e.target.value)}
                 />
               </div>
             </div>
@@ -583,32 +683,94 @@ export default function SearchComponent() {
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-3 mt-4">
             <div className="space-y-3">
-              {[
-                { id: "sell", label: "Sell" },
-                { id: "trade", label: "Trade" },
-                { id: "rental", label: "Rental" },
-                { id: "lessons", label: "Lessons" },
-              ].map((offer) => (
-                <div key={offer.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={offer.id}
-                    checked={selectedOffers.includes(offer.id)}
-                    onCheckedChange={(checked) =>
-                      handleOfferChange(offer.id, checked as boolean)
-                    }
-                    style={{ accentColor }}
-                  />
-                  <Label
-                    htmlFor={offer.id}
-                    className="text-sm font-normal text-gray-700 cursor-pointer"
-                  >
-                    {offer.label}
-                  </Label>
-                </div>
-              ))}
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="buy"
+                  checked={buyInstruments}
+                  onCheckedChange={(checked) => {
+                    setBuyInstruments(checked as boolean);
+                    setCurrentPage(1);
+                  }}
+                  style={{ accentColor }}
+                />
+                <Label
+                  htmlFor="buy"
+                  className="text-sm font-normal text-gray-700 cursor-pointer"
+                >
+                  Buy Instruments
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="sell"
+                  checked={sellInstruments}
+                  onCheckedChange={(checked) => {
+                    setSellInstruments(checked as boolean);
+                    setCurrentPage(1);
+                  }}
+                  style={{ accentColor }}
+                />
+                <Label
+                  htmlFor="sell"
+                  className="text-sm font-normal text-gray-700 cursor-pointer"
+                >
+                  Sell Instruments
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="lessons"
+                  checked={offerMusicLessons}
+                  onCheckedChange={(checked) => {
+                    setOfferMusicLessons(checked as boolean);
+                    setCurrentPage(1);
+                  }}
+                  style={{ accentColor }}
+                />
+                <Label
+                  htmlFor="lessons"
+                  className="text-sm font-normal text-gray-700 cursor-pointer"
+                >
+                  Music Lessons
+                </Label>
+              </div>
             </div>
           </CollapsibleContent>
         </Collapsible>
+
+        {/* Postal Code */}
+        <div className="mt-5">
+          <Label htmlFor="postal-code" className="text-sm text-gray-600">
+            Postal Code
+          </Label>
+          <Input
+            id="postal-code"
+            type="text"
+            placeholder="Enter postal code"
+            className="mt-1"
+            value={postalCode}
+            onChange={(e) => {
+              setPostalCode(e.target.value);
+              setCurrentPage(1);
+            }}
+          />
+        </div>
+
+        {/* Open Now */}
+        <div className="flex items-center space-x-2 mt-5">
+          <Checkbox
+            id="open-now"
+            checked={openNow}
+            onCheckedChange={(checked) => {
+              setOpenNow(checked as boolean);
+              setCurrentPage(1);
+            }}
+            style={{ accentColor }}
+          />
+          <label htmlFor="open-now" className="text-sm">
+            Open Now
+          </label>
+        </div>
       </div>
 
       {/* Main Content */}
@@ -616,18 +778,24 @@ export default function SearchComponent() {
         {/* Header - Desktop */}
         <div className="hidden lg:flex items-center justify-between mb-6">
           <div className="space-y-2">
-            <p className="text-gray-500">24 result for</p>
+            <p className="text-gray-500">{businessData.total} results</p>
             <h1 className="text-2xl font-semibold">Online Classes</h1>
           </div>
           <div className="flex items-center space-x-4">
             <span className="text-sm text-gray-600">Sort by</span>
-            <Select defaultValue="price-low">
+            <Select 
+              value={sortOption}
+              onValueChange={(value) => {
+                setSortOption(value);
+                setCurrentPage(1);
+              }}
+            >
               <SelectTrigger className="w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="price-low">Price Low to High</SelectItem>
-                <SelectItem value="price-high">Price High to Low</SelectItem>
+                <SelectItem value="low-to-high">Price Low to High</SelectItem>
+                <SelectItem value="high-to-low">Price High to Low</SelectItem>
                 <SelectItem value="rating">Rating</SelectItem>
                 <SelectItem value="distance">Distance</SelectItem>
               </SelectContent>
@@ -662,12 +830,105 @@ export default function SearchComponent() {
               </div>
             )}
 
-            {selectedServiceType && (
+            {minPrice !== null && (
               <div className="flex items-center bg-gray-100 text-sm px-3 py-1 rounded-full">
-                {selectedServiceType}
+                Min: ${minPrice}
                 <button
                   className="ml-2 text-gray-500 hover:text-gray-700"
-                  onClick={handleClearServiceType}
+                  onClick={() => {
+                    setMinPrice(null);
+                    setCurrentPage(1);
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
+            {maxPrice !== null && (
+              <div className="flex items-center bg-gray-100 text-sm px-3 py-1 rounded-full">
+                Max: ${maxPrice}
+                <button
+                  className="ml-2 text-gray-500 hover:text-gray-700"
+                  onClick={() => {
+                    setMaxPrice(null);
+                    setCurrentPage(1);
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
+            {buyInstruments && (
+              <div className="flex items-center bg-gray-100 text-sm px-3 py-1 rounded-full">
+                Buy
+                <button
+                  className="ml-2 text-gray-500 hover:text-gray-700"
+                  onClick={() => {
+                    setBuyInstruments(false);
+                    setCurrentPage(1);
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
+            {sellInstruments && (
+              <div className="flex items-center bg-gray-100 text-sm px-3 py-1 rounded-full">
+                Sell
+                <button
+                  className="ml-2 text-gray-500 hover:text-gray-700"
+                  onClick={() => {
+                    setSellInstruments(false);
+                    setCurrentPage(1);
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
+            {offerMusicLessons && (
+              <div className="flex items-center bg-gray-100 text-sm px-3 py-1 rounded-full">
+                Lessons
+                <button
+                  className="ml-2 text-gray-500 hover:text-gray-700"
+                  onClick={() => {
+                    setOfferMusicLessons(false);
+                    setCurrentPage(1);
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
+            {openNow && (
+              <div className="flex items-center bg-gray-100 text-sm px-3 py-1 rounded-full">
+                Open Now
+                <button
+                  className="ml-2 text-gray-500 hover:text-gray-700"
+                  onClick={() => {
+                    setOpenNow(false);
+                    setCurrentPage(1);
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
+            {postalCode && (
+              <div className="flex items-center bg-gray-100 text-sm px-3 py-1 rounded-full">
+                Near {postalCode}
+                <button
+                  className="ml-2 text-gray-500 hover:text-gray-700"
+                  onClick={() => {
+                    setPostalCode("");
+                    setCurrentPage(1);
+                  }}
                 >
                   ×
                 </button>
@@ -680,8 +941,10 @@ export default function SearchComponent() {
               id="open-now"
               type="checkbox"
               checked={openNow}
-              onChange={(e) => setOpenNow(e.target.checked)}
-              className="w-4 h-4"
+              onChange={(e) => {
+                setOpenNow(e.target.checked);
+                setCurrentPage(1);
+              }}
               style={{ accentColor }}
             />
             <label htmlFor="open-now" className="text-sm">
@@ -690,30 +953,21 @@ export default function SearchComponent() {
           </div>
         </div>
 
-        {/* Open Now - Mobile */}
-        <div className="lg:hidden flex items-center space-x-2 mb-4">
-          <input
-            id="open-now-mobile"
-            type="checkbox"
-            checked={openNow}
-            onChange={(e) => setOpenNow(e.target.checked)}
-            className="w-4 h-4"
-            style={{ accentColor }}
-          />
-          <label htmlFor="open-now-mobile" className="text-sm">
-            Open Now
-          </label>
-        </div>
-
         {/* Sort - Mobile */}
         <div className="lg:hidden mb-6">
-          <Select defaultValue="price-low">
+          <Select 
+            value={sortOption}
+            onValueChange={(value) => {
+              setSortOption(value);
+              setCurrentPage(1);
+            }}
+          >
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="price-low">Price Low to High</SelectItem>
-              <SelectItem value="price-high">Price High to Low</SelectItem>
+              <SelectItem value="low-to-high">Price Low to High</SelectItem>
+              <SelectItem value="high-to-low">Price High to Low</SelectItem>
               <SelectItem value="rating">Rating</SelectItem>
               <SelectItem value="distance">Distance</SelectItem>
             </SelectContent>
@@ -722,25 +976,28 @@ export default function SearchComponent() {
 
         {/* Business List */}
         <div className="space-y-4 lg:space-y-8">
-          {paginationResult.currentItems?.map((business: any) => (
+          {businessData.data?.map((business: any) => (
             <BusinessCard key={business?._id} business={business} />
           ))}
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-center space-x-2 my-6 lg:my-8">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            style={{ borderColor: accentColor, color: accentColor }}
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
+        {businessData.total > 0 && (
+          <div className="flex items-center justify-center space-x-2 my-6 lg:my-8">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              style={{ borderColor: accentColor, color: accentColor }}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
 
-          {getPageNumbers(currentPage, paginationResult.totalPages).map(
-            (page, index) =>
+            {getPageNumbers(
+              currentPage, 
+              Math.ceil(businessData.total / itemsPerPage)
+            ).map((page, index) =>
               typeof page === "number" ? (
                 <button
                   key={index}
@@ -762,18 +1019,19 @@ export default function SearchComponent() {
                   {page}
                 </span>
               )
-          )}
+            )}
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === paginationResult.totalPages}
-            style={{ borderColor: accentColor, color: accentColor }}
-          >
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage >= Math.ceil(businessData.total / itemsPerPage)}
+              style={{ borderColor: accentColor, color: accentColor }}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
 
         {/* Add Business CTA */}
         <div className="border border-gray-200 bg-gray-50 mt-6 lg:mt-10 p-4 lg:p-5 rounded-lg flex flex-col md:flex-row justify-between items-start gap-4 lg:gap-6">
@@ -812,7 +1070,7 @@ export default function SearchComponent() {
           </div>
         </div>
 
-        {allBusiness.length === 0 && (
+        {businessData.total === 0 && (
           <div className="text-center py-8 lg:py-12">
             <p className="text-gray-500">
               No instructors found matching your search.
