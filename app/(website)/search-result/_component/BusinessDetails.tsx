@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import type React from "react";
 import { useState } from "react";
 import {
   Star,
@@ -13,12 +12,19 @@ import {
   MessageCircleCodeIcon,
   Globe,
   Phone,
+  Loader2,
+  Copy,
+  X,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { toast } from "sonner";
 import ReviewModal from "@/components/modals/ReviewModal";
 import ReviewSubmittedModal from "@/components/modals/ReviewSubmittedModal";
-import ShareModal from "./modal/ShareModal";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useSession } from "next-auth/react";
+import AddPhotoModal from "./modal/AddPhotoModal";
 
 interface BusinessProfileProps {
   singleBusiness: {
@@ -72,21 +78,98 @@ interface BusinessProfileProps {
   };
 }
 
+interface ShareModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  businessName: string;
+  businessId: string;
+}
+
+const ShareModal = ({
+  isOpen,
+  onClose,
+  businessName,
+  businessId,
+}: ShareModalProps) => {
+  const [copied, setCopied] = useState(false);
+
+  const shareLink = `${window.location.origin}/search-result/${businessId}`;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(shareLink);
+    setCopied(true);
+    toast.success("Link copied to clipboard!");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Share {businessName}</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <p className="text-gray-600 mb-4">
+          Copy the link below to share this business with others
+        </p>
+
+        <div className="flex gap-2">
+          <Input value={shareLink} readOnly className="flex-1" />
+          <Button
+            onClick={handleCopy}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Copy className="h-4 w-4" />
+            {copied ? "Copied!" : "Copy"}
+          </Button>
+        </div>
+
+        <div className="mt-6 flex justify-end">
+          <Button onClick={onClose} className="bg-[#139a8e] hover:bg-[#0d7a70]">
+            Close
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+type SectionKey = "repair" | "lessons" | "otherService";
+
 const BusinessDetails: React.FC<BusinessProfileProps> = ({
   singleBusiness,
 }) => {
   const [expandedSections, setExpandedSections] = useState<{
-    [key: string]: boolean;
+    repair: boolean;
+    lessons: boolean;
+    otherService: boolean;
   }>({
     repair: true,
     lessons: false,
+    otherService: false,
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const toggleSection = (section: string) => {
+  const [isAddPhoto, setIsAddPhotoOpen] = useState(false);
+
+  const session = useSession();
+
+  const token = session?.data?.user?.accessToken;
+
+  const toggleSection = (section: SectionKey) => {
     setExpandedSections((prev) => ({
       ...prev,
       [section]: !prev[section],
@@ -106,6 +189,38 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
 
   const formatTime = (time: string, meridiem: string) => {
     return `${time} ${meridiem}`;
+  };
+
+  const handleSaveBusiness = async () => {
+    setIsSaving(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/saved-business/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            savedBusiness: singleBusiness._id,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to save business");
+      }
+
+      toast.success(data.message || "Business saved successfully!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save business");
+      console.error("Error saving business:", error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Group services by instrument family
@@ -175,7 +290,10 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
             <Star className="w-4 h-4 mr-1" />
             Write Review
           </button>
-          <button className="bg-[#e0f2f1] hover:bg-[#139a8e] flex items-center gap-2 px-5 py-3 rounded-lg text-[#139a8e] hover:text-white font-semibold">
+          <button
+            onClick={() => setIsAddPhotoOpen(true)}
+            className="bg-[#e0f2f1] hover:bg-[#139a8e] flex items-center gap-2 px-5 py-3 rounded-lg text-[#139a8e] hover:text-white font-semibold"
+          >
             <LocateIcon className="w-4 h-4 mr-1" />
             Add Photo
           </button>
@@ -186,8 +304,16 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
             <Share2Icon className="w-4 h-4 mr-1" />
             Share
           </button>
-          <button className="bg-[#e0f2f1] hover:bg-[#139a8e] flex items-center gap-2 px-5 py-3 rounded-lg text-[#139a8e] hover:text-white font-semibold">
-            <SaveIcon className="w-4 h-4 mr-1" />
+          <button
+            onClick={handleSaveBusiness}
+            disabled={isSaving}
+            className="bg-[#e0f2f1] hover:bg-[#139a8e] flex items-center gap-2 px-5 py-3 rounded-lg text-[#139a8e] hover:text-white font-semibold disabled:opacity-50"
+          >
+            {isSaving ? (
+              <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+            ) : (
+              <SaveIcon className="w-4 h-4 mr-1" />
+            )}
             Save
           </button>
         </div>
@@ -202,6 +328,13 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
       )}
 
       {isModalOpen && <ReviewSubmittedModal setIsModalOpen={setIsModalOpen} />}
+
+      {isAddPhoto && (
+        <AddPhotoModal
+          setIsAddPhotoOpen={setIsAddPhotoOpen}
+          businessID={singleBusiness?._id}
+        />
+      )}
 
       <ShareModal
         isOpen={isShareModalOpen}

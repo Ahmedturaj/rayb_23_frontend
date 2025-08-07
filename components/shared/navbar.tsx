@@ -318,9 +318,11 @@ const Navbar = () => {
               <div className="flex items-center justify-center h-12 w-12 bg-[#F7F8F8] rounded-full">
                 <Inbox className="h-6 w-6" />
               </div>
-              <div className="flex items-center justify-center h-12 w-12 bg-[#F7F8F8] rounded-full">
-                <Bookmark className="h-6 w-6" />
-              </div>
+              <Link href={'/save-business'}>
+                <div className="flex items-center justify-center h-12 w-12 bg-[#F7F8F8] rounded-full">
+                  <Bookmark className="h-6 w-6" />
+                </div>
+              </Link>
               <DropdownMenu>
                 <DropdownMenuTrigger className="hover:text-teal-400 flex gap-1 items-center outline-none">
                   <Avatar>
