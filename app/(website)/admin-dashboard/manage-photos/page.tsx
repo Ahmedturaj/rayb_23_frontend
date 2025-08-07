@@ -405,7 +405,7 @@ const fetchPhotos = async (
   timeRange?: string
 ): Promise<PhotoEntryProps[]> => {
   const queryParams = new URLSearchParams();
-  if (status && status !== "all") queryParams.append("status", status);
+  if (status && status !== "all") queryParams.append("photoType", status);
   if (sortBy && sortBy !== "asc-latest") queryParams.append("sortBy", sortBy);
   if (timeRange && timeRange !== "all") queryParams.append("timeRange", timeRange);
 
