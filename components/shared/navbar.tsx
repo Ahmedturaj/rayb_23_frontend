@@ -19,7 +19,6 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
@@ -51,11 +50,12 @@ const Navbar = () => {
   const notificationCount = notifications.length;
 
   return (
-    <nav className="p-4 shadow-md sticky top-0 z-50 bg-white">
+    <nav className="p-4 border-b sticky top-0 z-50 bg-white">
       <div className="container flex items-center justify-between h-14">
         {/* Logo */}
         <Link href="/">
-          <Image src="/images/logo.png" alt="Logo" width={150} height={40} />
+          {/* <Image src="/images/logo.png" alt="Logo" width={150} height={40} /> */}
+          <h1 className="font-bold text-3xl lg:text-5xl">Instrufix</h1>
         </Link>
 
         {/* Search Bar (hidden on mobile, visible on desktop) */}
