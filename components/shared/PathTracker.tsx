@@ -15,7 +15,15 @@ import { Fragment } from "react";
 const capitalize = (str: string) =>
   str.charAt(0).toUpperCase() + str.slice(1).replace(/-/g, " ");
 
-const PathTracker = ({ title, header }: { title: string, header ?: string }) => {
+const PathTracker = ({
+  title,
+  header,
+  id,
+}: {
+  title: string;
+  header?: string;
+  id?: string;
+}) => {
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
 
@@ -39,7 +47,9 @@ const PathTracker = ({ title, header }: { title: string, header ?: string }) => 
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
                     {isLast ? (
-                      <BreadcrumbPage>{capitalize(header ? header : segment)}</BreadcrumbPage>
+                      <BreadcrumbPage>
+                        {capitalize(header ? header : segment)}
+                      </BreadcrumbPage>
                     ) : (
                       <BreadcrumbLink asChild>
                         <Link href={href}>{capitalize(segment)}</Link>
@@ -54,9 +64,15 @@ const PathTracker = ({ title, header }: { title: string, header ?: string }) => 
       </div>
 
       <div>
-        <h1 className="font-semibold text-[32px] my-3">
-          {segments.length ? capitalize(header ? header : segments[segments.length - 1]) : "Home"}
-        </h1>
+        {pathname === `/search-result/${id}` ? (
+          <h1 className="font-semibold text-[32px] my-3"></h1>
+        ) : (
+          <h1 className="font-semibold text-[32px] my-3">
+            {segments.length
+              ? capitalize(header ? header : segments[segments.length - 1])
+              : "Home"}
+          </h1>
+        )}
 
         <p className="text-sm text-gray-500">{title}</p>
       </div>

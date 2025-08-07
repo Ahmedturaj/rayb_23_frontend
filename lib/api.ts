@@ -130,7 +130,6 @@ export async function getMyChat(userId: string) {
   }
 }
 
-
 // get chat by businessMan
 export async function getChatByBusinessMan(businessId: string) {
   try {
@@ -141,7 +140,6 @@ export async function getChatByBusinessMan(businessId: string) {
     return error;
   }
 }
-
 
 // get messages
 export async function getMessages(chatId: string) {
@@ -177,13 +175,13 @@ export async function addBusiness(payload: any) {
 }
 
 //get all business
-export async function getAllbusiness() {
+export async function getAllbusiness(params = {}) {
   try {
-    const res = await api.get("/business");
+    const res = await api.get("/business", { params });
     return res.data;
   } catch (error) {
     console.error("error fetching all business", error);
-    return error;
+    throw error;
   }
 }
 
@@ -198,6 +196,23 @@ export async function getSingleBusiness(params: string | string[]) {
   }
 }
 
+// update a business
+export async function updateBusiness(id: string, formData: FormData) {
+  try {
+    const response = await api.patch(`/business/update/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating business:", error);
+    return {
+      success: false,
+      error: "Failed to update business",
+    };
+  }
+}
 
 // get business stats
 export async function getBusinessStats() {
@@ -295,6 +310,28 @@ export async function getAllInstrument() {
     return response.data;
   } catch (error) {
     console.error("Error fetching saved business:", error);
+    return error;
+  }
+}
+
+//get all notification
+export async function getAllNotification() {
+  try {
+    const response = await api.get(`/notification`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching notification:", error);
+    return error;
+  }
+}
+
+//delete notification
+export async function deleteNotification(id: string) {
+  try {
+    const response = await api.delete(`/notification/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching notification:", error);
     return error;
   }
 }

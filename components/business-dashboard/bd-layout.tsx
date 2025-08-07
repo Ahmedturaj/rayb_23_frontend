@@ -33,7 +33,6 @@ export default function BusinessDashboardLayout() {
 
   const { selectedBusinessId, setSelectedBusinessId } = useBusinessContext()
 
-  console.log("My selected Businesses: ", selectedBusinessId);
 
   return (
     <section className="border-b py-4">
