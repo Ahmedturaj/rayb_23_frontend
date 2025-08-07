@@ -17,6 +17,7 @@ import {
   X,
   Filter,
   ChevronDown,
+  Loader2,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getAllbusiness, getAllInstrument } from "@/lib/api";
@@ -38,30 +39,6 @@ interface Instruments {
   instrumentTypes: string[];
   serviceType: string;
 }
-
-// interface Business {
-//   _id: string;
-//   name: string;
-//   instrumentFamily: string[];
-//   instruments: string[];
-//   priceRange: {
-//     min: number;
-//     max: number;
-//   };
-//   services: {
-//     buy: boolean;
-//     sell: boolean;
-//     trade: boolean;
-//     rental: boolean;
-//     lessons: boolean;
-//   };
-//   postalCode: string;
-//   openingHours: {
-//     openNow: boolean;
-//   };
-//   rating?: number;
-//   distance?: number;
-// }
 
 export default function SearchComponent() {
   // Filter states
@@ -105,13 +82,13 @@ export default function SearchComponent() {
   };
 
   // Fetch businesses with filters
-  const { data: businessData = { data: [], total: 0 } } = useQuery({
+  const { data: businessData = { data: [], total: 0 }, isLoading: isBusinessLoading } = useQuery({
     queryKey: ["all-business-search-result", queryParams],
     queryFn: () => getAllbusiness(queryParams),
   });
 
   // Fetch instrument families
-  const { data: instrumentFamilies } = useQuery({
+  const { data: instrumentFamilies, isLoading: isInstrumentLoading } = useQuery({
     queryKey: ["all-instrument"],
     queryFn: async () => {
       const res = await getAllInstrument();
@@ -240,29 +217,35 @@ export default function SearchComponent() {
                     />
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-3 border-b border-gray-200 pb-5">
-                    {instrumentFamilies?.map((family: Instruments) => (
-                      <div
-                        key={family._id}
-                        className="flex items-center space-x-2"
-                      >
-                        <input
-                          type="radio"
-                          id={`family-${family.instrumentFamily}`}
-                          name="instrumentFamily"
-                          value={family.instrumentFamily}
-                          checked={selectedFamily === family.instrumentFamily}
-                          onChange={() => handleFamilySelect(family.instrumentFamily)}
-                          className="w-4 h-4 border-gray-300"
-                          style={{ accentColor }}
-                        />
-                        <label
-                          htmlFor={`family-${family.instrumentFamily}`}
-                          className="text-sm"
-                        >
-                          {family.instrumentFamily}
-                        </label>
+                    {isInstrumentLoading ? (
+                      <div className="flex justify-center py-4">
+                        <Loader2 className="h-5 w-5 animate-spin" />
                       </div>
-                    ))}
+                    ) : (
+                      instrumentFamilies?.map((family: Instruments) => (
+                        <div
+                          key={family._id}
+                          className="flex items-center space-x-2"
+                        >
+                          <input
+                            type="radio"
+                            id={`family-${family.instrumentFamily}`}
+                            name="instrumentFamily"
+                            value={family.instrumentFamily}
+                            checked={selectedFamily === family.instrumentFamily}
+                            onChange={() => handleFamilySelect(family.instrumentFamily)}
+                            className="w-4 h-4 border-gray-300"
+                            style={{ accentColor }}
+                          />
+                          <label
+                            htmlFor={`family-${family.instrumentFamily}`}
+                            className="text-sm"
+                          >
+                            {family.instrumentFamily}
+                          </label>
+                        </div>
+                      ))
+                    )}
                   </CollapsibleContent>
                 </Collapsible>
 
@@ -527,26 +510,32 @@ export default function SearchComponent() {
             />
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-3 border-b border-gray-200 pb-5">
-            {instrumentFamilies?.map((family: Instruments) => (
-              <div key={family._id} className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  id={`family-${family.instrumentFamily}`}
-                  name="instrumentFamily"
-                  value={family.instrumentFamily}
-                  checked={selectedFamily === family.instrumentFamily}
-                  onChange={() => handleFamilySelect(family.instrumentFamily)}
-                  className="w-4 h-4 border-gray-300"
-                  style={{ accentColor }}
-                />
-                <label
-                  htmlFor={`family-${family.instrumentFamily}`}
-                  className="text-sm"
-                >
-                  {family.instrumentFamily}
-                </label>
+            {isInstrumentLoading ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-5 w-5 animate-spin" />
               </div>
-            ))}
+            ) : (
+              instrumentFamilies?.map((family: Instruments) => (
+                <div key={family._id} className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    id={`family-${family.instrumentFamily}`}
+                    name="instrumentFamily"
+                    value={family.instrumentFamily}
+                    checked={selectedFamily === family.instrumentFamily}
+                    onChange={() => handleFamilySelect(family.instrumentFamily)}
+                    className="w-4 h-4 border-gray-300"
+                    style={{ accentColor }}
+                  />
+                  <label
+                    htmlFor={`family-${family.instrumentFamily}`}
+                    className="text-sm"
+                  >
+                    {family.instrumentFamily}
+                  </label>
+                </div>
+              ))
+            )}
           </CollapsibleContent>
         </Collapsible>
 
@@ -975,107 +964,115 @@ export default function SearchComponent() {
         </div>
 
         {/* Business List */}
-        <div className="space-y-4 lg:space-y-8">
-          {businessData.data?.map((business: any) => (
-            <BusinessCard key={business?._id} business={business} />
-          ))}
-        </div>
+        {isBusinessLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : (
+          <>
+            <div className="space-y-4 lg:space-y-8">
+              {businessData.data?.map((business: any) => (
+                <BusinessCard key={business?._id} business={business} />
+              ))}
+            </div>
 
-        {/* Pagination */}
-        {businessData.total > 0 && (
-          <div className="flex items-center justify-center space-x-2 my-6 lg:my-8">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              style={{ borderColor: accentColor, color: accentColor }}
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-
-            {getPageNumbers(
-              currentPage, 
-              Math.ceil(businessData.total / itemsPerPage)
-            ).map((page, index) =>
-              typeof page === "number" ? (
-                <button
-                  key={index}
-                  className={`${
-                    currentPage === page
-                      ? "text-white"
-                      : "text-gray-700"
-                  } h-10 w-10 rounded-md font-medium`}
-                  onClick={() => handlePageChange(page)}
-                  style={{
-                    backgroundColor: currentPage === page ? accentColor : "transparent",
-                    border: currentPage === page ? "none" : `1px solid ${accentColor}`
-                  }}
+            {/* Pagination */}
+            {businessData.total > 0 && (
+              <div className="flex items-center justify-center space-x-2 my-6 lg:my-8">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  style={{ borderColor: accentColor, color: accentColor }}
                 >
-                  {page}
-                </button>
-              ) : (
-                <span key={index} className="text-gray-400 px-2">
-                  {page}
-                </span>
-              )
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+
+                {getPageNumbers(
+                  currentPage, 
+                  Math.ceil(businessData.total / itemsPerPage)
+                ).map((page, index) =>
+                  typeof page === "number" ? (
+                    <button
+                      key={index}
+                      className={`${
+                        currentPage === page
+                          ? "text-white"
+                          : "text-gray-700"
+                      } h-10 w-10 rounded-md font-medium`}
+                      onClick={() => handlePageChange(page)}
+                      style={{
+                        backgroundColor: currentPage === page ? accentColor : "transparent",
+                        border: currentPage === page ? "none" : `1px solid ${accentColor}`
+                      }}
+                    >
+                      {page}
+                    </button>
+                  ) : (
+                    <span key={index} className="text-gray-400 px-2">
+                      {page}
+                    </span>
+                  )
+                )}
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage >= Math.ceil(businessData.total / itemsPerPage)}
+                  style={{ borderColor: accentColor, color: accentColor }}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
             )}
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage >= Math.ceil(businessData.total / itemsPerPage)}
-              style={{ borderColor: accentColor, color: accentColor }}
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
-        )}
+            {/* Add Business CTA */}
+            <div className="border border-gray-200 bg-gray-50 mt-6 lg:mt-10 p-4 lg:p-5 rounded-lg flex flex-col md:flex-row justify-between items-start gap-4 lg:gap-6">
+              <div className="flex gap-4 lg:gap-6 items-start">
+                <div>
+                  <Image
+                    src={"/images/location.png"}
+                    alt="location.png"
+                    width={1000}
+                    height={1000}
+                    className="w-[40px] lg:w-[48px] h-[50px] lg:h-[60px]"
+                  />
+                </div>
+                <div>
+                  <h1 className="font-semibold text-lg lg:text-xl">
+                    Can&apos;t find the repair shop?
+                  </h1>
+                  <p className="text-[#485150] text-sm lg:text-[16px] mt-1 lg:mt-2">
+                    Adding a business to Instrufix is completely free!
+                  </p>
+                  <h1 className="font-medium mt-3 lg:mt-5 text-sm lg:text-md" style={{ color: accentColor }}>
+                    Got your own business? Add to Instrufix now!
+                  </h1>
+                </div>
+              </div>
 
-        {/* Add Business CTA */}
-        <div className="border border-gray-200 bg-gray-50 mt-6 lg:mt-10 p-4 lg:p-5 rounded-lg flex flex-col md:flex-row justify-between items-start gap-4 lg:gap-6">
-          <div className="flex gap-4 lg:gap-6 items-start">
-            <div>
-              <Image
-                src={"/images/location.png"}
-                alt="location.png"
-                width={1000}
-                height={1000}
-                className="w-[40px] lg:w-[48px] h-[50px] lg:h-[60px]"
-              />
+              <div className="w-full md:w-auto">
+                <Link href={"/add-a-business"}>
+                  <Button 
+                    className="w-full md:w-auto text-white px-6 lg:px-8 h-[40px] lg:h-[48px] text-sm lg:text-base"
+                    style={{ backgroundColor: accentColor }}
+                  >
+                    Add Business
+                  </Button>
+                </Link>
+              </div>
             </div>
-            <div>
-              <h1 className="font-semibold text-lg lg:text-xl">
-                Can&apos;t find the repair shop?
-              </h1>
-              <p className="text-[#485150] text-sm lg:text-[16px] mt-1 lg:mt-2">
-                Adding a business to Instrufix is completely free!
-              </p>
-              <h1 className="font-medium mt-3 lg:mt-5 text-sm lg:text-md" style={{ color: accentColor }}>
-                Got your own business? Add to Instrufix now!
-              </h1>
-            </div>
-          </div>
 
-          <div className="w-full md:w-auto">
-            <Link href={"/add-a-business"}>
-              <Button 
-                className="w-full md:w-auto text-white px-6 lg:px-8 h-[40px] lg:h-[48px] text-sm lg:text-base"
-                style={{ backgroundColor: accentColor }}
-              >
-                Add Business
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        {businessData.total === 0 && (
-          <div className="text-center py-8 lg:py-12">
-            <p className="text-gray-500">
-              No instructors found matching your search.
-            </p>
-          </div>
+            {businessData.total === 0 && (
+              <div className="text-center py-8 lg:py-12">
+                <p className="text-gray-500">
+                  No instructors found matching your search.
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
