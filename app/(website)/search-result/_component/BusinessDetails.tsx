@@ -24,6 +24,7 @@ import ReviewSubmittedModal from "@/components/modals/ReviewSubmittedModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSession } from "next-auth/react";
+import AddPhotoModal from "./modal/AddPhotoModal";
 
 interface BusinessProfileProps {
   singleBusiness: {
@@ -162,6 +163,8 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  const [isAddPhoto, setIsAddPhotoOpen] = useState(false);
+
   const session = useSession();
 
   const token = session?.data?.user?.accessToken;
@@ -287,7 +290,10 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
             <Star className="w-4 h-4 mr-1" />
             Write Review
           </button>
-          <button className="bg-[#e0f2f1] hover:bg-[#139a8e] flex items-center gap-2 px-5 py-3 rounded-lg text-[#139a8e] hover:text-white font-semibold">
+          <button
+            onClick={() => setIsAddPhotoOpen(true)}
+            className="bg-[#e0f2f1] hover:bg-[#139a8e] flex items-center gap-2 px-5 py-3 rounded-lg text-[#139a8e] hover:text-white font-semibold"
+          >
             <LocateIcon className="w-4 h-4 mr-1" />
             Add Photo
           </button>
@@ -322,6 +328,13 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
       )}
 
       {isModalOpen && <ReviewSubmittedModal setIsModalOpen={setIsModalOpen} />}
+
+      {isAddPhoto && (
+        <AddPhotoModal
+          setIsAddPhotoOpen={setIsAddPhotoOpen}
+          businessID={singleBusiness?._id}
+        />
+      )}
 
       <ShareModal
         isOpen={isShareModalOpen}
