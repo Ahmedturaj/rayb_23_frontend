@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import ReviewModal from "@/components/modals/ReviewModal";
+import ReviewSubmittedModal from "@/components/modals/ReviewSubmittedModal";
 
 interface BusinessProfileProps {
   singleBusiness: {
@@ -78,6 +80,9 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
     repair: true,
     lessons: false,
   });
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({
@@ -161,7 +166,10 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
 
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-5">
-          <button className="bg-[#e0f2f1] hover:bg-[#139a8e] flex items-center gap-2 px-5 py-3 rounded-lg text-[#139a8e] hover:text-white font-semibold">
+          <button
+            onClick={() => setIsOpen(true)}
+            className="bg-[#e0f2f1] hover:bg-[#139a8e] flex items-center gap-2 px-5 py-3 rounded-lg text-[#139a8e] hover:text-white font-semibold"
+          >
             <Star className="w-4 h-4 mr-1" />
             Write Review
           </button>
@@ -179,6 +187,16 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
           </button>
         </div>
       </div>
+
+      {isOpen && (
+        <ReviewModal
+          businessID={singleBusiness?._id}
+          setIsModalOpen={setIsModalOpen}
+          setIsOpen={setIsOpen}
+        />
+      )}
+
+      {isModalOpen && <ReviewSubmittedModal setIsModalOpen={setIsModalOpen} />}
 
       <div className="flex pt-8 pb-16">
         {/* Left Column */}
@@ -310,12 +328,10 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
                     The business provides{" "}
                     {singleBusiness?.buyInstruments && (
                       <span className="font-semibold">buying,</span>
-                    )}
-                    {" "}
+                    )}{" "}
                     {singleBusiness?.sellInstruments && (
                       <span className="font-semibold">selling,</span>
-                    )}
-                    {" "}
+                    )}{" "}
                     {singleBusiness?.offerMusicLessons && (
                       <span className="font-semibold">trading</span>
                     )}{" "}
