@@ -45,16 +45,16 @@ export default function LoginForm() {
             const res = await signIn("credentials", {
                 email: values.email,
                 password: values.password,
-                redirect: false,
             })
 
-            if (res?.error) {
-                toast.error(res.error)
-            } else {
-                toast.success("Login successful")
-                router.push("/admin-dashboard")
+            if (res?.ok === false) {
+                if (res.error?.startsWith("VERIFY_EMAIL:")) {
+                    const token = res.error.split(":")[1];
+                    router.push(`/auth/verify-email?token=${token}&type=login`);
+                } else {
+                    toast.error(res.error || "Login failed");
+                }
             }
-            console.log(res)
 
         } catch (error) {
             if (error instanceof Error) {

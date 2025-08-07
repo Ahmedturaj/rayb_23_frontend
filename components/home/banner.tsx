@@ -117,7 +117,7 @@ export default function BannerHome() {
     <section className="py-8 lg:py-20 relative">
       <div className="container flex flex-col lg:flex-row lg:justify-between items-center gap-8">
         {/* Text Section */}
-        <div className="text-center lg:text-left border">
+        <div className="text-center lg:text-left">
           <h1 className="text-3xl sm:text-4xl md:text-[40px] lg:text-[48px] font-semibold leading-tight">
             Bring Your Instrument
           </h1>

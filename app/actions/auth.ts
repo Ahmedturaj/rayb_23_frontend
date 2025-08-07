@@ -45,9 +45,8 @@ export async function registerUser(userData: {
 export async function verifyEmail(token: string, otp: string, type: string) {
     try {
         const url =
-            type === "forget-password"
-                ? `${process.env.NEXT_PUBLIC_API_URL}/auth/verify-token`
-                : `${process.env.NEXT_PUBLIC_API_URL}/auth/verify-email`;
+            type === "forget-password" ? `${process.env.NEXT_PUBLIC_API_URL}/auth/verify-token`
+                : `${process.env.NEXT_PUBLIC_API_URL}/user/verify-email`;
 
         const response = await fetch(url, {
             method: "POST",
