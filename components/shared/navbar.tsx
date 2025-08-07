@@ -25,6 +25,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { getAllNotification, getUserProfile } from "@/lib/api";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { usePathname } from "next/navigation";
 
 const Navbar = () => {
   const { data: session, status: sessionStatus } = useSession();
@@ -34,6 +35,10 @@ const Navbar = () => {
     select: (data) => data.data,
     enabled: sessionStatus === "authenticated",
   });
+
+  const pathname = usePathname()
+
+  const isAuthPage = pathname.startsWith('/auth')
 
   const { data: notifications = [] } = useQuery({
     queryKey: ["all-notifications"],
@@ -54,16 +59,20 @@ const Navbar = () => {
         </Link>
 
         {/* Search Bar (hidden on mobile, visible on desktop) */}
-        <div className="hidden md:flex flex-1 max-w-xl mx-auto items-center bg-[#F7F8F8] rounded-xl shadow-inner overflow-hidden">
-          <Input
-            type="text"
-            placeholder="Guitar, strings, restringing..."
-            className="flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 px-4 bg-transparent outline-none"
-          />
-          <Button className="bg-teal-500 hover:bg-[#00998E] text-white rounded-xl py-4 px-6 h-full">
-            <Search className="h-6 w-6" />
-          </Button>
-        </div>
+        {
+          !isAuthPage && (
+            <div className="hidden md:flex flex-1 max-w-xl mx-auto items-center bg-[#F7F8F8] rounded-xl shadow-inner overflow-hidden">
+              <Input
+                type="text"
+                placeholder="Guitar, strings, restringing..."
+                className="flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 px-4 bg-transparent outline-none"
+              />
+              <Button className="bg-teal-500 hover:bg-[#00998E] text-white rounded-xl py-4 px-6 h-full">
+                <Search className="h-6 w-6" />
+              </Button>
+            </div>
+          )
+        }
 
         {/* Mobile Sign Up Button and Menu (visible on mobile only) */}
         <div className="md:hidden flex items-center gap-3">
@@ -82,13 +91,12 @@ const Navbar = () => {
             <div className="flex items-center gap-2">
               <div className="flex items-center justify-center h-10 w-10 bg-[#F7F8F8] rounded-full">
                 <Link
-                  href={`${
-                    session?.user?.userType === "user"
-                      ? "/customer-dashboard/settings/notifications"
-                      : session?.user?.userType === "admin"
+                  href={`${session?.user?.userType === "user"
+                    ? "/customer-dashboard/settings/notifications"
+                    : session?.user?.userType === "admin"
                       ? "/admin-dashboard/settings"
                       : "/business-dashboard/settings/notifications"
-                  }`}
+                    }`}
                 >
                   <Bell className="h-5 w-5" />
                 </Link>
@@ -315,14 +323,20 @@ const Navbar = () => {
                   </span>
                 )}
               </div>
-              <div className="flex items-center justify-center h-12 w-12 bg-[#F7F8F8] rounded-full">
-                <Inbox className="h-6 w-6" />
-              </div>
-              <Link href={'/save-business'}>
-                <div className="flex items-center justify-center h-12 w-12 bg-[#F7F8F8] rounded-full">
-                  <Bookmark className="h-6 w-6" />
+              <Link href={session?.user?.userType === "admin" ? "/admin-dashboard/messages" : session?.user?.userType === "user" ? "/customer-dashboard/messages" : session?.user?.userType === "business" ? "/business-dashboard/messages" : "/customer-dashboard/messages"}>
+                <div className="flex items-center justify-center h-12 w-12 bg-[#F7F8F8] rounded-full cursor-pointer">
+                  <Inbox className="h-6 w-6" />
                 </div>
               </Link>
+              {
+                session?.user?.userType === "user" && (
+                  <Link href={'/customer-dashboard/saved'}>
+                    <div className="flex items-center justify-center h-12 w-12 bg-[#F7F8F8] rounded-full">
+                      <Bookmark className="h-6 w-6" />
+                    </div>
+                  </Link>
+                )
+              }
               <DropdownMenu>
                 <DropdownMenuTrigger className="hover:text-teal-400 flex gap-1 items-center outline-none">
                   <Avatar>
@@ -352,8 +366,8 @@ const Navbar = () => {
                         userData?.userType === "user"
                           ? "customer-dashboard/profile"
                           : userData?.userType === "admin"
-                          ? "admin-dashboard/settings"
-                          : "business-dashboard/profile"
+                            ? "admin-dashboard/settings"
+                            : "business-dashboard/profile"
                       }
                       className="flex gap-2 items-center"
                     >

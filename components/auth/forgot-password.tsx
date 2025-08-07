@@ -59,10 +59,10 @@ export default function ForgotPassForm() {
     }
 
     return (
-        <section className="h-screen flex justify-center items-center">
+        <section className="lg:py-20 py-10 flex justify-center items-center">
             <div className="max-w-2xl mx-auto w-full px-4">
                 <div className="text-center space-y-4 lg:pb-10">
-                    <h2 className='lg:text-3xl font-bold'>Forget Password?</h2>
+                    <h2 className='lg:text-3xl font-bold'>Forgot Password?</h2>
                     <p className='text-[#485150] lg:text-base'>Enter your email address below, and we&apos;ll email instructions
                         for setting a new one.</p>
                 </div>

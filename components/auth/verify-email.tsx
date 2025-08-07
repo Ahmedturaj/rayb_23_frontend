@@ -101,7 +101,7 @@ export default function VerifyOTPPage() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col justify-center px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="lg:py-20 py-10 flex flex-col justify-center px-4 sm:px-6 lg:px-8 bg-white">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">Verify Email</h2>
                 <p className="mt-2 text-center text-sm text-gray-600">Enter the 6-digit OTP sent to your email</p>
