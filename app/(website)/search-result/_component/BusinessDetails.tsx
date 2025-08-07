@@ -18,6 +18,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ReviewModal from "@/components/modals/ReviewModal";
 import ReviewSubmittedModal from "@/components/modals/ReviewSubmittedModal";
+import ShareModal from "./modal/ShareModal";
 
 interface BusinessProfileProps {
   singleBusiness: {
@@ -83,6 +84,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({
@@ -177,7 +179,10 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
             <LocateIcon className="w-4 h-4 mr-1" />
             Add Photo
           </button>
-          <button className="bg-[#e0f2f1] hover:bg-[#139a8e] flex items-center gap-2 px-5 py-3 rounded-lg text-[#139a8e] hover:text-white font-semibold">
+          <button
+            onClick={() => setIsShareModalOpen(true)}
+            className="bg-[#e0f2f1] hover:bg-[#139a8e] flex items-center gap-2 px-5 py-3 rounded-lg text-[#139a8e] hover:text-white font-semibold"
+          >
             <Share2Icon className="w-4 h-4 mr-1" />
             Share
           </button>
@@ -197,6 +202,13 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
       )}
 
       {isModalOpen && <ReviewSubmittedModal setIsModalOpen={setIsModalOpen} />}
+
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        businessName={singleBusiness.businessInfo.name}
+        businessId={singleBusiness._id}
+      />
 
       <div className="flex pt-8 pb-16">
         {/* Left Column */}
