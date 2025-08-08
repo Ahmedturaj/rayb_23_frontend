@@ -34,7 +34,7 @@ const Popular = () => {
       <div className="container">
         <div className="text-center">
           <h1 className="text-[40px] text-gray-700 font-semibold">
-            Instrument Families
+            Populer Instrument Shop
           </h1>
           <p className="text-[20px] text-gray-600">
             Explore the six major families of instruments and find out where

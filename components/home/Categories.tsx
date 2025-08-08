@@ -4,32 +4,32 @@ import Link from "next/link";
 const Categories = () => {
   const categories = [
     {
-      link: "/",
+      link: "/search-result?instrumentFamily=Strings",
       image: "/images/strings.png",
       title: "Strings",
     },
     {
-      link: "/",
+      link: "/search-result?instrumentFamily=Woodwinds",
       image: "/images/woodwinds.png",
       title: "Woodwinds",
     },
     {
-      link: "/",
+      link: "/search-result?instrumentFamily=Percussions",
       image: "/images/percussions.png",
       title: "Percussions",
     },
     {
-      link: "/",
+      link: "/search-result?instrumentFamily=Brass",
       image: "/images/brass.png",
       title: "Brass",
     },
     {
-      link: "/",
+      link: "/search-result?instrumentFamily=Keyboard",
       image: "/images/Keyboard.png",
       title: "Keyboard",
     },
     {
-      link: "/",
+      link: "/search-result?instrumentFamily=Other",
       image: "/images/others.png",
       title: "Other",
     },

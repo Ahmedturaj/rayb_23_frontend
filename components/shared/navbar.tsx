@@ -323,7 +323,7 @@ const Navbar = () => {
                   </span>
                 )}
               </div>
-              <Link href={session?.user?.userType === "admin" ? "/admin-dashboard/messages" : session?.user?.userType === "user" ? "/customer-dashboard/messages" : session?.user?.userType === "business" ? "/business-dashboard/messages" : "/customer-dashboard/messages"}>
+              <Link href={session?.user?.userType === "admin" ? "/admin-dashboard/messages" : session?.user?.userType === "user" ? "/customer-dashboard/messages" : session?.user?.userType === "businessMan" ? "/business-dashboard/messages" : "/customer-dashboard/messages"}>
                 <div className="flex items-center justify-center h-12 w-12 bg-[#F7F8F8] rounded-full cursor-pointer">
                   <Inbox className="h-6 w-6" />
                 </div>
