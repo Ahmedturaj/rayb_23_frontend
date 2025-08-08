@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +32,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { useSearchParams } from "next/navigation";
 
 interface Instruments {
   _id: string;
@@ -54,6 +55,8 @@ export default function SearchComponent() {
   const [sortOption, setSortOption] = useState("low-to-high");
   const [openNow, setOpenNow] = useState(false);
   const [postalCode, setPostalCode] = useState("");
+
+  const selectedFamilyfromParams = useSearchParams().get("instrumentFamily");
 
   // UI states
   const [priceRangeOpen, setPriceRangeOpen] = useState(true);
@@ -80,6 +83,12 @@ export default function SearchComponent() {
     page: currentPage,
     limit: itemsPerPage
   };
+
+  useEffect(() => {
+    if (selectedFamilyfromParams) {
+      setSelectedFamily(selectedFamilyfromParams);
+    }
+  }, [selectedFamily, selectedFamilyfromParams]);
 
   // Fetch businesses with filters
   const { data: businessData = { data: [], total: 0 }, isLoading: isBusinessLoading } = useQuery({
@@ -110,7 +119,7 @@ export default function SearchComponent() {
     setSelectedInstrument(instrument);
     setServiceTypeOpen(true); // This ensures Service Type section opens
     setCurrentPage(1);
-    
+
     // Find and set the service type for the selected family
     const selectedFamilyData = instrumentFamilies?.find(
       (item: Instruments) => item.instrumentFamily === selectedFamily
@@ -172,6 +181,8 @@ export default function SearchComponent() {
   // Accent color
   const accentColor = "#139A8E";
 
+  console.log("Selected family params: ", selectedFamily)
+
   return (
     <div className="flex flex-col lg:flex-row">
       {/* Mobile Filters Button */}
@@ -211,9 +222,8 @@ export default function SearchComponent() {
                   <CollapsibleTrigger className="flex justify-between w-full text-left">
                     <h3 className="font-medium mb-4">Instrument Family</h3>
                     <ChevronDown
-                      className={`h-4 w-4 mt-1 transition-transform ${
-                        instrumentFamilyOpen ? "rotate-180" : ""
-                      }`}
+                      className={`h-4 w-4 mt-1 transition-transform ${instrumentFamilyOpen ? "rotate-180" : ""
+                        }`}
                     />
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-3 border-b border-gray-200 pb-5">
@@ -258,9 +268,8 @@ export default function SearchComponent() {
                     <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
                       <h3 className="font-medium mb-4">Select Instruments</h3>
                       <ChevronDown
-                        className={`h-4 w-4 mt-1 transition-transform ${
-                          selectInstrumentsOpen ? "rotate-180" : ""
-                        }`}
+                        className={`h-4 w-4 mt-1 transition-transform ${selectInstrumentsOpen ? "rotate-180" : ""
+                          }`}
                       />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="border-b border-gray-200 pb-2">
@@ -300,9 +309,8 @@ export default function SearchComponent() {
                     <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
                       <h3 className="font-medium mb-4">Service Type</h3>
                       <ChevronDown
-                        className={`h-4 w-4 mt-1 transition-transform ${
-                          serviceTypeOpen ? "rotate-180" : ""
-                        }`}
+                        className={`h-4 w-4 mt-1 transition-transform ${serviceTypeOpen ? "rotate-180" : ""
+                          }`}
                       />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="space-y-3 border-b border-gray-200 pb-5">
@@ -313,7 +321,7 @@ export default function SearchComponent() {
                           name="serviceType"
                           value={getServiceTypeForFamily() || ''}
                           checked={true}
-                          onChange={() => {}}
+                          onChange={() => { }}
                           className="w-4 h-4 border-gray-300"
                           style={{ accentColor }}
                         />
@@ -338,9 +346,8 @@ export default function SearchComponent() {
                       Price Range
                     </h3>
                     <ChevronDown
-                      className={`h-4 w-4 transition-transform ${
-                        priceRangeOpen ? "rotate-180" : ""
-                      }`}
+                      className={`h-4 w-4 transition-transform ${priceRangeOpen ? "rotate-180" : ""
+                        }`}
                     />
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-4 mt-4">
@@ -391,9 +398,8 @@ export default function SearchComponent() {
                       Also Offers
                     </h3>
                     <ChevronDown
-                      className={`h-4 w-4 transition-transform ${
-                        alsoOffersOpen ? "rotate-180" : ""
-                      }`}
+                      className={`h-4 w-4 transition-transform ${alsoOffersOpen ? "rotate-180" : ""
+                        }`}
                     />
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-3 mt-4">
@@ -504,9 +510,8 @@ export default function SearchComponent() {
           <CollapsibleTrigger className="flex justify-between w-full text-left">
             <h3 className="font-medium mb-4">Instrument Family</h3>
             <ChevronDown
-              className={`h-4 w-4 mt-1 transition-transform ${
-                instrumentFamilyOpen ? "rotate-180" : ""
-              }`}
+              className={`h-4 w-4 mt-1 transition-transform ${instrumentFamilyOpen ? "rotate-180" : ""
+                }`}
             />
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-3 border-b border-gray-200 pb-5">
@@ -548,9 +553,8 @@ export default function SearchComponent() {
             <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
               <h3 className="font-medium mb-4">Select Instruments</h3>
               <ChevronDown
-                className={`h-4 w-4 mt-1 transition-transform ${
-                  selectInstrumentsOpen ? "rotate-180" : ""
-                }`}
+                className={`h-4 w-4 mt-1 transition-transform ${selectInstrumentsOpen ? "rotate-180" : ""
+                  }`}
               />
             </CollapsibleTrigger>
             <CollapsibleContent className="border-b border-gray-200 pb-2">
@@ -590,9 +594,8 @@ export default function SearchComponent() {
             <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
               <h3 className="font-medium mb-4">Service Type</h3>
               <ChevronDown
-                className={`h-4 w-4 mt-1 transition-transform ${
-                  serviceTypeOpen ? "rotate-180" : ""
-                }`}
+                className={`h-4 w-4 mt-1 transition-transform ${serviceTypeOpen ? "rotate-180" : ""
+                  }`}
               />
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-3 border-b border-gray-200 pb-5">
@@ -603,7 +606,7 @@ export default function SearchComponent() {
                   name="serviceType"
                   value={getServiceTypeForFamily() || ''}
                   checked={true}
-                  onChange={() => {}}
+                  onChange={() => { }}
                   className="w-4 h-4 border-gray-300"
                   style={{ accentColor }}
                 />
@@ -623,9 +626,8 @@ export default function SearchComponent() {
           <CollapsibleTrigger className="flex items-center justify-between w-full text-left pt-5">
             <h3 className="text-lg font-medium text-gray-900">Price Range</h3>
             <ChevronDown
-              className={`h-4 w-4 transition-transform ${
-                priceRangeOpen ? "rotate-180" : ""
-              }`}
+              className={`h-4 w-4 transition-transform ${priceRangeOpen ? "rotate-180" : ""
+                }`}
             />
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-4 mt-4">
@@ -665,9 +667,8 @@ export default function SearchComponent() {
           <CollapsibleTrigger className="flex items-center justify-between w-full text-left mt-5">
             <h3 className="text-lg font-medium text-gray-900">Also Offers</h3>
             <ChevronDown
-              className={`h-4 w-4 transition-transform ${
-                alsoOffersOpen ? "rotate-180" : ""
-              }`}
+              className={`h-4 w-4 transition-transform ${alsoOffersOpen ? "rotate-180" : ""
+                }`}
             />
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-3 mt-4">
@@ -772,7 +773,7 @@ export default function SearchComponent() {
           </div>
           <div className="flex items-center space-x-4">
             <span className="text-sm text-gray-600">Sort by</span>
-            <Select 
+            <Select
               value={sortOption}
               onValueChange={(value) => {
                 setSortOption(value);
@@ -791,7 +792,7 @@ export default function SearchComponent() {
             </Select>
           </div>
         </div>
-        
+
         {/* Tags Section */}
         <div className="mb-6 lg:mb-8 flex flex-wrap gap-2 items-center justify-between">
           <div className="flex flex-wrap gap-2">
@@ -944,7 +945,7 @@ export default function SearchComponent() {
 
         {/* Sort - Mobile */}
         <div className="lg:hidden mb-6">
-          <Select 
+          <Select
             value={sortOption}
             onValueChange={(value) => {
               setSortOption(value);
@@ -990,17 +991,16 @@ export default function SearchComponent() {
                 </Button>
 
                 {getPageNumbers(
-                  currentPage, 
+                  currentPage,
                   Math.ceil(businessData.total / itemsPerPage)
                 ).map((page, index) =>
                   typeof page === "number" ? (
                     <button
                       key={index}
-                      className={`${
-                        currentPage === page
-                          ? "text-white"
-                          : "text-gray-700"
-                      } h-10 w-10 rounded-md font-medium`}
+                      className={`${currentPage === page
+                        ? "text-white"
+                        : "text-gray-700"
+                        } h-10 w-10 rounded-md font-medium`}
                       onClick={() => handlePageChange(page)}
                       style={{
                         backgroundColor: currentPage === page ? accentColor : "transparent",
@@ -1055,7 +1055,7 @@ export default function SearchComponent() {
 
               <div className="w-full md:w-auto">
                 <Link href={"/add-a-business"}>
-                  <Button 
+                  <Button
                     className="w-full md:w-auto text-white px-6 lg:px-8 h-[40px] lg:h-[48px] text-sm lg:text-base"
                     style={{ backgroundColor: accentColor }}
                   >

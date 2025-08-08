@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { resendOTP, verifyEmail } from "@/app/actions/auth";
+import { signIn } from "next-auth/react";
 
 export default function VerifyOTPPage() {
     const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
@@ -61,6 +62,8 @@ export default function VerifyOTPPage() {
         }
     };
 
+    console.log("Type:", type);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const otpValue = otp.join("");
@@ -70,12 +73,23 @@ export default function VerifyOTPPage() {
         }
         setIsLoading(true);
         const { ok, data } = await verifyEmail(token, otpValue, type);
+
+        console.log("Data after verifty: ", data);
+
+
         if (ok && data?.success) {
             toast.success("Your email has been verified successfully");
+
             if (type === "signup") {
                 router.push("/auth/login");
-            } else {
+            } else if (type === "forget-password") {
                 router.push(`/auth/reset-password?token=${token}`);
+            } else {
+                await signIn("credentials", {
+                    token,
+                    redirect: true,
+                    callbackUrl: "/admin-dashboard",
+                });
             }
         } else {
             toast.error(data?.message || "Invalid OTP code");
@@ -101,7 +115,7 @@ export default function VerifyOTPPage() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col justify-center px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="lg:py-20 py-10 flex flex-col justify-center px-4 sm:px-6 lg:px-8 bg-white">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">Verify Email</h2>
                 <p className="mt-2 text-center text-sm text-gray-600">Enter the 6-digit OTP sent to your email</p>

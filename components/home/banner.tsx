@@ -115,9 +115,9 @@ export default function BannerHome() {
 
   return (
     <section className="py-8 lg:py-20 relative">
-      <div className="container flex flex-col lg:flex-row items-center gap-8 px-4">
+      <div className="container flex flex-col lg:flex-row lg:justify-between items-center gap-8">
         {/* Text Section */}
-        <div className="w-full lg:w-1/2 text-center lg:text-left">
+        <div className="text-center lg:text-left">
           <h1 className="text-3xl sm:text-4xl md:text-[40px] lg:text-[48px] font-semibold leading-tight">
             Bring Your Instrument
           </h1>
@@ -129,7 +129,7 @@ export default function BannerHome() {
           </p>
 
           <div
-            className="relative w-full max-w-[520px] mx-auto lg:mx-0"
+            className="relative w-full max-w-[526px] mx-auto lg:mx-0"
             ref={searchRef}
           >
             <div className="relative">
@@ -225,7 +225,7 @@ export default function BannerHome() {
             )}
           </div>
 
-          <div className="mt-5 flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
+          <div className="mt-5 flex flex-col sm:flex-row justify-center md:justify-between gap-4 md:gap-0">
             <Button className="h-[48px] w-full sm:w-[250px] bg-[#F7F8F8] border border-gray-200 text-black hover:text-white">
               <LocationEdit className="mr-2" />
               <span>{location}</span>
@@ -242,13 +242,13 @@ export default function BannerHome() {
         </div>
 
         {/* Image Section */}
-        <div className="w-full lg:w-1/2 flex justify-center">
+        <div className="w-full lg:w-1/2 flex justify-center lg:justify-end lg:-mr-7">
           <Image
             src={"/images/banner.png"}
             alt="Instrument repair services"
             width={1000}
             height={1000}
-            className="w-full max-w-[400px] md:max-w-[500px] lg:max-w-[579px] h-auto"
+            className="w-full max-w-[400px] md:max-w-[500px] lg:max-w-[579px] h-auto object-cover"
             priority
           />
         </div>

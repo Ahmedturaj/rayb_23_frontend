@@ -49,7 +49,7 @@ const BusinessCard = ({ business }: { business: Business }) => {
               </div>
               <div className="flex flex-col gap-2">
                 <div className="flex flex-wrap items-center gap-2 mb-2">
-                  {business.instrumentInfo.map((service, index) => (
+                  {business?.instrumentInfo?.map((service, index) => (
                     <button
                       className="h-[40px] lg:h-[48px] px-4 lg:px-5 rounded-lg bg-[#F8F8F8] text-sm lg:text-base flex items-center gap-5"
                       key={index}

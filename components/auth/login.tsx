@@ -45,16 +45,16 @@ export default function LoginForm() {
             const res = await signIn("credentials", {
                 email: values.email,
                 password: values.password,
-                redirect: false,
             })
 
-            if (res?.error) {
-                toast.error(res.error)
-            } else {
-                toast.success("Login successful")
-                router.push("/admin-dashboard")
+            if (res?.ok === false) {
+                if (res.error?.startsWith("VERIFY_EMAIL:")) {
+                    const token = res.error.split(":")[1];
+                    router.push(`/auth/verify-email?token=${token}&type=login`);
+                } else {
+                    toast.error(res.error || "Login failed");
+                }
             }
-            console.log(res)
 
         } catch (error) {
             if (error instanceof Error) {
@@ -67,7 +67,7 @@ export default function LoginForm() {
     }
 
     return (
-        <section className="h-screen flex justify-center items-center">
+        <section className="lg:py-20 py-10 flex justify-center items-center">
             <div className="max-w-2xl mx-auto w-full px-4">
                 <div className="text-center space-y-4 lg:pb-10">
                     <h2 className='lg:text-3xl font-bold'>Log In</h2>

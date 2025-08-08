@@ -77,7 +77,7 @@ export default function ResetPasswordForm() {
     };
 
     return (
-        <section className="h-screen flex justify-center items-center">
+        <section className="lg:py-20 py-10 flex justify-center items-center">
             <div className="max-w-2xl mx-auto w-full px-4">
                 <div className="text-center space-y-4 lg:pb-10">
                     <h2 className='lg:text-3xl font-bold'>Reset Password</h2>

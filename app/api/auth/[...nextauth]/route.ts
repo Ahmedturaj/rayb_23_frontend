@@ -9,9 +9,40 @@ const handler = NextAuth({
             credentials: {
                 email: { label: "Email", type: "email" },
                 password: { label: "Password", type: "password" },
+                token: { label: "Token", type: "text" },
             },
-            async authorize(credentials) {
+            authorize: async (credentials) => {
                 try {
+                    // ✅ Token-only login (e.g., after OTP verification)
+                    if (credentials?.token) {
+                        // You’ll need to decode the token or make an API call to get the user
+                        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login-with-token`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                token: credentials.token,
+                            }),
+                        });
+
+                        const data = await res.json();
+
+                        if (!res.ok || !data.success || !data.data) {
+                            throw new Error("Invalid token");
+                        }
+
+                        const user = data.data;
+
+                        return {
+                            id: user.userId,
+                            name: user.name,
+                            email: user.email,
+                            userType: user.userType,
+                            accessToken: user.accessToken,
+                        };
+                    }
+
                     if (!credentials?.email || !credentials?.password) {
                         throw new Error("Email and password are required");
                     }
@@ -25,8 +56,8 @@ const handler = NextAuth({
                         throw new Error(result.message || "Login failed");
                     }
 
-                    if (!result.data?.user?._id || !result.data?.accessToken) {
-                        throw new Error("Invalid user data received");
+                    if (!result.data?.user) {
+                        throw new Error(`VERIFY_EMAIL:${result.data?.accessToken}`);
                     }
 
                     return {
@@ -36,7 +67,9 @@ const handler = NextAuth({
                         userType: result.data.user.userType,
                         accessToken: result.data.accessToken,
                     };
+
                 } catch (error) {
+                    console.error("Authorize error:", error);
                     if (error instanceof Error) {
                         throw new Error(error.message);
                     }
