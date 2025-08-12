@@ -1,16 +1,25 @@
 "use client"
-
 import Image from "next/image"
 import { MapPin, Star } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { useQuery, useMutation, QueryClient } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { useState } from "react"
+import { toast } from "sonner"
 
-// Define the interface for the API response data
+// Define the interface for the mapped business entry
+interface BusinessEntryProps {
+  id: string
+  name: string
+  image: string
+  address: string
+  status: "under_review" | "approved" | "rejected"
+}
+
+// Raw API data interfaces
 interface BusinessApiData {
   _id: string
   businessInfo: {
@@ -43,10 +52,7 @@ interface ApiResponse {
   }
 }
 
-// Create a client for TanStack Query
-const queryClient = new QueryClient()
-
-// Function to fetch data from the API with dynamic parameters
+// Function to fetch data from the API with dynamic parameters and map to BusinessEntryProps
 async function fetchBusinesses({
   token,
   businessType,
@@ -57,7 +63,7 @@ async function fetchBusinesses({
   businessType?: string
   sortBy?: string
   timeRange?: string
-}): Promise<ApiResponse> {
+}): Promise<BusinessEntryProps[]> {
   const headers: HeadersInit = {
     "Content-Type": "application/json",
   }
@@ -82,11 +88,19 @@ async function fetchBusinesses({
   if (!res.ok) {
     throw new Error("Failed to fetch businesses")
   }
-  return res.json()
+  const data: ApiResponse = await res.json()
+  return data.data.map((entry) => ({
+    id: entry._id,
+    name: entry.businessInfo.name || "Unknown Business",
+    image: entry.businessInfo.image[0] || "/placeholder.svg?height=200&width=200&query=business image",
+    address: entry.businessInfo.address || "No address available",
+    status: entry.status === "pending" ? "under_review" : (entry.status as "under_review" | "approved" | "rejected"),
+  }))
 }
 
 // Function to toggle business status
-async function toggleBusinessStatus({ id, status, token }: { id: string; status: "approved" | "rejected"; token?: string }): Promise<void> {
+// eslint-disable-next-line
+async function toggleBusinessStatus({ id, status, token }: { id: string; status: "approved" | "rejected"; token?: string }): Promise<any> {
   const headers: HeadersInit = {
     "Content-Type": "application/json",
   }
@@ -101,7 +115,11 @@ async function toggleBusinessStatus({ id, status, token }: { id: string; status:
   if (!res.ok) {
     throw new Error(`Failed to ${status} business`)
   }
-  return res.json()
+  const contentType = res.headers.get("content-type")
+  if (contentType && contentType.includes("application/json")) {
+    return await res.json()
+  }
+  return await res.text()
 }
 
 // Skeleton Card Component
@@ -141,34 +159,40 @@ export default function BusinessSubmissionsComponent() {
   const { data: session } = useSession()
   const token = session?.user?.accessToken
 
+  const queryClient = useQueryClient()
+
   const [businessType, setBusinessType] = useState<string>("all")
   const [sortBy, setSortBy] = useState<string>("latest")
   const [timeRange, setTimeRange] = useState<string>("all")
 
-  const { data, isLoading, isError, error } = useQuery<ApiResponse, Error>({
+  const { data: submissions = [], isLoading, isError, error } = useQuery({
     queryKey: ["businesses", token, businessType, sortBy, timeRange],
     queryFn: () => fetchBusinesses({ token, businessType, sortBy, timeRange }),
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   })
 
   const mutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: "approved" | "rejected" }) => toggleBusinessStatus({ id, status, token }),
     onMutate: async ({ id, status }) => {
       await queryClient.cancelQueries({ queryKey: ["businesses", token, businessType, sortBy, timeRange] })
-      const previousBusinesses = queryClient.getQueryData<ApiResponse>(["businesses", token, businessType, sortBy, timeRange])
-      queryClient.setQueryData(["businesses", token, businessType, sortBy, timeRange], (old: ApiResponse | undefined) => {
+      const previousSubmissions = queryClient.getQueryData<BusinessEntryProps[]>(["businesses", token, businessType, sortBy, timeRange])
+      queryClient.setQueryData(["businesses", token, businessType, sortBy, timeRange], (old: BusinessEntryProps[] | undefined) => {
         if (!old) return old
-        return {
-          ...old,
-          data: old.data.map((submission) =>
-            submission._id === id ? { ...submission, status } : submission
-          ),
-        }
+        return old.map((submission) =>
+          submission.id === id ? { ...submission, status } : submission
+        )
       })
-      return { previousBusinesses }
+      return { previousSubmissions }
+    },
+    onSuccess: (data, variables) => {
+      const message = typeof data === "object" && data.message
+        ? data.message
+        : `Business ${variables.status} successfully!`
+      toast.success(message)
     },
     onError: (err, variables, context) => {
-      queryClient.setQueryData(["businesses", token, businessType, sortBy, timeRange], context?.previousBusinesses)
-      console.error("Error updating business status:", err.message)
+      queryClient.setQueryData(["businesses", token, businessType, sortBy, timeRange], context?.previousSubmissions)
+      toast.error(`Failed to ${variables.status} business: ${(err as Error).message}`)
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["businesses", token, businessType, sortBy, timeRange] })
@@ -203,8 +227,6 @@ export default function BusinessSubmissionsComponent() {
     return <div className="min-h-screen flex items-center justify-center text-red-500">Error: {error?.message}</div>
   }
 
-  const submissions = data?.data || []
-
   return (
     <div className="min-h-screen">
       <div className="w-full mx-auto bg-white p-6 md:p-8">
@@ -216,7 +238,10 @@ export default function BusinessSubmissionsComponent() {
         </div>
         <div className="flex flex-col sm:flex-row justify-between mb-8 gap-4">
           <div className="w-full sm:w-[30%]">
-            <label htmlFor="business-type" className="block text-sm font-medium text-gray-700 sr-only">
+            <label
+              htmlFor="business-type"
+              className="text-base text-[#485150] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-3 block"
+            >
               Business Type
             </label>
             <Select value={businessType} onValueChange={setBusinessType}>
@@ -232,7 +257,10 @@ export default function BusinessSubmissionsComponent() {
             </Select>
           </div>
           <div className="w-full sm:w-[30%]">
-            <label htmlFor="sort-by" className="block text-sm font-medium text-gray-700 sr-only">
+            <label
+              htmlFor="sort-by"
+              className="text-base text-[#485150] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-3 block"
+            >
               Sort By
             </label>
             <Select value={sortBy} onValueChange={setSortBy}>
@@ -248,7 +276,10 @@ export default function BusinessSubmissionsComponent() {
             </Select>
           </div>
           <div className="w-full sm:w-[30%]">
-            <label htmlFor="time-range" className="block text-sm font-medium text-gray-700 sr-only">
+            <label
+              htmlFor="time-range"
+              className="text-base text-[#485150] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-3 block"
+            >
               Time Range
             </label>
             <Select value={timeRange} onValueChange={setTimeRange}>
@@ -264,81 +295,82 @@ export default function BusinessSubmissionsComponent() {
           </div>
         </div>
         <div className="grid gap-4">
-          {submissions.map((submission) => (
-            <Card
-              key={submission._id}
-              className="p-4 flex flex-col border-none sm:flex-row gap-4 relative shadow-[#003D3914]"
-            >
-              <Image
-                src={submission.businessInfo.image[0] || "/placeholder.svg?height=200&width=200&query=business image"}
-                alt={submission.businessInfo.name || "Business image"}
-                width={200}
-                height={200}
-                className="rounded-[12px] w-[200px] h-[200px] object-cover aspect-square shrink-0"
-              />
-              <div className="flex-1 grid gap-2">
-                <h2 className="text-[24px] font-bold text-[#1D2020]">{submission.businessInfo.name}</h2>
-                <div className="flex items-center gap-2 text-xl text-[#485150]">
-                  <Star className="w-4 h-4 text-gray-400" />
-                  <span>Not Rated</span>
+          {submissions.length === 0 ? (
+            <div className="text-center text-[#485150]">No businesses found for the selected filters.</div>
+          ) : (
+            submissions.map((submission) => (
+              <Card
+                key={submission.id}
+                className="p-4 flex flex-col border-none sm:flex-row gap-4 relative shadow-[#003D3914]"
+              >
+                <Image
+                  src={submission.image}
+                  alt={submission.name}
+                  width={200}
+                  height={200}
+                  className="rounded-[12px] w-[200px] h-[200px] object-cover aspect-square shrink-0"
+                />
+                <div className="flex-1 grid gap-2">
+                  <h2 className="text-[24px] font-bold text-[#1D2020]">{submission.name}</h2>
+                  <div className="flex items-center gap-2 text-xl text-[#485150]">
+                    <Star className="w-4 h-4 text-gray-400" />
+                    <span>Not Rated</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xl text-[#485150]">
+                    <MapPin className="w-4 h-4" />
+                    <span>{submission.address}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 text-xl text-[#485150]">
-                  <MapPin className="w-4 h-4" />
-                  <span>{submission.businessInfo.address}</span>
-                </div>
-              </div>
-              <div className="flex flex-col items-end gap-2 sm:ml-auto mt-4 sm:mt-0">
-                {submission.status === "pending" && (
-                  <>
+                <div className="flex flex-col items-end gap-2 sm:ml-auto mt-4 sm:mt-0">
+                  {submission.status === "under_review" && (
+                    <>
+                      <Badge
+                        variant="outline"
+                        className="bg-orange-100 h-[32px] px-5 text-orange-600 border-orange-200"
+                      >
+                        Under Review
+                      </Badge>
+                      <div className="flex gap-2 mt-auto">
+                        <Button
+                          variant="outline"
+                          className="text-red-600 border-red-200 hover:bg-red-50 bg-transparent"
+                          onClick={() => mutation.mutate({ id: submission.id, status: "rejected" })}
+                          disabled={mutation.isPending}
+                        >
+                          Reject
+                        </Button>
+                        <Button
+                          className="bg-emerald-500 hover:bg-emerald-600 text-white text-base"
+                          onClick={() => mutation.mutate({ id: submission.id, status: "approved" })}
+                          disabled={mutation.isPending}
+                        >
+                          Approve
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                  {submission.status === "approved" && (
                     <Badge
                       variant="outline"
-                      className="bg-under-review-bg text-under-review-text px-3 py-2 rounded-full text-sm font-medium"
+                      className="bg-green-100 h-[32px] px-5 text-green-600 border-green-200"
                     >
-                      Under Review
+                      Approved
                     </Badge>
-                    <div className="flex gap-2 mt-auto">
-                      <Button
-                        variant="outline"
-                        className="border border-reject-button-text text-reject-button-text bg-transparent"
-                        onClick={() => mutation.mutate({ id: submission._id, status: "rejected" })}
-                        disabled={mutation.isPending}
-                      >
-                        Reject
-                      </Button>
-                      <Button
-                        className="bg-[#00998E] text-white text-base"
-                        onClick={() => mutation.mutate({ id: submission._id, status: "approved" })}
-                        disabled={mutation.isPending}
-                      >
-                        Approve
-                      </Button>
-                    </div>
-                  </>
-                )}
-                {submission.status === "approved" && (
-                  <Badge
-                    variant="outline"
-                    className="bg-[#00998E1F] text-[#00998E] px-3 !h-[31px] rounded-full text-xs font-medium"
-                  >
-                    Approved
-                  </Badge>
-                )}
-                {submission.status === "rejected" && (
-                  <Badge
-                    variant="outline"
-                    className="bg-rejected-badge-bg text-rejected-badge-text px-3 py-1 rounded-full text-xs font-medium"
-                  >
-                    Rejected
-                  </Badge>
-                )}
-              </div>
-            </Card>
-          ))}
+                  )}
+                  {submission.status === "rejected" && (
+                    <Badge
+                      variant="outline"
+                      className="bg-red-100 h-[32px] px-5 text-red-600 border-red-200"
+                    >
+                      Rejected
+                    </Badge>
+                  )}
+                </div>
+              </Card>
+            ))
+          )}
         </div>
       </div>
     </div>
   )
 }
-
-
-

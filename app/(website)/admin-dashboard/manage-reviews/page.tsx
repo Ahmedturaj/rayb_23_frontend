@@ -1,15 +1,31 @@
-'use client';
+"use client";
 import Image from "next/image";
 import { Star } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, CSSProperties } from "react";
+import { toast } from "sonner";
+import { useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useSession } from "next-auth/react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+interface ReviewEntryProps {
+  id: string;
+  userName: string;
+  userAvatar: string;
+  userDescription: string;
+  images: string[];
+  status: "under_review" | "approved" | "rejected";
+  rating: number;
+}
 
 interface User {
   _id: string;
@@ -41,160 +57,358 @@ interface ApiResponse {
   data: Review[];
 }
 
-const fetchReviews = async (reviewType: string, sortBy: string, timeRange: string, token?: string): Promise<ApiResponse> => {
-  const url = `${process.env.NEXT_PUBLIC_API_URL}/review?reviewType=${reviewType}&nameSort=az&sortBy=${sortBy}&timeRange=${timeRange}`;
+const fetchReviews = async (
+  token?: string,
+  status?: string,
+  sortBy?: string,
+  timeRange?: string
+): Promise<ReviewEntryProps[]> => {
+  const queryParams = new URLSearchParams();
+  if (status && status !== "all") queryParams.append("reviewType", status);
+  if (sortBy && sortBy !== "asc-latest") queryParams.append("sortBy", sortBy);
+  if (timeRange && timeRange !== "all") queryParams.append("timeRange", timeRange);
+
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/review/all?${queryParams.toString()}`;
+
   const response = await fetch(url, {
     headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
+      Authorization: token ? `Bearer ${token}` : "",
+      "Content-Type": "application/json",
     },
   });
+
   if (!response.ok) {
-    throw new Error("Failed to fetch reviews");
+    throw new Error(`Failed to fetch reviews: ${response.statusText}`);
   }
-  return response.json();
+
+  const data: ApiResponse = await response.json();
+
+  return data.data.map((entry: Review) => ({
+    id: entry._id,
+    userName: entry.user?.name || "Unknown User",
+    userAvatar: "/placeholder.svg?height=40&width=40",
+    userDescription: entry.user?.email || entry.feedback || "No description available",
+    images: entry.image.length > 0 ? entry.image : ["/placeholder.svg?height=150&width=150"],
+    status: entry.status === "pending" ? "under_review" : (entry.status as "under_review" | "approved" | "rejected"),
+    rating: entry.rating,
+  }));
+};
+
+const updateReviewStatus = async ({
+  id,
+  status,
+  token,
+}: {
+  id: string;
+  status: "approved" | "rejected";
+  token?: string;
+  // eslint-disable-next-line
+}): Promise<any> => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/review/toggle/${id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: token ? `Bearer ${token}` : "",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ status }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to ${status} review: ${response.statusText}`);
+  }
+
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return await response.json();
+  }
+  return await response.text();
+};
+
+const SkeletonCard = () => {
+  const skeletonStyle: CSSProperties = {
+    backgroundColor: "#e0e0e0",
+    borderRadius: "8px",
+    animation: "pulse 1.5s infinite",
+  };
+
+  return (
+    <Card className="relative border-none shadow-[#003D3914]">
+      <CardHeader className="flex flex-row items-center gap-4 pb-4">
+        <div style={{ ...skeletonStyle, width: "40px", height: "40px", borderRadius: "50%" }} />
+        <div className="grid gap-0.5">
+          <div style={{ ...skeletonStyle, width: "150px", height: "20px" }} />
+          <div style={{ ...skeletonStyle, width: "100px", height: "16px" }} />
+        </div>
+        <div className="ml-auto">
+          <div style={{ ...skeletonStyle, width: "100px", height: "32px", borderRadius: "16px" }} />
+        </div>
+      </CardHeader>
+      <CardContent className="flex items-end">
+        <div className="flex w-[70%] gap-4 flex-wrap">
+          {Array(3)
+            .fill(0)
+            .map((_, index) => (
+              <div
+                key={index}
+                style={{ ...skeletonStyle, width: "150px", height: "150px", borderRadius: "8px" }}
+              />
+            ))}
+        </div>
+        <div className="w-[30%] flex flex-col justify-between">
+          <div className="flex justify-end gap-2">
+            <div style={{ ...skeletonStyle, width: "80px", height: "36px", borderRadius: "8px" }} />
+            <div style={{ ...skeletonStyle, width: "80px", height: "36px", borderRadius: "8px" }} />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 };
 
 export default function ReviewsComponent() {
-  const [reviewType, setReviewType] = useState<string>("");
-  const [sortBy, setSortBy] = useState<string>("");
-  const [timeRange, setTimeRange] = useState<string>("");
-  const session = useSession();
-  const token = session?.data?.user?.accessToken;
+  const { data: session } = useSession();
+  const token = session?.user?.accessToken;
+  const queryClient = useQueryClient();
 
-  const { data, isLoading, error } = useQuery<ApiResponse>({
-    queryKey: ["reviews", reviewType, sortBy, timeRange, token],
-    queryFn: () => fetchReviews(reviewType, sortBy, timeRange, token),
+  const [reviewType, setReviewType] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("asc-latest");
+  const [timeRange, setTimeRange] = useState<string>("all");
+
+  const { data: reviewEntries = [], isLoading, error } = useQuery({
+    queryKey: ["reviews", token, reviewType, sortBy, timeRange],
+    queryFn: () => fetchReviews(token, reviewType, sortBy, timeRange),
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
+  const mutation = useMutation({
+    mutationFn: updateReviewStatus,
+    onMutate: async ({ id, status }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["reviews", token, reviewType, sortBy, timeRange] });
+
+      // Snapshot the previous value
+      const previousReviews = queryClient.getQueryData(["reviews", token, reviewType, sortBy, timeRange]) as ReviewEntryProps[];
+
+      // Optimistically update the review status
+      queryClient.setQueryData(["reviews", token, reviewType, sortBy, timeRange], (old: ReviewEntryProps[] | undefined) => {
+        if (!old) return old;
+        return old.map((review) =>
+          review.id === id ? { ...review, status } : review
+        );
+      });
+
+      // Return context with the previous data
+      return { previousReviews };
+    },
+    onSuccess: (data, variables) => {
+      const message = typeof data === "object" && data.message
+        ? data.message
+        : `Review ${variables.status} successfully!`;
+      toast.success(message);
+    },
+    onError: (error, variables, context) => {
+      // Revert to previous state on error
+      queryClient.setQueryData(["reviews", token, reviewType, sortBy, timeRange], context?.previousReviews);
+      toast.error(`Failed to ${variables.status} review: ${(error as Error).message}`);
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure data is correct
+      queryClient.invalidateQueries({ queryKey: ["reviews", token, reviewType, sortBy, timeRange] });
+    },
+  });
+
+  const handleStatusChange = (id: string, status: "approved" | "rejected") => {
+    mutation.mutate({ id, status, token });
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
-      <div className="mb-8">
-        <h1 className="text-[28px] text-[#1D2020] font-bold">Manage Reviews</h1>
-        <p className="text-[#485150] text-base mt-3">
-          Monitor platform activity, manage submissions, and keep your community running smoothly.
-        </p>
-      </div>
+    <div className="flex flex-col min-h-screen">
+      <style jsx global>{`
+        @keyframes pulse {
+          0% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.5;
+          }
+          100% {
+            opacity: 1;
+          }
+        }
+      `}</style>
+      <header className="px-6 py-4">
+        <div className="w-full">
+          <h1 className="text-[28px] text-[#1D2020] font-bold">Manage Reviews</h1>
+          <p className="text-base text-[#485150] mt-3">
+            Monitor platform activity, manage submissions, and keep your community running smoothly.
+          </p>
+        </div>
+      </header>
+      <main className="flex-1 p-6 md:p-8">
+        <div className="w-full grid gap-6">
+          <div className="flex justify-between gap-4">
+            <div className="w-[30%]">
+              <label
+                htmlFor="review-type"
+                className="text-base text-[#485150] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-3 block"
+              >
+                Review Type
+              </label>
+              <Select value={reviewType} onValueChange={setReviewType}>
+                <SelectTrigger id="review-type" className="w-full">
+                  <SelectValue placeholder="Select Review Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Reviews</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-[30%]">
+              <label
+                htmlFor="sort-by"
+                className="text-base text-[#485150] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-3 block"
+              >
+                Sort By
+              </label>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger id="sort-by" className="w-full">
+                  <SelectValue placeholder="Select Sort Option" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="asc-latest">Latest</SelectItem>
+                  <SelectItem value="desc-oldest">Oldest</SelectItem>
+                  <SelectItem value="az">A to Z</SelectItem>
+                  <SelectItem value="za">Z to A</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-[30%]">
+              <label
+                htmlFor="time-range"
+                className="text-base text-[#485150] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-3 block"
+              >
+                Time Range
+              </label>
+              <Select value={timeRange} onValueChange={setTimeRange}>
+                <SelectTrigger id="time-range" className="w-full">
+                  <SelectValue placeholder="Select Time Range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="7">Last 7 Days</SelectItem>
+                  <SelectItem value="30">Last 30 Days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
-      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div>
-          <label htmlFor="review-type" className="block text-base font-medium text-[#485150]">
-            Review Type
-          </label>
-          <Select value={reviewType} onValueChange={setReviewType}>
-            <SelectTrigger id="review-type" className="w-full">
-              <SelectValue placeholder="Select Review Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="grid gap-6">
+            {isLoading ? (
+              Array(3)
+                .fill(0)
+                .map((_, index) => <SkeletonCard key={index} />)
+            ) : error ? (
+              <div className="text-red-600">Error loading reviews: {(error as Error).message}</div>
+            ) : reviewEntries.length === 0 ? (
+              <div className="text-center text-[#485150]">No reviews found for the selected filters.</div>
+            ) : (
+              reviewEntries.map((entry) => (
+                <Card key={entry.id} className="relative border-none shadow-[#003D3914]">
+                  <CardHeader className="flex flex-row items-center gap-4 pb-4">
+                    <Avatar className="w-10 h-10">
+                      <AvatarImage src={entry.userAvatar} alt={entry.userName} />
+                      <AvatarFallback>{entry.userName.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className="grid gap-0.5">
+                      <div className="font-semibold text-[#485150] text-xl">{entry.userName}</div>
+                      <div className="text-sm text-[#8D9A99] dark:text-gray-400">
+                        {entry.userDescription}
+                      </div>
+                    </div>
+                    <div className="ml-auto">
+                      {entry.status === "under_review" && (
+                        <Badge
+                          variant="outline"
+                          className="bg-orange-100 h-[32px] px-5 text-orange-600 border-orange-200"
+                        >
+                          Under Review
+                        </Badge>
+                      )}
+                      {entry.status === "approved" && (
+                        <Badge
+                          variant="outline"
+                          className="bg-green-100 h-[32px] px-5 text-green-600 border-green-200"
+                        >
+                          Approved
+                        </Badge>
+                      )}
+                      {entry.status === "rejected" && (
+                        <Badge
+                          variant="outline"
+                          className="bg-red-100 h-[32px] px-5 text-red-600 border-red-200"
+                        >
+                          Rejected
+                        </Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex items-end">
+                    <div className="flex w-[70%] gap-4 flex-wrap">
+                      <div className="mb-3 flex items-center space-x-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-4 w-4 ${
+                              i < Math.floor(entry.rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {entry.rating.toFixed(1)}
+                        </span>
+                      </div>
+                      {entry.images.map((imageSrc, index) => (
+                        <Image
+                          key={index}
+                          src={imageSrc}
+                          width={150}
+                          height={150}
+                          alt={`Review image ${index + 1} from ${entry.userName}`}
+                          className="rounded-lg object-cover aspect-square"
+                        />
+                      ))}
+                    </div>
+                    <div className="w-[30%] flex flex-col justify-between">
+                      {entry.status === "under_review" && (
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            className="text-red-600 border-red-200 hover:bg-red-50 bg-transparent"
+                            onClick={() => handleStatusChange(entry.id, "rejected")}
+                            disabled={mutation.isPending}
+                          >
+                            Reject
+                          </Button>
+                          <Button
+                            className="bg-emerald-500 hover:bg-emerald-600 text-white"
+                            onClick={() => handleStatusChange(entry.id, "approved")}
+                            disabled={mutation.isPending}
+                          >
+                            Approve
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
         </div>
-        <div>
-          <label htmlFor="sort-by" className="block text-base font-medium text-[#485150]">
-            Sort By
-          </label>
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger id="sort-by" className="w-full">
-              <SelectValue placeholder="Sort By" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="asc">Ascending</SelectItem>
-              <SelectItem value="desc">Descending</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <label htmlFor="time-range" className="block text-base font-medium text-[#485150]">
-            Time Range
-          </label>
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger id="time-range" className="w-full">
-              <SelectValue placeholder="Time Range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="7d">Last 7 Days</SelectItem>
-              <SelectItem value="30d">Last 30 Days</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {isLoading ? (
-        <div>Loading reviews...</div>
-      ) : error ? (
-        <div className="text-red-500">Error fetching reviews: {(error as Error).message}</div>
-      ) : (
-        <div className="grid gap-6">
-          {data?.data.map((review) => (
-            <Card key={review._id} className="relative">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <div className="flex items-center space-x-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src="/placeholder.svg?height=40&width=40" alt={review?.user?.name} />
-                    <AvatarFallback>{review?.user?.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <CardTitle className="text-xl text-[#1D2020] font-semibold">{review?.user?.name}</CardTitle>
-                    <p className="text-base text-[#485150]">{review?.user?.email}</p>
-                  </div>
-                </div>
-                <Badge
-                  variant="outline"
-                  className={
-                    review.status === "rejected"
-                      ? "bg-red-100 text-red-700 border-red-200"
-                      : review.status === "approved"
-                      ? "bg-green-100 text-green-700 border-green-200"
-                      : "bg-orange-100 text-orange-700 border-orange-200"
-                  }
-                >
-                  {review.status.charAt(0).toUpperCase() + review.status.slice(1)}
-                </Badge>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-3 flex items-center space-x-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-4 w-4 ${
-                        i < Math.floor(review.rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                      }`}
-                    />
-                  ))}
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {review.rating.toFixed(1)}
-                  </span>
-                </div>
-                <p className="mb-4 text-base text-[#485150] font-medium">{review.feedback}</p>
-                <div className="mb-4 flex space-x-2">
-                  {review.image.map((src, index) => (
-                    <Image
-                      key={index}
-                      src={src || "/placeholder.svg"}
-                      width={80}
-                      height={80}
-                      alt={`Review image ${index + 1}`}
-                      className="h-20 w-20 rounded-md object-cover"
-                    />
-                  ))}
-                </div>
-                {review.status === "pending" && (
-                  <div className="flex justify-end space-x-2">
-                    <Button variant="outline" className="border-red-400 text-red-600 hover:bg-red-50 bg-transparent">
-                      Reject
-                    </Button>
-                    <Button className="bg-teal-500 text-white hover:bg-teal-600">Approve</Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+      </main>
     </div>
   );
 }
