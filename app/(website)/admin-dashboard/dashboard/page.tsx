@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -51,6 +50,40 @@ const fetchDashboardData = async (range: string): Promise<ApiResponse> => {
   }
   return response.json();
 };
+
+// Skeleton component for a single card
+const SkeletonCard = ({ bgColor }: { bgColor: string; textColor?: string }) => (
+  <Card className={bgColor}>
+    <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <div className="h-4 w-[80px] bg-gray-300 animate-pulse rounded" />
+      <div className="h-10 w-10 bg-gray-300 animate-pulse rounded" />
+    </CardHeader>
+    <CardContent className="flex items-end gap-2">
+      <div className="h-9 w-16 bg-gray-300 animate-pulse rounded" />
+      <div className="h-4 w-20 bg-gray-300 animate-pulse rounded" />
+    </CardContent>
+  </Card>
+);
+
+// Skeleton component for recent activity or moderation highlights
+const SkeletonActivityCard = () => (
+  <Card>
+    <CardHeader>
+      <div className="h-6 w-32 bg-gray-300 animate-pulse rounded" />
+    </CardHeader>
+    <CardContent className="grid gap-4">
+      {[...Array(5)].map((_, index) => (
+        <div key={index}>
+          <div className="flex items-center gap-3">
+            <div className="h-5 w-5 bg-gray-300 animate-pulse rounded" />
+            <div className="h-4 w-3/4 bg-gray-300 animate-pulse rounded" />
+          </div>
+          {index < 4 && <Separator />}
+        </div>
+      ))}
+    </CardContent>
+  </Card>
+);
 
 export default function DashboardPage() {
   const [selectedRange, setSelectedRange] = useState<"day" | "week" | "month">(
@@ -107,7 +140,31 @@ export default function DashboardPage() {
 
             {/* Display loading, error, or data */}
             {isLoading && (
-              <p className="text-center text-lg">Loading dashboard data...</p>
+              <>
+                {/* Skeleton for Summary Cards */}
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                  <SkeletonCard bgColor="bg-[#00998E]" />
+                  <SkeletonCard bgColor="bg-[#F4C321]" />
+                  <SkeletonCard bgColor="bg-[#C981F2]" />
+                  <SkeletonCard bgColor="bg-[#3D77E0]" />
+                  <SkeletonCard bgColor="bg-[#FA8636]" />
+                </div>
+
+                {/* Skeleton for Submission Cards */}
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                  <SkeletonCard bgColor="bg-[#00998E1F]" textColor="text-[#00998E]" />
+                  <SkeletonCard bgColor="bg-[#FFC5071F]" textColor="text-[#F4C321]" />
+                  <SkeletonCard bgColor="bg-[#C981F21F]" textColor="text-[#C981F2]" />
+                  <SkeletonCard bgColor="bg-[#3D77E01F]" textColor="text-[#3D77E0]" />
+                  <SkeletonCard bgColor="bg-[#FA86361F]" textColor="text-[#FA8636]" />
+                </div>
+
+                {/* Skeleton for Recent Activity and Moderation Highlights */}
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <SkeletonActivityCard />
+                  <SkeletonActivityCard />
+                </div>
+              </>
             )}
             {isError && (
               <p className="text-center text-lg text-red-500">

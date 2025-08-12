@@ -131,8 +131,9 @@ export default function ManageUsersPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
-              <SelectItem value="customer">Customer</SelectItem>
+              <SelectItem value="user">User</SelectItem>
               <SelectItem value="businessOwner">Business Owner</SelectItem>
+              <SelectItem value="businessMan">businessMan</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -147,8 +148,8 @@ export default function ManageUsersPage() {
             <SelectContent>
               <SelectItem value="latest">Latest</SelectItem>
               <SelectItem value="oldest">Oldest</SelectItem>
-              <SelectItem value="name-asc">Name (A-Z)</SelectItem>
-              <SelectItem value="name-desc">Name (Z-A)</SelectItem>
+              {/* <SelectItem value="name-asc">Name (A-Z)</SelectItem>
+              <SelectItem value="name-desc">Name (Z-A)</SelectItem> */}
             </SelectContent>
           </Select>
         </div>
@@ -162,9 +163,9 @@ export default function ManageUsersPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
-              <SelectItem value="last-7-days">Last 7 Days</SelectItem>
-              <SelectItem value="last-30-days">Last 30 Days</SelectItem>
-              <SelectItem value="last-90-days">Last 90 Days</SelectItem>
+              <SelectItem value="last-7">Last 7 Days</SelectItem>
+              <SelectItem value="ast-30">Last 30 Days</SelectItem>
+              {/* <SelectItem value="last-90-days">Last 90 Days</SelectItem> */}
             </SelectContent>
           </Select>
         </div>
