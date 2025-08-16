@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Building,
   Star,
@@ -14,8 +14,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Separator } from "@/components/ui/separator";
+import { useSession } from "next-auth/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
-// Define types for the API response data for better type safety
+// Define types for the dashboard API response data
 interface DashboardMetric {
   total: number;
   new: number;
@@ -40,13 +50,131 @@ interface ApiResponse {
   data: DashboardData;
 }
 
-// Function to fetch dashboard data from your API
-const fetchDashboardData = async (range: string): Promise<ApiResponse> => {
+// Define types for the notification API response
+interface NotificationMetadata {
+  businessId?: string;
+}
+
+interface Notification {
+  _id: string;
+  senderId: string;
+  receiverId: string;
+  userType: string;
+  type: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  isIgnored: boolean;
+  metadata: NotificationMetadata;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+interface NotificationResponse {
+  status: boolean;
+  message: string;
+  notify: Notification[];
+}
+
+// Function to fetch dashboard data
+const fetchDashboardData = async (range: string, token?: string): Promise<ApiResponse> => {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/business/dashboard?range=${range}`
+    `${process.env.NEXT_PUBLIC_API_URL}/business/dashboard?range=${range}`,
+    { headers }
   );
   if (!response.ok) {
     throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
+  }
+  return response.json();
+};
+
+// Function to fetch all notifications
+const fetchAllNotifications = async (token?: string): Promise<NotificationResponse> => {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/notification/all`,
+    { headers }
+  );
+  if (!response.ok) {
+    throw new Error(`Failed to fetch notifications: ${response.statusText}`);
+  }
+  return response.json();
+};
+
+// Function to fetch notification data
+const fetchNotifications = async (token?: string): Promise<NotificationResponse> => {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/notification`,
+    { headers }
+  );
+  if (!response.ok) {
+    throw new Error(`Failed to fetch notifications: ${response.statusText}`);
+  }
+  return response.json();
+};
+
+// Function to ignore notification
+const ignoreNotification = async ({ notificationId, token }: { notificationId: string; token?: string }) => {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/notification/ignore/${notificationId}`,
+    {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({ isIgnored: true }),
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`Failed to ignore notification: ${response.statusText}`);
+  }
+  return response.json();
+};
+
+// Function to delete notification
+const deleteNotification = async ({ notificationId, token }: { notificationId: string; token?: string }) => {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/notification/${notificationId}`,
+    {
+      method: "DELETE",
+      headers,
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`Failed to delete notification: ${response.statusText}`);
   }
   return response.json();
 };
@@ -89,17 +217,99 @@ export default function DashboardPage() {
   const [selectedRange, setSelectedRange] = useState<"day" | "week" | "month">(
     "day"
   );
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const { data: session } = useSession();
+  const token = session?.user?.accessToken;
 
   const { data, isLoading, isError, error } = useQuery<ApiResponse, Error>({
     queryKey: ["dashboardData", selectedRange],
-    queryFn: () => fetchDashboardData(selectedRange),
+    queryFn: () => fetchDashboardData(selectedRange, token),
     staleTime: 1000 * 60 * 5,
+  });
+
+  const {
+    data: notificationData,
+    isLoading: isNotificationsLoading,
+    isError: isNotificationsError,
+    error: notificationsError,
+  } = useQuery<NotificationResponse, Error>({
+    queryKey: ["notifications", token],
+    queryFn: () => fetchNotifications(token),
+    staleTime: 1000 * 60 * 5,
+    enabled: !!token,
+  });
+
+  const {
+    data: allNotificationsData,
+    isLoading: isAllNotificationsLoading,
+    isError: isAllNotificationsError,
+    error: allNotificationsError,
+  } = useQuery<NotificationResponse, Error>({
+    queryKey: ["allNotifications", token],
+    queryFn: () => fetchAllNotifications(token),
+    staleTime: 1000 * 60 * 5,
+    enabled: !!token,
+  });
+
+  const ignoreMutation = useMutation({
+    mutationFn: ({ notificationId }: { notificationId: string }) =>
+      ignoreNotification({ notificationId, token }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications", token] });
+      queryClient.invalidateQueries({ queryKey: ["allNotifications", token] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: ({ notificationId }: { notificationId: string }) =>
+      deleteNotification({ notificationId, token }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications", token] });
+      queryClient.invalidateQueries({ queryKey: ["allNotifications", token] });
+      toast.success("Notification deleted successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete notification: ${error.message}`);
+    },
   });
 
   const dashboardMetrics = data?.data;
 
+  // Map notification types to icons and colors
+  const getNotificationIconAndColor = (type: string) => {
+    switch (type) {
+      case "business_submission":
+      case "new_business_submitted":
+        return {
+          icon: <Building className="h-5 w-5 text-muted-foreground" />,
+          linkColor: "text-teal-600",
+        };
+      case "review_submission":
+        return {
+          icon: <Star className="h-5 w-5 text-muted-foreground" />,
+          linkColor: "text-yellow-600",
+        };
+      case "photo_submission":
+        return {
+          icon: <ImageIcon className="h-5 w-5 text-muted-foreground" />,
+          linkColor: "text-purple-600",
+        };
+      case "claim_request":
+        return {
+          icon: <ClipboardList className="h-5 w-5 text-muted-foreground" />,
+          linkColor: "text-blue-600",
+        };
+      default:
+        return {
+          icon: <User className="h-5 w-5 text-muted-foreground" />,
+          linkColor: "text-orange-600",
+        };
+    }
+  };
+
   return (
-    <div className="flex min-h-screen w-full flex-col">
+    <div className="flex  w-full flex-col">
       <div className="flex flex-col sm:gap-4">
         <main className="grid flex-1 items-start gap-4 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
           <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-3">
@@ -126,11 +336,10 @@ export default function DashboardPage() {
                     key={range}
                     value={range}
                     aria-label={`Toggle ${range}`}
-                    className={`px-4 py-2 rounded-md transition-colors duration-200 ${
-                      selectedRange === range
+                    className={`px-4 py-2 rounded-md transition-colors duration-200 ${selectedRange === range
                         ? "!bg-[#00998E] !text-white"
                         : "text-gray-700 hover:bg-gray-100"
-                    }`}
+                      }`}
                   >
                     {range.charAt(0).toUpperCase() + range.slice(1)}
                   </ToggleGroupItem>
@@ -269,7 +478,8 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Submission Cards */}
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5  ">
                   <Card className="bg-[#00998E1F]">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                       <CardTitle className="text-base font-medium text-[#00998E] w-[80px]">
@@ -363,220 +573,136 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Recent Activity and Moderation Highlights */}
+
+
                 <div className="grid gap-4 lg:grid-cols-2">
-                  <Card>
+                  {/* Recent Activity Card */}
+                  <Card className="flex flex-col h-[400px]">
                     <CardHeader>
                       <CardTitle>Recent Activity</CardTitle>
                     </CardHeader>
-                    <CardContent className="grid gap-4">
-                      <div className="flex items-center gap-3">
-                        <Building className="h-5 w-5 text-muted-foreground" />
-                        <p className="text-sm">
-                          Jamie Submitted a new business:{" "}
-                          <a
-                            href="#"
-                            className="font-medium text-teal-600 hover:underline"
-                          >
-                            GuitarFix
-                          </a>
-                        </p>
-                      </div>
-                      <Separator />
-                      <div className="flex items-center gap-3">
-                        <ImageIcon className="h-5 w-5 text-muted-foreground" />
-                        <p className="text-sm">
-                          Martha added 3 new photos for{" "}
-                          <a
-                            href="#"
-                            className="font-medium text-purple-600 hover:underline"
-                          >
-                            DrumPoint
-                          </a>
-                        </p>
-                      </div>
-                      <Separator />
-                      <div className="flex items-center gap-3">
-                        <Star className="h-5 w-5 text-muted-foreground" />
-                        <p className="text-sm">
-                          Robin Submitted a new review for{" "}
-                          <a
-                            href="#"
-                            className="font-medium text-yellow-600 hover:underline"
-                          >
-                            Harmonics Academy
-                          </a>
-                        </p>
-                      </div>
-                      <Separator />
-                      <div className="flex items-center gap-3">
-                        <Star className="h-5 w-5 text-muted-foreground" />
-                        <p className="text-sm">
-                          Review flagged for{" "}
-                          <a
-                            href="#"
-                            className="font-medium text-yellow-600 hover:underline"
-                          >
-                            Melody Makers
-                          </a>
-                          : &ldquo;Scam, avoid!&ldquo;
-                        </p>
-                      </div>
-                      <Separator />
-                      <div className="flex items-center gap-3">
-                        <ImageIcon className="h-5 w-5 text-muted-foreground" />
-                        <p className="text-sm">
-                          Martha added 3 new photos for{" "}
-                          <a
-                            href="#"
-                            className="font-medium text-purple-600 hover:underline"
-                          >
-                            DrumPoint
-                          </a>
-                        </p>
+                    <CardContent className="flex-1 overflow-y-auto">
+                      <div className="grid gap-4">
+                        {isAllNotificationsLoading && (
+                          <>
+                            {[...Array(5)].map((_, index) => (
+                              <div key={index}>
+                                <div className="flex items-center gap-3">
+                                  <div className="h-5 w-5 bg-gray-300 animate-pulse rounded" />
+                                  <div className="h-4 w-3/4 bg-gray-300 animate-pulse rounded" />
+                                </div>
+                                {index < 4 && <Separator />}
+                              </div>
+                            ))}
+                          </>
+                        )}
+                        {isAllNotificationsError && (
+                          <p className="text-center text-lg text-red-500">
+                            Error: {allNotificationsError?.message}
+                          </p>
+                        )}
+                        {!isAllNotificationsLoading &&
+                          !isAllNotificationsError &&
+                          allNotificationsData?.notify?.length === 0 && (
+                            <p className="text-center text-lg text-gray-500">
+                              No recent activity available
+                            </p>
+                          )}
+                        {!isAllNotificationsLoading &&
+                          !isAllNotificationsError &&
+                          allNotificationsData?.notify?.map((notification) => {
+                            const { icon, linkColor } = getNotificationIconAndColor(notification.type);
+                            return (
+                              <div key={notification._id} className="border-b border-gray-200 pb-4">
+                                <div className="flex items-center gap-3">
+                                  {icon}
+                                  <p className="text-sm flex-1">
+                                    {notification.message}{" "}
+                                    {notification?.metadata?.businessId && (
+                                      <a
+                                        href={`/business/${notification.metadata.businessId}`}
+                                        className={`font-medium ${linkColor} hover:underline`}
+                                      >
+                                        View Business
+                                      </a>
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })}
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  {/* Moderation Highlights Card */}
+                  <Card className="flex flex-col h-[400px]">
                     <CardHeader>
                       <CardTitle>Moderation Highlights</CardTitle>
                     </CardHeader>
-                    <CardContent className="grid gap-4">
-                      <div className="flex items-center gap-3">
-                        <Star className="h-5 w-5 text-muted-foreground" />
-                        <p className="text-sm flex-1">
-                          Review flagged for{" "}
-                          <a
-                            href="#"
-                            className="font-medium text-yellow-600 hover:underline"
-                          >
-                            GuitarPro
-                          </a>
-                          : &ldquo;Owner was rude&ldquo;
-                        </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 w-[64px] bg-[#E240401F] text-[#E24040] font-semibold"
-                        >
-                          Remove
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 w-[64px] bg-[#F7F8F8] text-[#485150] font-semibold"
-                        >
-                          Ignore
-                        </Button>
-                      </div>
-                      <Separator />
-                      <div className="flex items-center gap-3">
-                        <Building className="h-5 w-5 text-muted-foreground" />
-                        <p className="text-sm flex-1">
-                          New business submission:{" "}
-                          <a
-                            href="#"
-                            className="font-medium text-teal-600 hover:underline"
-                          >
-                            TuneMasters
-                          </a>
-                        </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 w-[64px] bg-[#E240401F] text-[#E24040] font-semibold"
-                        >
-                          Reject
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 w-[64px] bg-[#00998E1F] text-[#00998E] font-semibold"
-                        >
-                          Approve
-                        </Button>
-                      </div>
-                      <Separator />
-                      <div className="flex items-center gap-3">
-                        <ClipboardList className="h-5 w-5 text-muted-foreground" />
-                        <p className="text-sm flex-1">
-                          Claim request for{" "}
-                          <a
-                            href="#"
-                            className="font-medium text-blue-600 hover:underline"
-                          >
-                            PianoCare
-                          </a>{" "}
-                          San Diego by Ellie
-                        </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 w-[64px] bg-[#E240401F] text-[#E24040] font-semibold"
-                        >
-                          Reject
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 w-[64px] bg-[#00998E1F] text-[#00998E] font-semibold"
-                        >
-                          Approve
-                        </Button>
-                      </div>
-                      <Separator />
-                      <div className="flex items-center gap-3">
-                        <ImageIcon className="h-5 w-5 text-muted-foreground" />
-                        <p className="text-sm flex-1">
-                          Photo uploaded for{" "}
-                          <a
-                            href="#"
-                            className="font-medium text-purple-600 hover:underline"
-                          >
-                            Sitar House
-                          </a>
-                        </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 w-[64px] bg-[#E240401F] text-[#E24040] font-semibold"
-                        >
-                          Reject
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 w-[64px] bg-[#00998E1F] text-[#00998E] font-semibold"
-                        >
-                          Approve
-                        </Button>
-                      </div>
-                      <Separator />
-                      <div className="flex items-center gap-3">
-                        <User className="h-5 w-5 text-muted-foreground" />
-                        <p className="text-sm flex-1">
-                          <a
-                            href="#"
-                            className="font-medium text-orange-600 hover:underline"
-                          >
-                            Elijah James
-                          </a>{" "}
-                          reported for guideline violation
-                        </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 w-[64px] bg-[#E240401F] text-[#E24040] font-semibold"
-                        >
-                          Suspend
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 w-[64px] bg-[#F7F8F8] text-[#485150] font-semibold"
-                        >
-                          Ignore
-                        </Button>
+                    <CardContent className="flex-1 overflow-y-auto">
+                      <div className="grid gap-4">
+                        {isNotificationsLoading && (
+                          <>
+                            {[...Array(5)].map((_, index) => (
+                              <div key={index}>
+                                <div className="flex items-center gap-3">
+                                  <div className="h-5 w-5 bg-gray-300 animate-pulse rounded" />
+                                  <div className="h-4 w-3/4 bg-gray-300 animate-pulse rounded" />
+                                </div>
+                              </div>
+                            ))}
+                          </>
+                        )}
+                        {isNotificationsError && (
+                          <p className="text-center text-lg text-red-500">
+                            Error: {notificationsError?.message}
+                          </p>
+                        )}
+                        {!isNotificationsLoading && !isNotificationsError && notificationData?.notify?.length === 0 && (
+                          <p className="text-center text-lg text-gray-500">
+                            No notifications available
+                          </p>
+                        )}
+                        {!isNotificationsLoading && !isNotificationsError && notificationData?.notify?.map((notification) => {
+                          const { icon, linkColor } = getNotificationIconAndColor(notification.type);
+                          return (
+                            <div key={notification._id} className="border-b border-gray-200 pb-4">
+                              <div className="flex items-center gap-3">
+                                {icon}
+                                <p className="text-sm flex-1">
+                                  {notification.message}{" "}
+                                  {notification.metadata.businessId && (
+                                    <a
+                                      href={`/business/${notification.metadata.businessId}`}
+                                      className={`font-medium ${linkColor} hover:underline`}
+                                    >
+                                      View Business
+                                    </a>
+                                  )}
+                                </p>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 w-[64px] bg-[#E240401F] text-[#E24040] font-semibold"
+                                  onClick={() => setDeleteId(notification._id)}
+                                  disabled={deleteMutation.isPending}
+                                >
+                                  Remove
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 w-[64px] bg-[#F7F8F8] text-[#485150] font-semibold"
+                                  onClick={() => ignoreMutation.mutate({ notificationId: notification._id })}
+                                  disabled={ignoreMutation.isPending}
+                                >
+                                  {notification.isIgnored ? "Ignored" : "Ignore"}
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </CardContent>
                   </Card>
@@ -586,6 +712,33 @@ export default function DashboardPage() {
           </div>
         </main>
       </div>
+      <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this notification? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteId(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (deleteId) {
+                  deleteMutation.mutate({ notificationId: deleteId });
+                  setDeleteId(null);
+                }
+              }}
+              disabled={deleteMutation.isPending}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
