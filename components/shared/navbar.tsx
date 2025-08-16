@@ -143,7 +143,7 @@ const Navbar = () => {
         </Link>
 
         {/* Search Bar (hidden on mobile, visible on desktop) */}
-        {!isAuthPage && (
+        {!isAuthPage && pathname === "/search-result" && (
           <div
             className="hidden md:flex flex-1 max-w-xl mx-auto items-center relative"
             ref={searchRef}
