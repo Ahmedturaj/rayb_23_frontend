@@ -23,7 +23,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAllbusiness, getAllInstrument } from "@/lib/api";
 import Link from "next/link";
 import BusinessCard from "./BusinessCard";
-import { getPageNumbers } from "@/utils/paginate";
+import { getPageNumbers, paginate } from "@/utils/paginate";
 import {
   Collapsible,
   CollapsibleContent,
@@ -68,7 +68,7 @@ export default function SearchComponent() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Build query params
+  // Build query params (without pagination params)
   const queryParams = {
     instrumentFamily: selectedFamily || undefined,
     selectedInstrumentsGroup: selectedInstrument || undefined,
@@ -80,8 +80,6 @@ export default function SearchComponent() {
     sort: sortOption,
     openNow: openNow || undefined,
     postalCode: postalCode || undefined,
-    page: currentPage,
-    limit: itemsPerPage
   };
 
   useEffect(() => {
@@ -90,11 +88,18 @@ export default function SearchComponent() {
     }
   }, [selectedFamily, selectedFamilyfromParams]);
 
-  // Fetch businesses with filters
-  const { data: businessData = { data: [], total: 0 }, isLoading: isBusinessLoading } = useQuery({
+  // Fetch all businesses without pagination
+  const { data: allBusinessData = { data: [], total: 0 }, isLoading: isBusinessLoading } = useQuery({
     queryKey: ["all-business-search-result", queryParams],
     queryFn: () => getAllbusiness(queryParams),
   });
+
+  // Apply frontend pagination
+  const paginatedData = paginate(
+    allBusinessData.data,
+    currentPage,
+    itemsPerPage
+  );
 
   // Fetch instrument families
   const { data: instrumentFamilies, isLoading: isInstrumentLoading } = useQuery({
@@ -117,10 +122,9 @@ export default function SearchComponent() {
 
   const handleInstrumentSelect = (instrument: string) => {
     setSelectedInstrument(instrument);
-    setServiceTypeOpen(true); // This ensures Service Type section opens
+    setServiceTypeOpen(true);
     setCurrentPage(1);
 
-    // Find and set the service type for the selected family
     const selectedFamilyData = instrumentFamilies?.find(
       (item: Instruments) => item.instrumentFamily === selectedFamily
     );
@@ -156,7 +160,7 @@ export default function SearchComponent() {
   };
 
   const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= Math.ceil(businessData.total / itemsPerPage)) {
+    if (page >= 1 && page <= Math.ceil(allBusinessData.data.length / itemsPerPage)) {
       setCurrentPage(page);
     }
   };
@@ -180,8 +184,6 @@ export default function SearchComponent() {
 
   // Accent color
   const accentColor = "#139A8E";
-
-  console.log("Selected family params: ", selectedFamily)
 
   return (
     <div className="flex flex-col lg:flex-row">
@@ -300,7 +302,7 @@ export default function SearchComponent() {
                   </Collapsible>
                 )}
 
-                {/* Service Type - Only show if instrument is selected */}
+                {/* Service Type */}
                 {selectedInstrument && (
                   <Collapsible
                     open={serviceTypeOpen}
@@ -585,7 +587,7 @@ export default function SearchComponent() {
           </Collapsible>
         )}
 
-        {/* Service Type - Only show if instrument is selected */}
+        {/* Service Type */}
         {selectedInstrument && (
           <Collapsible
             open={serviceTypeOpen}
@@ -768,7 +770,7 @@ export default function SearchComponent() {
         {/* Header - Desktop */}
         <div className="hidden lg:flex items-center justify-between mb-6">
           <div className="space-y-2">
-            <p className="text-gray-500">{businessData.total} results</p>
+            <p className="text-gray-500">{allBusinessData.data.length} results</p>
             <h1 className="text-2xl font-semibold">Online Classes</h1>
           </div>
           <div className="flex items-center space-x-4">
@@ -972,13 +974,13 @@ export default function SearchComponent() {
         ) : (
           <>
             <div className="space-y-4 lg:space-y-8">
-              {businessData.data?.map((business: any) => (
+              {paginatedData.currentItems?.map((business: any) => (
                 <BusinessCard key={business?._id} business={business} />
               ))}
             </div>
 
             {/* Pagination */}
-            {businessData.total > 0 && (
+            {allBusinessData.data.length > 0 && (
               <div className="flex items-center justify-center space-x-2 my-6 lg:my-8">
                 <Button
                   variant="outline"
@@ -992,7 +994,7 @@ export default function SearchComponent() {
 
                 {getPageNumbers(
                   currentPage,
-                  Math.ceil(businessData.total / itemsPerPage)
+                  paginatedData.totalPages
                 ).map((page, index) =>
                   typeof page === "number" ? (
                     <button
@@ -1020,7 +1022,7 @@ export default function SearchComponent() {
                   variant="outline"
                   size="sm"
                   onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage >= Math.ceil(businessData.total / itemsPerPage)}
+                  disabled={currentPage >= paginatedData.totalPages}
                   style={{ borderColor: accentColor, color: accentColor }}
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -1065,7 +1067,7 @@ export default function SearchComponent() {
               </div>
             </div>
 
-            {businessData.total === 0 && (
+            {allBusinessData.data.length === 0 && (
               <div className="text-center py-8 lg:py-12">
                 <p className="text-gray-500">
                   No instructors found matching your search.
