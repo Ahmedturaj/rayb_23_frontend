@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getBusinessStats, getChatByBusinessMan, getMyReview } from "@/lib/api";
 import { useBusinessContext } from "@/lib/business-context";
 import Link from "next/link";
-import { ChevronRight, Loader, Star } from "lucide-react";
+import { ChevronRight, FileText, Loader, Star } from "lucide-react";
 import { useEffect } from "react";
 
 interface Review {
@@ -150,57 +150,73 @@ export default function BdDashComponent() {
           </div>
 
           <div className="space-y-6 h-[800px] overflow-y-auto scrollbar-hide">
-            {allReview?.data?.map((review: Review) => (
-              <div
-                key={review._id} // Better to use database ID instead of index
-                className="space-y-3 shadow-[0px_2px_12px_0px_#003D3914] p-4 rounded-lg"
-              >
-                <div className="flex items-start gap-3">
-                  <div>
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage
-                        src={review.user.imageLink || "/placeholder.svg"}
-                      />
-                      <AvatarFallback className="bg-yellow-500 text-white">
-                        {review.user.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-semibold text-gray-900 text-sm">
-                          {review.user.name}
-                        </h4>
-                        {review.report.isReport && (
-                          <span className="text-xs text-red-500">Reported</span>
-                        )}
-                      </div>
-                      <p className="text-xs text-gray-500">
-                        {new Date(review.createdAt).toLocaleDateString()}
-                      </p>
-                      <div className="flex items-center gap-1">
-                        {[...Array(review.rating)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className="h-4 w-4 fill-yellow-400 text-yellow-400"
-                          />
-                        ))}
+            {allReview?.data?.length ? (
+              allReview.data.map((review: Review) => (
+                <div
+                  key={review._id}
+                  className="space-y-3 shadow-[0px_2px_12px_0px_#003D3914] p-4 rounded-lg"
+                >
+                  <div className="flex items-start gap-3">
+                    <div>
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage
+                          src={review.user.imageLink || "/placeholder.svg"}
+                        />
+                        <AvatarFallback className="bg-yellow-500 text-white">
+                          {review.user.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <div className="flex-1 space-y-2">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-semibold text-gray-900 text-sm">
+                            {review.user.name}
+                          </h4>
+                          {review.report.isReport && (
+                            <span className="text-xs text-red-500">
+                              Reported
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          {new Date(review.createdAt).toLocaleDateString()}
+                        </p>
+                        <div className="flex items-center gap-1">
+                          {[...Array(review.rating)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                            />
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {review.feedback && (
-                  <p className="text-sm text-gray-700 leading-relaxed ml-13">
-                    {review.feedback}
+                  {review.feedback && (
+                    <p className="text-sm text-gray-700 leading-relaxed ml-13">
+                      {review.feedback}
+                    </p>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full">
+                <div className="text-center p-8">
+                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-1">
+                    No Reviews For This Business
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    There are no reviews to display yet.
                   </p>
-                )}
+                </div>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
