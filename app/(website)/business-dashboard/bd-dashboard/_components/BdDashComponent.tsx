@@ -3,118 +3,56 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
-import { getBusinessStats, getChatByBusinessMan } from "@/lib/api";
+import { getBusinessStats, getChatByBusinessMan, getMyReview } from "@/lib/api";
 import { useBusinessContext } from "@/lib/business-context";
 import Link from "next/link";
 import { ChevronRight, Loader, Star } from "lucide-react";
 import { useEffect } from "react";
 
-export default function BdDashComponent() {
+interface Review {
+  _id: string;
+  user: { name: string; imageLink: string };
+  report: { isReport: boolean };
+  createdAt: string;
+  rating: number;
+  feedback?: string;
+}
 
+export default function BdDashComponent() {
   const { selectedBusinessId } = useBusinessContext();
 
-  const reviews = [
-    {
-      name: "Samantha T.",
-      role: "Pianist",
-      rating: 5,
-      review:
-        "Bronstein Music is amazing! They repaired my guitar perfectly and quickly. Excellent service, knowledgeable staff, and great attention to detail!",
-      avatar: "/placeholder.svg?height=40&width=40&text=ST",
-      hasReply: true,
-    },
-    {
-      name: "Samantha T.",
-      role: "Pianist",
-      rating: 5,
-      review:
-        "Bronstein Music is amazing! They repaired my guitar perfectly and quickly. Excellent service, knowledgeable staff, and great attention to detail!",
-      avatar: "/placeholder.svg?height=40&width=40&text=ST",
-      images: [
-        "/placeholder.svg?height=80&width=80&text=1",
-        "/placeholder.svg?height=80&width=80&text=2",
-        "/placeholder.svg?height=80&width=80&text=3",
-      ],
-    },
-    {
-      name: "Samantha T.",
-      role: "Pianist",
-      rating: 5,
-      review:
-        "Bronstein Music is amazing! They repaired my guitar perfectly and quickly. Excellent service, knowledgeable staff, and great attention to detail!",
-      avatar: "/placeholder.svg?height=40&width=40&text=ST",
-      images: [
-        "/placeholder.svg?height=80&width=80&text=1",
-        "/placeholder.svg?height=80&width=80&text=2",
-        "/placeholder.svg?height=80&width=80&text=3",
-      ],
-    },
-    {
-      name: "Samantha T.",
-      role: "Pianist",
-      rating: 5,
-      review:
-        "Bronstein Music is amazing! They repaired my guitar perfectly and quickly. Excellent service, knowledgeable staff, and great attention to detail!",
-      avatar: "/placeholder.svg?height=40&width=40&text=ST",
-      images: [
-        "/placeholder.svg?height=80&width=80&text=1",
-        "/placeholder.svg?height=80&width=80&text=2",
-        "/placeholder.svg?height=80&width=80&text=3",
-      ],
-    },
-    {
-      name: "Samantha T.",
-      role: "Pianist",
-      rating: 5,
-      review:
-        "Bronstein Music is amazing! They repaired my guitar perfectly and quickly. Excellent service, knowledgeable staff, and great attention to detail!",
-      avatar: "/placeholder.svg?height=40&width=40&text=ST",
-      images: [
-        "/placeholder.svg?height=80&width=80&text=1",
-        "/placeholder.svg?height=80&width=80&text=2",
-        "/placeholder.svg?height=80&width=80&text=3",
-      ],
-    },
-    {
-      name: "Samantha T.",
-      role: "Pianist",
-      rating: 5,
-      review:
-        "Bronstein Music is amazing! They repaired my guitar perfectly and quickly. Excellent service, knowledgeable staff, and great attention to detail!",
-      avatar: "/placeholder.svg?height=40&width=40&text=ST",
-      images: [
-        "/placeholder.svg?height=80&width=80&text=1",
-        "/placeholder.svg?height=80&width=80&text=2",
-        "/placeholder.svg?height=80&width=80&text=3",
-      ],
-    },
-  ];
-
-
-
-  const { data: newMessages, isLoading: isNewMessagesLoading, refetch: refetchNewMessages } = useQuery({
+  const {
+    data: newMessages,
+    isLoading: isNewMessagesLoading,
+    refetch: refetchNewMessages,
+  } = useQuery({
     queryKey: ["newMessages"],
     queryFn: () => getChatByBusinessMan(selectedBusinessId as string),
-    select: (data) => data?.data
-  })
+    select: (data) => data?.data,
+  });
 
-
-  const { data: businessStats, isLoading: isBusinessStatsLoading, refetch: refetchBusinessStats } = useQuery({
+  const {
+    data: businessStats,
+    isLoading: isBusinessStatsLoading,
+    refetch: refetchBusinessStats,
+  } = useQuery({
     queryKey: ["stats"],
     queryFn: () => getBusinessStats(),
-    select: (data) => data?.data
-  })
+    select: (data) => data?.data,
+  });
+
+  const { data: allReview } = useQuery({
+    queryKey: ["get-my-reviews", selectedBusinessId],
+    queryFn: () => getMyReview(selectedBusinessId as string),
+  });
 
   useEffect(() => {
     if (selectedBusinessId) {
-      refetchBusinessStats()
-      refetchNewMessages()
+      refetchBusinessStats();
+      refetchNewMessages();
     }
-  }, [selectedBusinessId, refetchBusinessStats, refetchNewMessages])
-
-  console.log(businessStats)
+  }, [selectedBusinessId, refetchBusinessStats, refetchNewMessages]);
 
   return (
     <div className="space-y-8 min-h-screen">
@@ -154,38 +92,42 @@ export default function BdDashComponent() {
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {["Views", "Reviews", "Photos", "Saves"].map((metric, index) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {["Reviews", "Photos", "Saves"].map((metric, index) => (
           <Card
             key={index}
-            className={`${index === 0 ? "bg-teal-500" : index === 1 ? "bg-yellow-500" : index === 2 ? "bg-purple-500" : "bg-blue-500"} border-0 text-white rounded-xl`}
+            className={`${
+              index === 0
+                ? "bg-teal-500"
+                : index === 1
+                ? "bg-yellow-500"
+                : index === 2
+                ? "bg-purple-500"
+                : "bg-blue-500"
+            } border-0 text-white rounded-xl`}
           >
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-3">
-                  <p className="text-white/80 text-sm font-medium">
-                    {metric}
-                  </p>
+                  <p className="text-white/80 text-sm font-medium">{metric}</p>
                   <div className="space-y-1">
                     <p className="text-3xl font-bold text-white">
                       {metric === "Views"
                         ? businessStats?.views
                         : metric === "Reviews"
-                          ? businessStats?.reviews
-                          : metric === "Photos"
-                            ? businessStats?.photos
-                            : metric === "Saves"
-                              ? businessStats?.saves
-                              : 0}
+                        ? businessStats?.reviews
+                        : metric === "Photos"
+                        ? businessStats?.photos
+                        : metric === "Saves"
+                        ? businessStats?.saves
+                        : 0}
                     </p>
                     <p className="text-white/80 text-sm">
-                      {
-                        isBusinessStatsLoading
-                          ?
-                          <Loader className="animate-spin h-4 w-4 text-white" />
-                          :
-                          metric
-                      }
+                      {isBusinessStatsLoading ? (
+                        <Loader className="animate-spin h-4 w-4 text-white" />
+                      ) : (
+                        metric
+                      )}
                     </p>
                   </div>
                 </div>
@@ -208,29 +150,38 @@ export default function BdDashComponent() {
           </div>
 
           <div className="space-y-6 h-[800px] overflow-y-auto scrollbar-hide">
-            {reviews.map((review, index) => (
+            {allReview?.data?.map((review: Review) => (
               <div
-                key={index}
+                key={review._id} // Better to use database ID instead of index
                 className="space-y-3 shadow-[0px_2px_12px_0px_#003D3914] p-4 rounded-lg"
               >
                 <div className="flex items-start gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={review.avatar || "/placeholder.svg"} />
-                    <AvatarFallback className="bg-yellow-500 text-white">
-                      {review.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div>
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage
+                        src={review.user.imageLink || "/placeholder.svg"}
+                      />
+                      <AvatarFallback className="bg-yellow-500 text-white">
+                        {review.user.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
                   <div className="flex-1 space-y-2">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <h4 className="font-semibold text-gray-900 text-sm">
-                          {review.name}
+                          {review.user.name}
                         </h4>
+                        {review.report.isReport && (
+                          <span className="text-xs text-red-500">Reported</span>
+                        )}
                       </div>
-                      <p className="text-xs text-gray-500">{review.role}</p>
+                      <p className="text-xs text-gray-500">
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </p>
                       <div className="flex items-center gap-1">
                         {[...Array(review.rating)].map((_, i) => (
                           <Star
@@ -243,31 +194,10 @@ export default function BdDashComponent() {
                   </div>
                 </div>
 
-                {review.review && (
+                {review.feedback && (
                   <p className="text-sm text-gray-700 leading-relaxed ml-13">
-                    {review.review}
+                    {review.feedback}
                   </p>
-                )}
-
-                {review.images && (
-                  <div className="flex gap-2 ml-13">
-                    {review.images.map((image, imgIndex) => (
-                      <Image
-                        key={imgIndex}
-                        src={image || "/placeholder.svg"}
-                        alt={`Review image ${imgIndex + 1}`}
-                        width={1000}
-                        height={1000}
-                        className="h-20 w-20 rounded-lg object-cover"
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {review.hasReply && (
-                  <button className="text-sm text-teal-600 hover:text-teal-700 ml-13 font-medium">
-                    Write a reply
-                  </button>
                 )}
               </div>
             ))}
@@ -283,13 +213,18 @@ export default function BdDashComponent() {
             <ChevronRight className="h-5 w-5 text-gray-400" />
           </div>
 
-          {
-            isNewMessagesLoading
-              ?
-              <Loader className="animate-spin h-7 w-7" />
-              :
-              <div className="space-y-6 h-[800px] overflow-y-auto scrollbar-hide">
-                {newMessages?.map((message: { userId: { name: string; imageLink: string; }, lastMessage: { date: string; message: string } }, index: number) => (
+          {isNewMessagesLoading ? (
+            <Loader className="animate-spin h-7 w-7" />
+          ) : (
+            <div className="space-y-6 h-[800px] overflow-y-auto scrollbar-hide">
+              {newMessages?.map(
+                (
+                  message: {
+                    userId: { name: string; imageLink: string };
+                    lastMessage: { date: string; message: string };
+                  },
+                  index: number
+                ) => (
                   <div
                     key={index}
                     className="space-y-3 shadow-[0px_2px_12px_0px_#003D3914] p-4 rounded-lg"
@@ -297,7 +232,9 @@ export default function BdDashComponent() {
                     <Link href={`/business-dashboard/messages`}>
                       <div className="flex items-start gap-3">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage src={message.userId.imageLink || "/placeholder.svg"} />
+                          <AvatarImage
+                            src={message.userId.imageLink || "/placeholder.svg"}
+                          />
                           <AvatarFallback className="bg-gray-500 text-white text-xs uppercase">
                             {message.userId.name
                               .split(" ")
@@ -313,17 +250,16 @@ export default function BdDashComponent() {
                                 {message.userId.name}
                               </h4>
                               <span className="text-xs text-gray-500 ml-2">
-                                {new Date(message.lastMessage.date).toLocaleString(
-                                  "en-US",
-                                  {
-                                    hour: "numeric",
-                                    minute: "numeric",
-                                    hour12: true,
-                                    day: "numeric",
-                                    month: "short",
-                                    year: "numeric",
-                                  }
-                                )}
+                                {new Date(
+                                  message.lastMessage.date
+                                ).toLocaleString("en-US", {
+                                  hour: "numeric",
+                                  minute: "numeric",
+                                  hour12: true,
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                })}
                               </span>
                             </div>
                             <p className="text-sm text-gray-700 leading-relaxed">
@@ -334,9 +270,10 @@ export default function BdDashComponent() {
                       </div>
                     </Link>
                   </div>
-                ))}
-              </div>
-          }
+                )
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

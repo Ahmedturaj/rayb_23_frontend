@@ -335,3 +335,15 @@ export async function deleteNotification(id: string) {
     return error;
   }
 }
+
+
+//get my review
+export async function getMyReview(id : string) {
+  try {
+    const response = await api.get(`/review/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching notification:", error);
+    return error;
+  }
+}
