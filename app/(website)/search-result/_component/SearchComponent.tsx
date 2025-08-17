@@ -44,9 +44,13 @@ interface Instruments {
 export default function SearchComponent() {
   // Filter states
   const [selectedFamily, setSelectedFamily] = useState<string | null>(null);
-  const [selectedInstrument, setSelectedInstrument] = useState<string | null>(null);
+  const [selectedInstrument, setSelectedInstrument] = useState<string | null>(
+    null
+  );
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedServiceType, setSelectedServiceType] = useState<string | null>(null);
+  const [selectedServiceType, setSelectedServiceType] = useState<string | null>(
+    null
+  );
   const [minPrice, setMinPrice] = useState<number | null>(null);
   const [maxPrice, setMaxPrice] = useState<number | null>(null);
   const [buyInstruments, setBuyInstruments] = useState(false);
@@ -89,7 +93,10 @@ export default function SearchComponent() {
   }, [selectedFamily, selectedFamilyfromParams]);
 
   // Fetch all businesses without pagination
-  const { data: allBusinessData = { data: [], total: 0 }, isLoading: isBusinessLoading } = useQuery({
+  const {
+    data: allBusinessData = { data: [], total: 0 },
+    isLoading: isBusinessLoading,
+  } = useQuery({
     queryKey: ["all-business-search-result", queryParams],
     queryFn: () => getAllbusiness(queryParams),
   });
@@ -102,13 +109,15 @@ export default function SearchComponent() {
   );
 
   // Fetch instrument families
-  const { data: instrumentFamilies, isLoading: isInstrumentLoading } = useQuery({
-    queryKey: ["all-instrument"],
-    queryFn: async () => {
-      const res = await getAllInstrument();
-      return res?.data;
-    },
-  });
+  const { data: instrumentFamilies, isLoading: isInstrumentLoading } = useQuery(
+    {
+      queryKey: ["all-instrument"],
+      queryFn: async () => {
+        const res = await getAllInstrument();
+        return res?.data;
+      },
+    }
+  );
 
   // Handler functions
   const handleFamilySelect = (family: string) => {
@@ -149,9 +158,9 @@ export default function SearchComponent() {
     setCurrentPage(1);
   };
 
-  const handlePriceChange = (type: 'min' | 'max', value: string) => {
+  const handlePriceChange = (type: "min" | "max", value: string) => {
     const numValue = value ? parseInt(value) : null;
-    if (type === 'min') {
+    if (type === "min") {
       setMinPrice(numValue);
     } else {
       setMaxPrice(numValue);
@@ -160,7 +169,10 @@ export default function SearchComponent() {
   };
 
   const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= Math.ceil(allBusinessData.data.length / itemsPerPage)) {
+    if (
+      page >= 1 &&
+      page <= Math.ceil(allBusinessData.data.length / itemsPerPage)
+    ) {
       setCurrentPage(page);
     }
   };
@@ -189,7 +201,7 @@ export default function SearchComponent() {
     <div className="flex flex-col lg:flex-row">
       {/* Mobile Filters Button */}
       <div className="lg:hidden p-4 border-b flex justify-between items-center">
-        <h1 className="text-xl font-semibold">Online Classes</h1>
+        <h1 className="text-xl font-semibold">Search Results</h1>
         <Button
           variant="outline"
           onClick={() => setMobileFiltersOpen(true)}
@@ -224,8 +236,9 @@ export default function SearchComponent() {
                   <CollapsibleTrigger className="flex justify-between w-full text-left">
                     <h3 className="font-medium mb-4">Instrument Family</h3>
                     <ChevronDown
-                      className={`h-4 w-4 mt-1 transition-transform ${instrumentFamilyOpen ? "rotate-180" : ""
-                        }`}
+                      className={`h-4 w-4 mt-1 transition-transform ${
+                        instrumentFamilyOpen ? "rotate-180" : ""
+                      }`}
                     />
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-3 border-b border-gray-200 pb-5">
@@ -245,7 +258,9 @@ export default function SearchComponent() {
                             name="instrumentFamily"
                             value={family.instrumentFamily}
                             checked={selectedFamily === family.instrumentFamily}
-                            onChange={() => handleFamilySelect(family.instrumentFamily)}
+                            onChange={() =>
+                              handleFamilySelect(family.instrumentFamily)
+                            }
                             className="w-4 h-4 border-gray-300"
                             style={{ accentColor }}
                           />
@@ -270,8 +285,9 @@ export default function SearchComponent() {
                     <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
                       <h3 className="font-medium mb-4">Select Instruments</h3>
                       <ChevronDown
-                        className={`h-4 w-4 mt-1 transition-transform ${selectInstrumentsOpen ? "rotate-180" : ""
-                          }`}
+                        className={`h-4 w-4 mt-1 transition-transform ${
+                          selectInstrumentsOpen ? "rotate-180" : ""
+                        }`}
                       />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="border-b border-gray-200 pb-2">
@@ -311,8 +327,9 @@ export default function SearchComponent() {
                     <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
                       <h3 className="font-medium mb-4">Service Type</h3>
                       <ChevronDown
-                        className={`h-4 w-4 mt-1 transition-transform ${serviceTypeOpen ? "rotate-180" : ""
-                          }`}
+                        className={`h-4 w-4 mt-1 transition-transform ${
+                          serviceTypeOpen ? "rotate-180" : ""
+                        }`}
                       />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="space-y-3 border-b border-gray-200 pb-5">
@@ -321,9 +338,9 @@ export default function SearchComponent() {
                           type="radio"
                           id={`service-${getServiceTypeForFamily()}`}
                           name="serviceType"
-                          value={getServiceTypeForFamily() || ''}
+                          value={getServiceTypeForFamily() || ""}
                           checked={true}
-                          onChange={() => { }}
+                          onChange={() => {}}
                           className="w-4 h-4 border-gray-300"
                           style={{ accentColor }}
                         />
@@ -348,8 +365,9 @@ export default function SearchComponent() {
                       Price Range
                     </h3>
                     <ChevronDown
-                      className={`h-4 w-4 transition-transform ${priceRangeOpen ? "rotate-180" : ""
-                        }`}
+                      className={`h-4 w-4 transition-transform ${
+                        priceRangeOpen ? "rotate-180" : ""
+                      }`}
                     />
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-4 mt-4">
@@ -366,8 +384,10 @@ export default function SearchComponent() {
                           type="number"
                           placeholder="0"
                           className="mt-1"
-                          value={minPrice || ''}
-                          onChange={(e) => handlePriceChange('min', e.target.value)}
+                          value={minPrice || ""}
+                          onChange={(e) =>
+                            handlePriceChange("min", e.target.value)
+                          }
                         />
                       </div>
                       <div className="flex-1">
@@ -382,8 +402,10 @@ export default function SearchComponent() {
                           type="number"
                           placeholder="1000"
                           className="mt-1"
-                          value={maxPrice || ''}
-                          onChange={(e) => handlePriceChange('max', e.target.value)}
+                          value={maxPrice || ""}
+                          onChange={(e) =>
+                            handlePriceChange("max", e.target.value)
+                          }
                         />
                       </div>
                     </div>
@@ -400,8 +422,9 @@ export default function SearchComponent() {
                       Also Offers
                     </h3>
                     <ChevronDown
-                      className={`h-4 w-4 transition-transform ${alsoOffersOpen ? "rotate-180" : ""
-                        }`}
+                      className={`h-4 w-4 transition-transform ${
+                        alsoOffersOpen ? "rotate-180" : ""
+                      }`}
                     />
                   </CollapsibleTrigger>
                   <CollapsibleContent className="space-y-3 mt-4">
@@ -463,7 +486,10 @@ export default function SearchComponent() {
 
                 {/* Postal Code */}
                 <div className="mt-5">
-                  <Label htmlFor="postal-code" className="text-sm text-gray-600">
+                  <Label
+                    htmlFor="postal-code"
+                    className="text-sm text-gray-600"
+                  >
                     Postal Code
                   </Label>
                   <Input
@@ -512,8 +538,9 @@ export default function SearchComponent() {
           <CollapsibleTrigger className="flex justify-between w-full text-left">
             <h3 className="font-medium mb-4">Instrument Family</h3>
             <ChevronDown
-              className={`h-4 w-4 mt-1 transition-transform ${instrumentFamilyOpen ? "rotate-180" : ""
-                }`}
+              className={`h-4 w-4 mt-1 transition-transform ${
+                instrumentFamilyOpen ? "rotate-180" : ""
+              }`}
             />
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-3 border-b border-gray-200 pb-5">
@@ -555,8 +582,9 @@ export default function SearchComponent() {
             <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
               <h3 className="font-medium mb-4">Select Instruments</h3>
               <ChevronDown
-                className={`h-4 w-4 mt-1 transition-transform ${selectInstrumentsOpen ? "rotate-180" : ""
-                  }`}
+                className={`h-4 w-4 mt-1 transition-transform ${
+                  selectInstrumentsOpen ? "rotate-180" : ""
+                }`}
               />
             </CollapsibleTrigger>
             <CollapsibleContent className="border-b border-gray-200 pb-2">
@@ -589,15 +617,13 @@ export default function SearchComponent() {
 
         {/* Service Type */}
         {selectedInstrument && (
-          <Collapsible
-            open={serviceTypeOpen}
-            onOpenChange={setServiceTypeOpen}
-          >
+          <Collapsible open={serviceTypeOpen} onOpenChange={setServiceTypeOpen}>
             <CollapsibleTrigger className="flex justify-between w-full text-left pt-5">
               <h3 className="font-medium mb-4">Service Type</h3>
               <ChevronDown
-                className={`h-4 w-4 mt-1 transition-transform ${serviceTypeOpen ? "rotate-180" : ""
-                  }`}
+                className={`h-4 w-4 mt-1 transition-transform ${
+                  serviceTypeOpen ? "rotate-180" : ""
+                }`}
               />
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-3 border-b border-gray-200 pb-5">
@@ -606,9 +632,9 @@ export default function SearchComponent() {
                   type="radio"
                   id={`service-${getServiceTypeForFamily()}`}
                   name="serviceType"
-                  value={getServiceTypeForFamily() || ''}
+                  value={getServiceTypeForFamily() || ""}
                   checked={true}
-                  onChange={() => { }}
+                  onChange={() => {}}
                   className="w-4 h-4 border-gray-300"
                   style={{ accentColor }}
                 />
@@ -628,8 +654,9 @@ export default function SearchComponent() {
           <CollapsibleTrigger className="flex items-center justify-between w-full text-left pt-5">
             <h3 className="text-lg font-medium text-gray-900">Price Range</h3>
             <ChevronDown
-              className={`h-4 w-4 transition-transform ${priceRangeOpen ? "rotate-180" : ""
-                }`}
+              className={`h-4 w-4 transition-transform ${
+                priceRangeOpen ? "rotate-180" : ""
+              }`}
             />
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-4 mt-4">
@@ -643,8 +670,8 @@ export default function SearchComponent() {
                   type="number"
                   placeholder="0"
                   className="mt-1"
-                  value={minPrice || ''}
-                  onChange={(e) => handlePriceChange('min', e.target.value)}
+                  value={minPrice || ""}
+                  onChange={(e) => handlePriceChange("min", e.target.value)}
                 />
               </div>
               <div className="flex-1">
@@ -656,8 +683,8 @@ export default function SearchComponent() {
                   type="number"
                   placeholder="1000"
                   className="mt-1"
-                  value={maxPrice || ''}
-                  onChange={(e) => handlePriceChange('max', e.target.value)}
+                  value={maxPrice || ""}
+                  onChange={(e) => handlePriceChange("max", e.target.value)}
                 />
               </div>
             </div>
@@ -669,8 +696,9 @@ export default function SearchComponent() {
           <CollapsibleTrigger className="flex items-center justify-between w-full text-left mt-5">
             <h3 className="text-lg font-medium text-gray-900">Also Offers</h3>
             <ChevronDown
-              className={`h-4 w-4 transition-transform ${alsoOffersOpen ? "rotate-180" : ""
-                }`}
+              className={`h-4 w-4 transition-transform ${
+                alsoOffersOpen ? "rotate-180" : ""
+              }`}
             />
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-3 mt-4">
@@ -770,8 +798,10 @@ export default function SearchComponent() {
         {/* Header - Desktop */}
         <div className="hidden lg:flex items-center justify-between mb-6">
           <div className="space-y-2">
-            <p className="text-gray-500">{allBusinessData.data.length} results</p>
-            <h1 className="text-2xl font-semibold">Online Classes</h1>
+            <p className="text-gray-500">
+              {allBusinessData.data.length} results
+            </p>
+            <h1 className="text-2xl font-semibold">Search Results</h1>
           </div>
           <div className="flex items-center space-x-4">
             <span className="text-sm text-gray-600">Sort by</span>
@@ -788,8 +818,6 @@ export default function SearchComponent() {
               <SelectContent>
                 <SelectItem value="low-to-high">Price Low to High</SelectItem>
                 <SelectItem value="high-to-low">Price High to Low</SelectItem>
-                <SelectItem value="rating">Rating</SelectItem>
-                <SelectItem value="distance">Distance</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -960,8 +988,6 @@ export default function SearchComponent() {
             <SelectContent>
               <SelectItem value="low-to-high">Price Low to High</SelectItem>
               <SelectItem value="high-to-low">Price High to Low</SelectItem>
-              <SelectItem value="rating">Rating</SelectItem>
-              <SelectItem value="distance">Distance</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -977,6 +1003,14 @@ export default function SearchComponent() {
               {paginatedData.currentItems?.map((business: any) => (
                 <BusinessCard key={business?._id} business={business} />
               ))}
+
+              {allBusinessData.data.length === 0 && (
+                <div className="text-center py-8 lg:py-12">
+                  <p className="text-gray-500">
+                    No instructors found matching your search.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Pagination */}
@@ -992,30 +1026,31 @@ export default function SearchComponent() {
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
 
-                {getPageNumbers(
-                  currentPage,
-                  paginatedData.totalPages
-                ).map((page, index) =>
-                  typeof page === "number" ? (
-                    <button
-                      key={index}
-                      className={`${currentPage === page
-                        ? "text-white"
-                        : "text-gray-700"
+                {getPageNumbers(currentPage, paginatedData.totalPages).map(
+                  (page, index) =>
+                    typeof page === "number" ? (
+                      <button
+                        key={index}
+                        className={`${
+                          currentPage === page ? "text-white" : "text-gray-700"
                         } h-10 w-10 rounded-md font-medium`}
-                      onClick={() => handlePageChange(page)}
-                      style={{
-                        backgroundColor: currentPage === page ? accentColor : "transparent",
-                        border: currentPage === page ? "none" : `1px solid ${accentColor}`
-                      }}
-                    >
-                      {page}
-                    </button>
-                  ) : (
-                    <span key={index} className="text-gray-400 px-2">
-                      {page}
-                    </span>
-                  )
+                        onClick={() => handlePageChange(page)}
+                        style={{
+                          backgroundColor:
+                            currentPage === page ? accentColor : "transparent",
+                          border:
+                            currentPage === page
+                              ? "none"
+                              : `1px solid ${accentColor}`,
+                        }}
+                      >
+                        {page}
+                      </button>
+                    ) : (
+                      <span key={index} className="text-gray-400 px-2">
+                        {page}
+                      </span>
+                    )
                 )}
 
                 <Button
@@ -1049,7 +1084,10 @@ export default function SearchComponent() {
                   <p className="text-[#485150] text-sm lg:text-[16px] mt-1 lg:mt-2">
                     Adding a business to Instrufix is completely free!
                   </p>
-                  <h1 className="font-medium mt-3 lg:mt-5 text-sm lg:text-md" style={{ color: accentColor }}>
+                  <h1
+                    className="font-medium mt-3 lg:mt-5 text-sm lg:text-md"
+                    style={{ color: accentColor }}
+                  >
                     Got your own business? Add to Instrufix now!
                   </h1>
                 </div>
@@ -1066,14 +1104,6 @@ export default function SearchComponent() {
                 </Link>
               </div>
             </div>
-
-            {allBusinessData.data.length === 0 && (
-              <div className="text-center py-8 lg:py-12">
-                <p className="text-gray-500">
-                  No instructors found matching your search.
-                </p>
-              </div>
-            )}
           </>
         )}
       </div>
