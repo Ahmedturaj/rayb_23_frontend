@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Eye,
@@ -9,61 +10,192 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
+  X,
 } from "lucide-react";
+import { toast } from "sonner";
 import InstrumentFamilyModal from "./InstrumentFamilyModal";
 
 interface InstrumentData {
-  id: number;
-  familyName: string;
-  instrumentName: string;
-  date: string;
+  _id: string;
+  instrumentFamily: string;
+  instrumentTypes: string[];
+  serviceType: string | string[];
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
-const mockData: InstrumentData[] = [
-  {
-    id: 1,
-    familyName: "Woodwinds",
-    instrumentName: "10",
-    date: "06/21/2025\n03:18pm",
-  },
-];
+interface ApiResponse {
+  success: boolean;
+  code: number;
+  message: string;
+  data: InstrumentData[] | InstrumentData;
+}
+
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+}
+
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer }) => {
+  if (!isOpen) return null;
+  
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">{title}</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="mb-4">{children}</div>
+        {footer && <div className="flex justify-end gap-2">{footer}</div>}
+      </div>
+    </div>
+  );
+};
+
+const fetchInstrumentFamilies = async (): Promise<ApiResponse> => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/instrument-family`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch instrument families");
+  }
+  return response.json();
+};
+
+const fetchInstrumentDetails = async (id: string): Promise<ApiResponse> => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/instrument-family/${id}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch instrument details");
+  }
+  return response.json();
+};
+
+const deleteInstrumentFamily = async (id: string): Promise<ApiResponse> => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/instrument-family/${id}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to delete instrument family");
+  }
+  return response.json();
+};
+
+const updateInstrumentFamily = async ({ id, data }: { id: string; data: Partial<InstrumentData> }): Promise<ApiResponse> => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/instrument-family/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to update instrument family");
+  }
+  return response.json();
+};
 
 export default function InstrumentFamily() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState<boolean>(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [selectedInstrumentId, setSelectedInstrumentId] = useState<string | null>(null);
+  const [editFormData, setEditFormData] = useState<Partial<InstrumentData>>({});
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage: number = 5;
+  const queryClient = useQueryClient();
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-  const totalItems = 12;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const { data, isLoading, error } = useQuery<ApiResponse>({
+    queryKey: ["instrumentFamilies"],
+    queryFn: fetchInstrumentFamilies,
+  });
 
-  const handlePageChange = (page: number) => {
+  const { data: instrumentDetails, isLoading: isDetailsLoading } = useQuery<ApiResponse>({
+    queryKey: ["instrumentDetails", selectedInstrumentId],
+    queryFn: () => fetchInstrumentDetails(selectedInstrumentId!),
+    enabled: !!selectedInstrumentId && isViewModalOpen,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteInstrumentFamily,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["instrumentFamilies"] });
+      toast.success("Instrument family deleted successfully");
+      setIsDeleteModalOpen(false);
+      setSelectedInstrumentId(null);
+    },
+    onError: (error) => {
+      toast.error(`Error: ${error.message}`);
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: updateInstrumentFamily,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["instrumentFamilies"] });
+      toast.success("Instrument family updated successfully");
+      setIsEditModalOpen(false);
+      setSelectedInstrumentId(null);
+    },
+    onError: (error) => {
+      toast.error(`Error: ${error.message}`);
+    },
+  });
+
+  const instrumentData: InstrumentData[] = Array.isArray(data?.data) ? data?.data : [];
+  const totalItems: number = instrumentData.length;
+  const totalPages: number = Math.ceil(totalItems / itemsPerPage);
+
+  const paginatedData: InstrumentData[] = instrumentData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (page: number): void => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
   };
 
-  const renderPaginationNumbers = () => {
-    const pages = [];
-
-    // Always show page 1
+  const renderPaginationNumbers = (): (number | string)[] => {
+    const pages: (number | string)[] = [];
     pages.push(1);
-
-    // Show page 2 if we have more than 1 page
-    if (totalPages > 1) {
-      pages.push(2);
-    }
-
-    // Add ellipsis if there are more pages
-    if (totalPages > 3) {
-      pages.push("...");
-    }
-
-    // Show last page if it's different from what we already have
-    if (totalPages > 2) {
-      pages.push(totalPages);
-    }
-
+    if (totalPages > 1) pages.push(2);
+    if (totalPages > 3) pages.push("...");
+    if (totalPages > 2) pages.push(totalPages);
     return pages;
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setSelectedInstrumentId(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleViewClick = (id: string) => {
+    setSelectedInstrumentId(id);
+    setIsViewModalOpen(true);
+  };
+
+  const handleEditClick = (instrument: InstrumentData) => {
+    setSelectedInstrumentId(instrument._id);
+    setEditFormData({
+      instrumentFamily: instrument.instrumentFamily,
+      instrumentTypes: instrument.instrumentTypes,
+      serviceType: instrument.serviceType,
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedInstrumentId) {
+      updateMutation.mutate({ id: selectedInstrumentId, data: editFormData });
+    }
   };
 
   return (
@@ -71,7 +203,10 @@ export default function InstrumentFamily() {
       {/* Header Section */}
       <div className="flex items-center justify-between mb-8">
         <div></div>
-        <Button onClick={() => setIsOpen(true)} className="bg-[#139a8e] hover:bg-[#139a8e] text-white px-4 py-2 rounded-md flex items-center gap-2">
+        <Button
+          onClick={() => setIsOpen(true)}
+          className="bg-[#139a8e] hover:bg-[#139a8e] text-white px-4 py-2 rounded-md flex items-center gap-2"
+        >
           <Plus className="w-4 h-4" />
           Add Instrument Family
         </Button>
@@ -86,7 +221,7 @@ export default function InstrumentFamily() {
                 Instrument Family Name
               </th>
               <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">
-                Instrument Name
+                Instrument Types
               </th>
               <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">
                 Date
@@ -97,35 +232,64 @@ export default function InstrumentFamily() {
             </tr>
           </thead>
           <tbody>
-            {mockData.map((item) => (
-              <tr
-                key={item.id}
-                className="border-b border-gray-200 last:border-b-0"
-              >
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {item.familyName}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {item.instrumentName}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900 whitespace-pre-line">
-                  {item.date}
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <button className="p-1 hover:bg-gray-100 rounded">
-                      <Eye className="w-4 h-4 text-gray-600" />
-                    </button>
-                    <button className="p-1 hover:bg-gray-100 rounded">
-                      <Edit className="w-4 h-4 text-gray-600" />
-                    </button>
-                    <button className="p-1 hover:bg-gray-100 rounded">
-                      <Trash2 className="w-4 h-4 text-gray-600" />
-                    </button>
-                  </div>
+            {isLoading ? (
+              <tr>
+                <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-900">
+                  Loading...
                 </td>
               </tr>
-            ))}
+            ) : error ? (
+              <tr>
+                <td colSpan={4} className="px-6 py-4 text-center text-sm text-red-600">
+                  Error: {(error as Error).message}
+                </td>
+              </tr>
+            ) : paginatedData.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-900">
+                  No data available
+                </td>
+              </tr>
+            ) : (
+              paginatedData.map((item: InstrumentData) => (
+                <tr
+                  key={item._id}
+                  className="border-b border-gray-200 last:border-b-0"
+                >
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    {item.instrumentFamily}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    {item.instrumentTypes.join(", ")}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900 whitespace-pre-line">
+                    {new Date(item.createdAt).toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleViewClick(item._id)}
+                        className="p-1 hover:bg-gray-100 rounded"
+                      >
+                        <Eye className="w-4 h-4 text-gray-600" />
+                      </button>
+                      <button
+                        onClick={() => handleEditClick(item)}
+                        className="p-1 hover:bg-gray-100 rounded"
+                      >
+                        <Edit className="w-4 h-4 text-gray-600" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(item._id)}
+                        className="p-1 hover:bg-gray-100 rounded"
+                      >
+                        <Trash2 className="w-4 h-4 text-gray-600" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -133,7 +297,8 @@ export default function InstrumentFamily() {
       {/* Pagination Section */}
       <div className="flex items-center justify-between mt-6">
         <div className="text-sm text-gray-500">
-          Showing 1 to 5 of 12 results
+          Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
+          {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} results
         </div>
         <div className="flex items-center gap-1">
           <button
@@ -173,7 +338,136 @@ export default function InstrumentFamily() {
         </div>
       </div>
 
-      {isOpen && <InstrumentFamilyModal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Pick an instrument family" />}
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        title="Confirm Deletion"
+        footer={
+          <>
+            <Button
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="bg-gray-200 text-gray-800 hover:bg-gray-300"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => selectedInstrumentId && deleteMutation.mutate(selectedInstrumentId)}
+              className="bg-red-600 text-white hover:bg-red-700"
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </>
+        }
+      >
+        <p>Are you sure you want to delete this instrument family?</p>
+      </Modal>
+
+      {/* View Details Modal */}
+      <Modal
+        isOpen={isViewModalOpen}
+        onClose={() => setIsViewModalOpen(false)}
+        title="Instrument Family Details"
+      >
+        {isDetailsLoading ? (
+          <p>Loading...</p>
+        ) : instrumentDetails?.data && !Array.isArray(instrumentDetails.data) ? (
+          <div className="space-y-2">
+            <p><strong>Family:</strong> {instrumentDetails.data.instrumentFamily}</p>
+            <p><strong>Types:</strong> {instrumentDetails.data.instrumentTypes.join(", ")}</p>
+            <p><strong>Service Type:</strong> {Array.isArray(instrumentDetails.data.serviceType) 
+              ? instrumentDetails.data.serviceType.join(", ") 
+              : instrumentDetails.data.serviceType}</p>
+            <p><strong>Created:</strong> {new Date(instrumentDetails.data.createdAt).toLocaleString()}</p>
+            <p><strong>Updated:</strong> {new Date(instrumentDetails.data.updatedAt).toLocaleString()}</p>
+          </div>
+        ) : (
+          <p>Error loading details</p>
+        )}
+      </Modal>
+
+      {/* Edit Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title="Edit Instrument Family"
+        footer={
+          <>
+            <Button
+              onClick={() => setIsEditModalOpen(false)}
+              className="bg-gray-200 text-gray-800 hover:bg-gray-300"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleEditSubmit}
+              className="bg-[#139a8e] text-white hover:bg-[#139a8e]/90"
+              disabled={updateMutation.isPending}
+            >
+              {updateMutation.isPending ? "Saving..." : "Save"}
+            </Button>
+          </>
+        }
+      >
+        <form onSubmit={handleEditSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Instrument Family
+            </label>
+            <input
+              type="text"
+              value={editFormData.instrumentFamily || ""}
+              onChange={(e) =>
+                setEditFormData({ ...editFormData, instrumentFamily: e.target.value })
+              }
+              className="mt-1 block w-full border border-gray-300 rounded-md  h-[40px] pl-3 shadow-sm focus:border-[#139a8e] focus:ring-[#139a8e]"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Instrument Types (comma-separated)
+            </label>
+            <input
+              type="text"
+              value={editFormData.instrumentTypes?.join(", ") || ""}
+              onChange={(e) =>
+                setEditFormData({
+                  ...editFormData,
+                  instrumentTypes: e.target.value.split(",").map((t) => t.trim()),
+                })
+              }
+              className="mt-1 block w-full border h-[40px] pl-3 rounded-md border-gray-300 shadow-sm focus:border-[#139a8e] focus:ring-[#139a8e]"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Service Type
+            </label>
+            <input
+              type="text"
+              value={Array.isArray(editFormData.serviceType) 
+                ? editFormData.serviceType.join(", ") 
+                : editFormData.serviceType || ""}
+              onChange={(e) =>
+                setEditFormData({
+                  ...editFormData,
+                  serviceType: e.target.value,
+                })
+              }
+              className="mt-1 block w-full border h-[40px] pl-3 rounded-md border-gray-300 shadow-sm focus:border-[#139a8e] focus:ring-[#139a8e]"
+            />
+          </div>
+        </form>
+      </Modal>
+
+      {isOpen && (
+        <InstrumentFamilyModal
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          title="Pick an instrument family"
+        />
+      )}
     </div>
   );
 }
