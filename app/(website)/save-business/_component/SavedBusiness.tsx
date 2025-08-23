@@ -95,6 +95,7 @@ const SavedBusiness = () => {
           const business = {
             _id: item.savedBusiness._id,
             businessInfo: item.savedBusiness.businessInfo,
+            services: item.savedBusiness.services,
             instrumentInfo: item.savedBusiness.services.map((service) => ({
               newInstrumentName: service.selectedInstrumentsGroup,
               price:
