@@ -10,6 +10,7 @@ import { Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import Link from "next/link";
 
 interface BusinessItem {
   email: string;
@@ -120,58 +121,58 @@ const Popular = () => {
             >
               {allBusiness?.slice(0, 12)?.map((business: Business) => (
                 <SwiperSlide key={business?.businessInfo?.email}>
-                  <div className="bg-white rounded-lg border border-gray-100 shadow-lg p-6 h-full">
-                    <div className="flex flex-col gap-5 h-full">
-                      {/* Profile Image */}
-                      <div className="flex-shrink-0 overflow-hidden rounded-lg">
-                        <Image
-                          src={
-                            business?.businessInfo?.image[0] ||
-                            "/placeholder.svg"
-                          }
-                          alt={"business.png"}
-                          width={1000}
-                          height={1000}
-                          className="rounded-lg object-cover w-full h-[250px] hover:scale-105 transition"
-                        />
-                      </div>
+                  <Link href={`search-result/${business?._id}`}>
+                    <div className="bg-white rounded-lg border border-gray-100 shadow-lg p-6 h-full">
+                      <div className="flex flex-col gap-5 h-full">
+                        {/* Profile Image */}
+                        <div className="flex-shrink-0 overflow-hidden rounded-lg">
+                          <Image
+                            src={
+                              business?.businessInfo?.image[0] ||
+                              "/placeholder.svg"
+                            }
+                            alt={"business.png"}
+                            width={1000}
+                            height={1000}
+                            className="rounded-lg object-cover w-full h-[250px] hover:scale-105 transition"
+                          />
+                        </div>
 
-                      {/* Content */}
-                      <div className="flex-1 flex flex-col">
-                        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                          <div className="flex-1">
-                            <h3 className="text-lg font-semibold text-gray-900">
-                              {business?.businessInfo?.name}
-                            </h3>
+                        {/* Content */}
+                        <div className="flex-1 flex flex-col">
+                          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                            <div className="flex-1">
+                              <h3 className="text-lg font-semibold text-gray-900">
+                                {business?.businessInfo?.name}
+                              </h3>
 
-                            {/* Rating */}
-                            <div className="flex items-center gap-1 my-3">
-                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              <span className="text-sm font-medium">
-                                {"3.7"}
-                              </span>
-                            </div>
+                              {/* Rating */}
+                              <div className="flex items-center gap-1 my-3">
+                                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                <span className="text-sm font-medium">
+                                  {"3.7"}
+                                </span>
+                              </div>
 
-                            {/* Services */}
-                            <div className="flex items-center gap-2">
-                              <div className="flex flex-wrap items-center gap-2 mb-2">
-                                {business?.services?.map(
-                                  (service, index) => (
+                              {/* Services */}
+                              <div className="flex items-center gap-2">
+                                <div className="flex flex-wrap items-center gap-2 mb-2">
+                                  {business?.services?.map((service, index) => (
                                     <button
                                       className="h-[48px] px-5 rounded-lg bg-[#F8F8F8]"
                                       key={index}
                                     >
                                       {service?.newInstrumentName}
                                     </button>
-                                  )
-                                )}
+                                  ))}
+                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 </SwiperSlide>
               ))}
             </Swiper>

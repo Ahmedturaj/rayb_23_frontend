@@ -26,6 +26,27 @@ import { Input } from "@/components/ui/input";
 import { useSession } from "next-auth/react";
 import AddPhotoModal from "./modal/AddPhotoModal";
 
+interface Review {
+  _id: string;
+  rating: number;
+  feedback: string;
+  image: string[];
+  status: string;
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+  } | null;
+  business: string;
+  googlePlaceId: string;
+  createdAt: string;
+  updatedAt: string;
+  report: {
+    isReported: boolean;
+    reportMessage: string;
+  };
+}
+
 interface BusinessProfileProps {
   singleBusiness: {
     _id: string;
@@ -72,7 +93,7 @@ interface BusinessProfileProps {
     sellInstruments: boolean;
     offerMusicLessons: boolean;
     rentInstruments: boolean;
-    review: any[];
+    review: Review[];
     isVerified: boolean;
     status: string;
   };
@@ -162,11 +183,9 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
   const [isAddPhoto, setIsAddPhotoOpen] = useState(false);
 
   const session = useSession();
-
   const token = session?.data?.user?.accessToken;
 
   const toggleSection = (section: SectionKey) => {
@@ -223,6 +242,19 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
     }
   };
 
+  // Calculate average rating
+  const calculateAverageRating = () => {
+    if (singleBusiness.review.length === 0) return "0.0";
+    
+    const totalRating = singleBusiness.review.reduce((sum, review) => {
+      return sum + review.rating;
+    }, 0);
+    
+    return (totalRating / singleBusiness.review.length).toFixed(1);
+  };
+
+  const averageRating = calculateAverageRating();
+
   // Group services by instrument family
   const groupedServices = singleBusiness.services.reduce(
     (acc: any, service) => {
@@ -235,6 +267,83 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
     },
     {}
   );
+
+  // ReviewItem component
+  const ReviewItem = ({ review }: { review: Review }) => {
+    const [expanded, setExpanded] = useState(false);
+    const needsTruncation = review.feedback.length > 150;
+
+    return (
+      <div className="border shadow-md rounded-lg p-4 border-gray-200 py-6">
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0">
+            <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
+              <span className="text-teal-800 font-semibold">
+                {review.user?.name?.[0]?.toUpperCase() || "U"}
+              </span>
+            </div>
+          </div>
+          
+          <div className="flex-1">
+            <div className="mb-2">
+              <h1 className="text-sm font-medium text-gray-900 mb-1">
+                {review.user?.name || "Anonymous User"}
+              </h1>
+              <div className="flex items-center">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`w-4 h-4 ${
+                      star <= review.rating
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-gray-300"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+            
+            <div className="text-sm text-gray-500 mb-2">
+              {new Date(review.createdAt).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </div>
+            
+            <p className="text-gray-700">
+              {needsTruncation && !expanded
+                ? `${review.feedback.substring(0, 150)}...`
+                : review.feedback}
+              {needsTruncation && (
+                <button
+                  onClick={() => setExpanded(!expanded)}
+                  className="text-teal-600 hover:text-teal-800 ml-1 font-medium"
+                >
+                  {expanded ? "Show less" : "Read more"}
+                </button>
+              )}
+            </p>
+            
+            {review.image.length > 0 && (
+              <div className="flex gap-2 mt-3">
+                {review.image.map((img, index) => (
+                  <div key={index} className="w-20 h-20 relative">
+                    <Image
+                      src={img}
+                      alt={`Review image ${index + 1}`}
+                      fill
+                      className="object-cover rounded-md"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div>
@@ -264,11 +373,15 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
               {[1, 2, 3, 4, 5].map((star) => (
                 <Star
                   key={star}
-                  className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                  className={`w-4 h-4 ${
+                    star <= Math.round(Number(averageRating))
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-300"
+                  }`}
                 />
               ))}
             </div>
-            <span className="text-gray-600 font-medium">4.7</span>
+            <span className="text-gray-600 font-medium">{averageRating}</span>
             <span className="text-gray-500">
               ({singleBusiness.review.length} Reviews)
             </span>
@@ -502,13 +615,17 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
           <div className="pt-8">
             <h2 className="text-xl font-semibold mb-4">Rating & Reviews</h2>
             <div className="flex items-center gap-4 mb-6">
-              <div className="text-4xl font-bold">4.7</div>
+              <div className="text-4xl font-bold">{averageRating}</div>
               <div>
                 <div className="flex items-center mb-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Star
                       key={star}
-                      className="w-5 h-5 fill-yellow-400 text-yellow-400"
+                      className={`w-5 h-5 ${
+                        star <= Math.round(Number(averageRating))
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-gray-300"
+                      }`}
                     />
                   ))}
                 </div>
@@ -518,9 +635,17 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
               </div>
             </div>
 
-            {singleBusiness.review.length === 0 && (
+            {singleBusiness.review.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 No reviews yet. Be the first to leave a review!
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {singleBusiness.review
+                  .filter((review) => review.status === "approved")
+                  .map((review) => (
+                    <ReviewItem key={review._id} review={review} />
+                  ))}
               </div>
             )}
           </div>
