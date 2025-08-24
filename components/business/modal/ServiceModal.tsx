@@ -1,5 +1,14 @@
-"use client"
+"use client";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { getInstrumentTypes } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 import React from "react";
 
 interface ServiceModalProps {
@@ -15,6 +24,8 @@ interface ServiceModalProps {
   setMinPrice: (value: string) => void;
   maxPrice: string;
   setMaxPrice: (value: string) => void;
+  selectedInstrumentsGroup: string;
+  selectedInstrumentsGroupMusic: string;
 }
 
 const ServiceModal: React.FC<ServiceModalProps> = ({
@@ -30,7 +41,25 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
   setMinPrice,
   maxPrice,
   setMaxPrice,
+  selectedInstrumentsGroup,
+  selectedInstrumentsGroupMusic,
 }) => {
+  const { data: instrumentTypes = [] } = useQuery<string[]>({
+    queryKey: [
+      "get-instrument-instrument",
+      selectedInstrumentsGroup,
+      selectedInstrumentsGroupMusic,
+    ],
+    queryFn: async () => {
+      const res = await getInstrumentTypes(
+        selectedInstrumentsGroup,
+        selectedInstrumentsGroupMusic
+      );
+      return res?.data?.serviceType as string[];
+    },
+  });
+
+
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
       <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-6 space-y-6">
@@ -41,13 +70,21 @@ const ServiceModal: React.FC<ServiceModalProps> = ({
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Service Name
           </label>
-          <input
-            type="text"
-            placeholder="Type instrument name"
+          <Select
             value={newInstrumentName}
-            onChange={(e) => setNewInstrumentName(e.target.value)}
-            className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm bg-gray-50 focus:outline-none h-[48px]"
-          />
+            onValueChange={(value) => setNewInstrumentName(value)}
+          >
+            <SelectTrigger className="w-full h-[48px] text-sm bg-gray-50 border border-gray-300 rounded-md px-4 py-2 focus:outline-none">
+              <SelectValue placeholder="Select instrument" />
+            </SelectTrigger>
+            <SelectContent>
+              {instrumentTypes.map((item, index) => (
+                <SelectItem key={index} value={item}>
+                  {item}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Service Pricing Input */}
