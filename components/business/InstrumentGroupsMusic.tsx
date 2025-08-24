@@ -1,7 +1,13 @@
+interface InstrumentType {
+  _id: string;
+  type: string;
+  serviceType: string[];
+}
+
 interface Instruments {
   _id: string;
   instrumentFamily: string;
-  instrumentTypes: string[];
+  instrumentTypes: InstrumentType[];
 }
 
 interface PropsTypes {
@@ -27,24 +33,25 @@ const InstrumentGroupsMusic = ({
 
   return (
     <div className="grid grid-cols-2 gap-8 mt-5">
-      {allInstrument?.map((instruments: Instruments) => (
-        <div key={instruments?._id}>
+      {allInstrument?.map((instruments) => (
+        <div key={instruments._id}>
           <h4 className="font-medium text-gray-900 mb-3">
-            {instruments?.instrumentFamily}
+            {instruments.instrumentFamily}
           </h4>
+
           <div className="space-y-2">
-            {instruments?.instrumentTypes.map((instrument) => (
+            {instruments.instrumentTypes.map((instrument) => (
               <label
-                key={instrument}
+                key={instrument._id}
                 className="flex items-center gap-2 text-sm text-gray-800 cursor-pointer"
               >
                 <input
                   type="checkbox"
-                  checked={selectedInstrumentsMusic.includes(instrument)}
-                  onChange={() => toggleInstrument(instrument)}
+                  checked={selectedInstrumentsMusic.includes(instrument.type)}
+                  onChange={() => toggleInstrument(instrument.type)}
                   className="form-checkbox w-4 h-4 text-teal-600 rounded accent-[#139a8e]"
                 />
-                {instrument}
+                {instrument.type}
               </label>
             ))}
           </div>

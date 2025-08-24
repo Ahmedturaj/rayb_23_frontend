@@ -6,12 +6,18 @@ import { ChevronDown, Plus, Trash2 } from "lucide-react"
 import { useQuery, useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
 
+// InstrumentType interface (new schema)
+interface InstrumentType {
+  _id?: string
+  type: string
+  serviceType: string[]
+}
+
 // Instrument family interface
 interface InstrumentFamily {
   _id: string
   instrumentFamily: string
-  instrumentTypes: string[]
-  serviceType: string[]
+  instrumentTypes: InstrumentType[]   // <-- updated
   createdAt: string
   updatedAt: string
   __v: number
@@ -28,7 +34,9 @@ interface ApiResponse {
 export default function InstrumentName() {
   const [selectedFamily, setSelectedFamily] = useState<string>("")
   const [selectedFamilyId, setSelectedFamilyId] = useState<string>("")
-  const [instrumentTypes, setInstrumentTypes] = useState<string[]>([""]) // start with one input
+  const [instrumentTypes, setInstrumentTypes] = useState<InstrumentType[]>([
+    { type: "", serviceType: [] },
+  ]) // <-- start with one object
 
   // Fetch instrument families
   const { data: instrumentFamiliesRaw, isLoading, isError, error } = useQuery({
@@ -41,16 +49,15 @@ export default function InstrumentName() {
     },
   })
 
-  // Ensure instrumentFamilies is always array
   const instrumentFamilies: InstrumentFamily[] = Array.isArray(instrumentFamiliesRaw) ? instrumentFamiliesRaw : []
 
   // Mutation to update instrument types
   const mutation = useMutation({
-    mutationFn: async (newInstrumentTypes: string[]) => {
+    mutationFn: async (newInstrumentTypes: InstrumentType[]) => {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/instrument-family/${selectedFamilyId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ instrumentTypes: newInstrumentTypes }),
+        body: JSON.stringify({ instrumentTypes: newInstrumentTypes }), // <-- send objects, not strings
       })
       if (!response.ok) throw new Error("Failed to update instrument types")
       const data: ApiResponse = await response.json()
@@ -58,8 +65,8 @@ export default function InstrumentName() {
     },
     onSuccess: () => {
       toast.success("Instrument types added successfully!")
-      setInstrumentTypes([""]) // reset inputs
-      setSelectedFamily("") // reset dropdown
+      setInstrumentTypes([{ type: "", serviceType: [] }]) // reset
+      setSelectedFamily("")
       setSelectedFamilyId("")
     },
     onError: (error: Error) => {
@@ -70,22 +77,22 @@ export default function InstrumentName() {
   // Handle input change
   const handleInstrumentTypeChange = (index: number, value: string) => {
     const newTypes = [...instrumentTypes]
-    newTypes[index] = value
+    newTypes[index].type = value   // <-- update type field
     setInstrumentTypes(newTypes)
   }
 
   // Add new input
-  const addInstrumentType = () => setInstrumentTypes([...instrumentTypes, ""])
+  const addInstrumentType = () => setInstrumentTypes([...instrumentTypes, { type: "", serviceType: [] }])
 
   // Remove input
   const removeInstrumentType = (index: number) => {
     const newTypes = instrumentTypes.filter((_, i) => i !== index)
-    setInstrumentTypes(newTypes.length > 0 ? newTypes : [""])
+    setInstrumentTypes(newTypes.length > 0 ? newTypes : [{ type: "", serviceType: [] }])
   }
 
   // Handle publish
   const handleSubmit = () => {
-    const validTypes = instrumentTypes.filter((t) => t.trim() !== "")
+    const validTypes = instrumentTypes.filter((t) => t.type.trim() !== "")
     if (!selectedFamilyId) return toast.error("Please select an instrument family")
     if (validTypes.length === 0) return toast.error("Please add at least one instrument type")
     mutation.mutate(validTypes)
@@ -103,8 +110,11 @@ export default function InstrumentName() {
               const selectedOption = instrumentFamilies.find(f => f.instrumentFamily === e.target.value)
               setSelectedFamily(e.target.value)
               setSelectedFamilyId(selectedOption?._id || "")
-              // preload existing instrumentTypes
-              setInstrumentTypes(selectedOption?.instrumentTypes.length ? selectedOption.instrumentTypes : [""])
+              setInstrumentTypes(
+                selectedOption?.instrumentTypes.length
+                  ? selectedOption.instrumentTypes
+                  : [{ type: "", serviceType: [] }]
+              )
             }}
             className="w-full px-4 py-3 bg-white border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-2 focus:ring-[#139a8e]-500 focus:border-[#139a8e]-500 text-gray-900"
             disabled={isLoading || isError}
@@ -126,11 +136,11 @@ export default function InstrumentName() {
       <div className="mb-6">
         <h2 className="text-lg font-medium text-gray-900 mb-4">Instrument Types</h2>
 
-        {instrumentTypes.map((type, index) => (
+        {instrumentTypes.map((instrument, index) => (
           <div key={index} className="mb-4 flex items-center gap-2">
             <input
               type="text"
-              value={type}
+              value={instrument.type}
               onChange={e => handleInstrumentTypeChange(index, e.target.value)}
               placeholder="Add instrument type..."
               className="w-full px-4 py-3 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#139a8e]-500 focus:border-[#139a8e]-500 text-gray-900 placeholder-gray-400"
