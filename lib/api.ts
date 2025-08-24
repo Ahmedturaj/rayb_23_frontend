@@ -314,6 +314,17 @@ export async function getAllInstrument() {
   }
 }
 
+//get all instrument types
+export async function getInstrumentTypes(selectedInstrumentsGroup : string, selectedInstrumentsGroupMusic : string) {
+  try {
+    const response = await api.get(`/instrument-family?name=${selectedInstrumentsGroup || selectedInstrumentsGroupMusic}&`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching saved business:", error);
+    return error;
+  }
+}
+
 //get all notification
 export async function getAllNotification() {
   try {

@@ -163,7 +163,9 @@ const Service = ({
                       setSelectedInstrumentsGroup(service);
 
                       const foundFamily = allInstrument.find((group) =>
-                        group.instrumentTypes.some((instrument) => instrument.type === service)
+                        group.instrumentTypes.some(
+                          (instrument) => instrument.type === service
+                        )
                       )?.instrumentFamily;
 
                       if (foundFamily) {
@@ -316,7 +318,9 @@ const Service = ({
                             setSelectedInstrumentsGroupMusic(service);
 
                             const foundFamily = allInstrument.find((group) =>
-                              group.instrumentTypes.some((instrument) => instrument.type === service)
+                              group.instrumentTypes.some(
+                                (instrument) => instrument.type === service
+                              )
                             )?.instrumentFamily;
 
                             if (foundFamily) {
@@ -431,6 +435,8 @@ const Service = ({
       {/* services modal */}
       {serviceModal && (
         <ServiceModal
+          selectedInstrumentsGroup={selectedInstrumentsGroup}
+          selectedInstrumentsGroupMusic={selectedInstrumentsGroupMusic}
           newInstrumentName={newInstrumentName}
           setNewInstrumentName={setNewInstrumentName}
           handleAddInstrument={handleAddInstrument}
@@ -449,6 +455,8 @@ const Service = ({
       {/* services music modal */}
       {serviceModalMusic && (
         <ServiceModalMusic
+          selectedInstrumentsGroup={selectedInstrumentsGroup}
+          selectedInstrumentsGroupMusic={selectedInstrumentsGroupMusic}
           newInstrumentName={newInstrumentName}
           setNewInstrumentName={setNewInstrumentName}
           handleAddInstrumentMusic={handleAddInstrumentMusic}
