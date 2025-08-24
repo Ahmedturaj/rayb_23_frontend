@@ -12,10 +12,16 @@ import ServiceModalMusic from "./modal/ServiceModalMusic";
 
 type OptionKey = "buy" | "sell" | "trade" | "rent";
 
+interface InstrumentType {
+  _id: string;
+  type: string;
+  serviceType: string[];
+}
+
 interface Instruments {
   _id: string;
   instrumentFamily: string;
-  instrumentTypes: string[];
+  instrumentTypes: InstrumentType[];
 }
 
 interface Service {
@@ -157,7 +163,7 @@ const Service = ({
                       setSelectedInstrumentsGroup(service);
 
                       const foundFamily = allInstrument.find((group) =>
-                        group.instrumentTypes.includes(service)
+                        group.instrumentTypes.some((instrument) => instrument.type === service)
                       )?.instrumentFamily;
 
                       if (foundFamily) {
@@ -310,7 +316,7 @@ const Service = ({
                             setSelectedInstrumentsGroupMusic(service);
 
                             const foundFamily = allInstrument.find((group) =>
-                              group.instrumentTypes.includes(service)
+                              group.instrumentTypes.some((instrument) => instrument.type === service)
                             )?.instrumentFamily;
 
                             if (foundFamily) {

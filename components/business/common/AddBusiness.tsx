@@ -284,7 +284,6 @@ const AddBusiness = () => {
     businessHoursEnables,
   ]);
 
-  console.log("allInstrument", allInstrument);
 
   const handleUploadImage = () => {
     const input = document.getElementById("image_input");

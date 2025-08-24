@@ -15,11 +15,17 @@ import {
 import { toast } from "sonner";
 import InstrumentFamilyModal from "./InstrumentFamilyModal";
 
+// === Types ===
+interface InstrumentType {
+  _id: string;
+  type: string;
+  serviceType: string[];
+}
+
 interface InstrumentData {
   _id: string;
   instrumentFamily: string;
-  instrumentTypes: string[];
-  serviceType: string | string[];
+  instrumentTypes: InstrumentType[];
   createdAt: string;
   updatedAt: string;
   __v: number;
@@ -40,6 +46,7 @@ interface ModalProps {
   footer?: React.ReactNode;
 }
 
+// === Reusable Modal Component ===
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer }) => {
   if (!isOpen) return null;
   
@@ -59,19 +66,16 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, footer 
   );
 };
 
+// === API Calls ===
 const fetchInstrumentFamilies = async (): Promise<ApiResponse> => {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/instrument-family`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch instrument families");
-  }
+  if (!response.ok) throw new Error("Failed to fetch instrument families");
   return response.json();
 };
 
 const fetchInstrumentDetails = async (id: string): Promise<ApiResponse> => {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/instrument-family/${id}`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch instrument details");
-  }
+  if (!response.ok) throw new Error("Failed to fetch instrument details");
   return response.json();
 };
 
@@ -79,35 +83,36 @@ const deleteInstrumentFamily = async (id: string): Promise<ApiResponse> => {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/instrument-family/${id}`, {
     method: "DELETE",
   });
-  if (!response.ok) {
-    throw new Error("Failed to delete instrument family");
-  }
+  if (!response.ok) throw new Error("Failed to delete instrument family");
   return response.json();
 };
 
-const updateInstrumentFamily = async ({ id, data }: { id: string; data: Partial<InstrumentData> }): Promise<ApiResponse> => {
+const updateInstrumentFamily = async ({
+  id,
+  data,
+}: {
+  id: string;
+  data: Partial<InstrumentData>;
+}): Promise<ApiResponse> => {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/instrument-family/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  if (!response.ok) {
-    throw new Error("Failed to update instrument family");
-  }
+  if (!response.ok) throw new Error("Failed to update instrument family");
   return response.json();
 };
 
+// === Main Component ===
 export default function InstrumentFamily() {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState<boolean>(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedInstrumentId, setSelectedInstrumentId] = useState<string | null>(null);
   const [editFormData, setEditFormData] = useState<Partial<InstrumentData>>({});
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage: number = 5;
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
   const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery<ApiResponse>({
@@ -129,9 +134,7 @@ export default function InstrumentFamily() {
       setIsDeleteModalOpen(false);
       setSelectedInstrumentId(null);
     },
-    onError: (error) => {
-      toast.error(`Error: ${error.message}`);
-    },
+    onError: (error) => toast.error(`Error: ${(error as Error).message}`),
   });
 
   const updateMutation = useMutation({
@@ -142,33 +145,20 @@ export default function InstrumentFamily() {
       setIsEditModalOpen(false);
       setSelectedInstrumentId(null);
     },
-    onError: (error) => {
-      toast.error(`Error: ${error.message}`);
-    },
+    onError: (error) => toast.error(`Error: ${(error as Error).message}`),
   });
 
   const instrumentData: InstrumentData[] = Array.isArray(data?.data) ? data?.data : [];
-  const totalItems: number = instrumentData.length;
-  const totalPages: number = Math.ceil(totalItems / itemsPerPage);
+  const totalItems = instrumentData.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  const paginatedData: InstrumentData[] = instrumentData.slice(
+  const paginatedData = instrumentData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const handlePageChange = (page: number): void => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
-  const renderPaginationNumbers = (): (number | string)[] => {
-    const pages: (number | string)[] = [];
-    pages.push(1);
-    if (totalPages > 1) pages.push(2);
-    if (totalPages > 3) pages.push("...");
-    if (totalPages > 2) pages.push(totalPages);
-    return pages;
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
   const handleDeleteClick = (id: string) => {
@@ -186,7 +176,6 @@ export default function InstrumentFamily() {
     setEditFormData({
       instrumentFamily: instrument.instrumentFamily,
       instrumentTypes: instrument.instrumentTypes,
-      serviceType: instrument.serviceType,
     });
     setIsEditModalOpen(true);
   };
@@ -199,8 +188,8 @@ export default function InstrumentFamily() {
   };
 
   return (
-    <div className="">
-      {/* Header Section */}
+    <div>
+      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div></div>
         <Button
@@ -212,31 +201,21 @@ export default function InstrumentFamily() {
         </Button>
       </div>
 
-      {/* Table Section */}
+      {/* Table */}
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">
-                Instrument Family Name
-              </th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">
-                Instrument Types
-              </th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">
-                Date
-              </th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">
-                Action
-              </th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Instrument Family</th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Instrument Types</th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Date</th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Action</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-900">
-                  Loading...
-                </td>
+                <td colSpan={4} className="px-6 py-4 text-center text-sm">Loading...</td>
               </tr>
             ) : error ? (
               <tr>
@@ -246,43 +225,27 @@ export default function InstrumentFamily() {
               </tr>
             ) : paginatedData.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-900">
-                  No data available
-                </td>
+                <td colSpan={4} className="px-6 py-4 text-center text-sm">No data available</td>
               </tr>
             ) : (
-              paginatedData.map((item: InstrumentData) => (
-                <tr
-                  key={item._id}
-                  className="border-b border-gray-200 last:border-b-0"
-                >
+              paginatedData.map((item) => (
+                <tr key={item._id} className="border-b border-gray-200 last:border-b-0">
+                  <td className="px-6 py-4 text-sm text-gray-900">{item.instrumentFamily}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    {item.instrumentFamily}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {item.instrumentTypes.join(", ")}
+                    {item.instrumentTypes.map((t) => t.type).join(", ")}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900 whitespace-pre-line">
                     {new Date(item.createdAt).toLocaleString()}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleViewClick(item._id)}
-                        className="p-1 hover:bg-gray-100 rounded"
-                      >
+                      <button onClick={() => handleViewClick(item._id)} className="p-1 hover:bg-gray-100 rounded">
                         <Eye className="w-4 h-4 text-gray-600" />
                       </button>
-                      <button
-                        onClick={() => handleEditClick(item)}
-                        className="p-1 hover:bg-gray-100 rounded"
-                      >
+                      <button onClick={() => handleEditClick(item)} className="p-1 hover:bg-gray-100 rounded">
                         <Edit className="w-4 h-4 text-gray-600" />
                       </button>
-                      <button
-                        onClick={() => handleDeleteClick(item._id)}
-                        className="p-1 hover:bg-gray-100 rounded"
-                      >
+                      <button onClick={() => handleDeleteClick(item._id)} className="p-1 hover:bg-gray-100 rounded">
                         <Trash2 className="w-4 h-4 text-gray-600" />
                       </button>
                     </div>
@@ -294,7 +257,7 @@ export default function InstrumentFamily() {
         </table>
       </div>
 
-      {/* Pagination Section */}
+      {/* Pagination */}
       <div className="flex items-center justify-between mt-6">
         <div className="text-sm text-gray-500">
           Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
@@ -309,22 +272,15 @@ export default function InstrumentFamily() {
             <ChevronLeft className="w-4 h-4" />
           </button>
 
-          {renderPaginationNumbers().map((page, index) => (
+          {[...Array(totalPages)].map((_, idx) => (
             <button
-              key={index}
-              onClick={() =>
-                typeof page === "number" ? handlePageChange(page) : undefined
-              }
-              disabled={page === "..."}
+              key={idx}
+              onClick={() => handlePageChange(idx + 1)}
               className={`px-3 py-2 text-sm rounded ${
-                page === currentPage
-                  ? "bg-[#139a8e] text-white"
-                  : page === "..."
-                  ? "text-gray-400 cursor-default"
-                  : "text-gray-700 hover:bg-gray-100"
+                currentPage === idx + 1 ? "bg-[#139a8e] text-white" : "text-gray-700 hover:bg-gray-100"
               }`}
             >
-              {page}
+              {idx + 1}
             </button>
           ))}
 
@@ -345,10 +301,7 @@ export default function InstrumentFamily() {
         title="Confirm Deletion"
         footer={
           <>
-            <Button
-              onClick={() => setIsDeleteModalOpen(false)}
-              className="bg-gray-200 text-gray-800 hover:bg-gray-300"
-            >
+            <Button onClick={() => setIsDeleteModalOpen(false)} className="bg-gray-200 text-gray-800 hover:bg-gray-300">
               Cancel
             </Button>
             <Button
@@ -365,20 +318,16 @@ export default function InstrumentFamily() {
       </Modal>
 
       {/* View Details Modal */}
-      <Modal
-        isOpen={isViewModalOpen}
-        onClose={() => setIsViewModalOpen(false)}
-        title="Instrument Family Details"
-      >
+      <Modal isOpen={isViewModalOpen} onClose={() => setIsViewModalOpen(false)} title="Instrument Family Details">
         {isDetailsLoading ? (
           <p>Loading...</p>
         ) : instrumentDetails?.data && !Array.isArray(instrumentDetails.data) ? (
           <div className="space-y-2">
             <p><strong>Family:</strong> {instrumentDetails.data.instrumentFamily}</p>
-            <p><strong>Types:</strong> {instrumentDetails.data.instrumentTypes.join(", ")}</p>
-            <p><strong>Service Type:</strong> {Array.isArray(instrumentDetails.data.serviceType) 
-              ? instrumentDetails.data.serviceType.join(", ") 
-              : instrumentDetails.data.serviceType}</p>
+            <p>
+              <strong>Types:</strong>{" "}
+              {instrumentDetails.data.instrumentTypes.map((t) => `${t.type} (${t.serviceType.join(", ")})`).join("; ")}
+            </p>
             <p><strong>Created:</strong> {new Date(instrumentDetails.data.createdAt).toLocaleString()}</p>
             <p><strong>Updated:</strong> {new Date(instrumentDetails.data.updatedAt).toLocaleString()}</p>
           </div>
@@ -394,10 +343,7 @@ export default function InstrumentFamily() {
         title="Edit Instrument Family"
         footer={
           <>
-            <Button
-              onClick={() => setIsEditModalOpen(false)}
-              className="bg-gray-200 text-gray-800 hover:bg-gray-300"
-            >
+            <Button onClick={() => setIsEditModalOpen(false)} className="bg-gray-200 text-gray-800 hover:bg-gray-300">
               Cancel
             </Button>
             <Button
@@ -412,47 +358,29 @@ export default function InstrumentFamily() {
       >
         <form onSubmit={handleEditSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Instrument Family
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Instrument Family</label>
             <input
               type="text"
               value={editFormData.instrumentFamily || ""}
-              onChange={(e) =>
-                setEditFormData({ ...editFormData, instrumentFamily: e.target.value })
-              }
-              className="mt-1 block w-full border border-gray-300 rounded-md  h-[40px] pl-3 shadow-sm focus:border-[#139a8e] focus:ring-[#139a8e]"
+              onChange={(e) => setEditFormData({ ...editFormData, instrumentFamily: e.target.value })}
+              className="mt-1 block w-full border border-gray-300 rounded-md h-[40px] pl-3 shadow-sm focus:border-[#139a8e] focus:ring-[#139a8e]"
             />
           </div>
+          {/* For now, editing instrumentTypes as plain text (comma-separated types).
+              You can extend this later to manage serviceType too. */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Instrument Types (comma-separated)
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Instrument Types (comma-separated)</label>
             <input
               type="text"
-              value={editFormData.instrumentTypes?.join(", ") || ""}
+              value={editFormData.instrumentTypes?.map((t) => t.type).join(", ") || ""}
               onChange={(e) =>
                 setEditFormData({
                   ...editFormData,
-                  instrumentTypes: e.target.value.split(",").map((t) => t.trim()),
-                })
-              }
-              className="mt-1 block w-full border h-[40px] pl-3 rounded-md border-gray-300 shadow-sm focus:border-[#139a8e] focus:ring-[#139a8e]"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Service Type
-            </label>
-            <input
-              type="text"
-              value={Array.isArray(editFormData.serviceType) 
-                ? editFormData.serviceType.join(", ") 
-                : editFormData.serviceType || ""}
-              onChange={(e) =>
-                setEditFormData({
-                  ...editFormData,
-                  serviceType: e.target.value,
+                  instrumentTypes: e.target.value.split(",").map((t, i) => ({
+                    _id: editFormData.instrumentTypes?.[i]?._id || `${Date.now()}-${i}`,
+                    type: t.trim(),
+                    serviceType: editFormData.instrumentTypes?.[i]?.serviceType || [],
+                  })),
                 })
               }
               className="mt-1 block w-full border h-[40px] pl-3 rounded-md border-gray-300 shadow-sm focus:border-[#139a8e] focus:ring-[#139a8e]"
@@ -462,11 +390,7 @@ export default function InstrumentFamily() {
       </Modal>
 
       {isOpen && (
-        <InstrumentFamilyModal
-          isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
-          title="Pick an instrument family"
-        />
+        <InstrumentFamilyModal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Pick an instrument family" />
       )}
     </div>
   );
