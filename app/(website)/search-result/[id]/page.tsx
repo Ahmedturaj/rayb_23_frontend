@@ -17,8 +17,6 @@ const Page = () => {
     },
   });
 
-  console.log(singleBusiness);
-
   return (
     <div className=" container">
       <div className="py-5">
