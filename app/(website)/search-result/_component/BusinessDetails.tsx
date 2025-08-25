@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Star,
   ChevronDown,
@@ -15,6 +15,7 @@ import {
   Loader2,
   Copy,
   X,
+  LocateFixed,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -25,6 +26,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSession } from "next-auth/react";
 import AddPhotoModal from "./modal/AddPhotoModal";
+import "leaflet/dist/leaflet.css";
+import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import ReactDOMServer from "react-dom/server";
+import { DivIcon } from "leaflet";
 
 interface Review {
   _id: string;
@@ -179,6 +184,8 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
     otherService: false,
   });
 
+  console.log("singleBusiness : ", singleBusiness);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -187,6 +194,53 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
 
   const session = useSession();
   const token = session?.data?.user?.accessToken;
+
+  const address = singleBusiness.businessInfo.address;
+
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
+    null
+  );
+
+  console.log("coords : ", coords);
+
+  useEffect(() => {
+    const fetchLocation = async () => {
+      const res = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+          address
+        )}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+      );
+      const data = await res.json();
+
+      if (data.status === "OK") {
+        setCoords(data.results[0].geometry.location);
+      } else {
+        console.error("Geocode error:", data.status);
+      }
+    };
+
+    fetchLocation();
+  }, [address]);
+
+  // Custom icon
+const customMarker = new DivIcon({
+  html: ReactDOMServer.renderToString(
+    <LocateFixed className="text-red-600 w-6 h-6" />
+  ),
+  className: "", // remove default styles
+  iconSize: [24, 24],
+  iconAnchor: [12, 24], // bottom center
+});
+
+// Optional: auto-fit map view to coordinates
+const SetMapView = ({ coords, zoom }: { coords: { lat: number; lng: number }; zoom: number }) => {
+  const map = useMap();
+  if (coords) {
+    map.setView([coords.lat, coords.lng], zoom);
+  }
+  return null;
+};
+
 
   const toggleSection = (section: SectionKey) => {
     setExpandedSections((prev) => ({
@@ -245,11 +299,11 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
   // Calculate average rating
   const calculateAverageRating = () => {
     if (singleBusiness.review.length === 0) return "0.0";
-    
+
     const totalRating = singleBusiness.review.reduce((sum, review) => {
       return sum + review.rating;
     }, 0);
-    
+
     return (totalRating / singleBusiness.review.length).toFixed(1);
   };
 
@@ -283,7 +337,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
               </span>
             </div>
           </div>
-          
+
           <div className="flex-1">
             <div className="mb-2">
               <h1 className="text-sm font-medium text-gray-900 mb-1">
@@ -302,7 +356,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
                 ))}
               </div>
             </div>
-            
+
             <div className="text-sm text-gray-500 mb-2">
               {new Date(review.createdAt).toLocaleDateString("en-US", {
                 year: "numeric",
@@ -310,7 +364,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
                 day: "numeric",
               })}
             </div>
-            
+
             <p className="text-gray-700">
               {needsTruncation && !expanded
                 ? `${review.feedback.substring(0, 150)}...`
@@ -324,7 +378,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
                 </button>
               )}
             </p>
-            
+
             {review.image.length > 0 && (
               <div className="flex gap-2 mt-3">
                 {review.image.map((img, index) => (
@@ -657,7 +711,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact Info</h3>
             <div className="space-y-5">
-              <Link href={""}>
+              <Link href={"/admin-dashboard/messages"}>
                 <div className=" flex items-center gap-2">
                   <span className="text-[#139a8e]">
                     <MessageCircleCodeIcon />
@@ -721,21 +775,26 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
           </div>
 
           {/* Location */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Location</h3>
-            <div className="space-y-3">
-              <div>
-                <div className="font-medium">
-                  {singleBusiness.businessInfo.name}
-                </div>
-                <div className="text-gray-600">
-                  {singleBusiness.businessInfo.address}
-                </div>
-              </div>
-              <div className="bg-gray-100 h-48 rounded-lg flex items-center justify-center">
-                <span className="text-gray-500">Map placeholder</span>
-              </div>
-            </div>
+          <div className="h-[300px] w-[300px]">
+            {coords && (
+              <MapContainer
+                center={[coords.lat, coords.lng]}
+                zoom={15} // adjust zoom here
+                scrollWheelZoom={true}
+                className="h-full w-full rounded-xl shadow-lg"
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                <Marker position={[coords.lat, coords.lng]} icon={customMarker}>
+                  <Popup>{singleBusiness.businessInfo.name}</Popup>
+                </Marker>
+
+                {/* Optional: reset view */}
+                <SetMapView coords={coords} zoom={15} />
+              </MapContainer>
+            )}
           </div>
         </div>
       </div>
