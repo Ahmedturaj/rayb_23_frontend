@@ -592,13 +592,7 @@ const Navbar = () => {
               )}
               <div className="flex items-center justify-center h-12 w-12 bg-[#F7F8F8] rounded-full relative">
                 <Link
-                  href={`${
-                    session?.user?.userType === "user"
-                      ? "/customer-dashboard/settings/notifications"
-                      : session?.user?.userType === "admin"
-                      ? "/admin-dashboard/settings"
-                      : "/business-dashboard/settings/notifications"
-                  }`}
+                  href={`/notifications`}
                 >
                   <Bell className="h-6 w-6" />
                   {notificationCount > 0 && (

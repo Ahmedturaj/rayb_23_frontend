@@ -201,8 +201,6 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
     null
   );
 
-  console.log("coords : ", coords);
-
   useEffect(() => {
     const fetchLocation = async () => {
       const res = await fetch(
