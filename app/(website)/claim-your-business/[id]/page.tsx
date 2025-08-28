@@ -9,6 +9,7 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import AddClaimModal from "./_component/AddClaimModal";
+import Link from "next/link";
 
 const SingleBusiness = () => {
   const params = useParams();
@@ -82,9 +83,11 @@ const SingleBusiness = () => {
               </div>
 
               {/* Action Button */}
-              <button className="bg-[#139a8e] h-[40px] text-white px-5 rounded-lg w-full md:w-[180px]">
-                View Profile
-              </button>
+              <Link href={`/search-result/${singleBusiness?._id}`}>
+                <button className="bg-[#139a8e] h-[40px] text-white px-5 rounded-lg w-full md:w-[180px]">
+                  View Profile
+                </button>
+              </Link>
             </div>
           </div>
         </div>

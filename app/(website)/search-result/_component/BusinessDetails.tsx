@@ -63,7 +63,6 @@ interface BusinessProfileProps {
       email: string;
       website: string;
       description: string;
-      isClaimed: string;
     };
     user: {
       _id: string;
@@ -101,6 +100,7 @@ interface BusinessProfileProps {
     rentInstruments: boolean;
     review: Review[];
     isVerified: boolean;
+    isClaimed: boolean;
     status: string;
   };
 }
@@ -429,7 +429,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
             </h1>
 
             <h1 className="text-teal-500 font-medium">
-              {singleBusiness.businessInfo.isClaimed ? "Claimed" : "Unclaimed"}
+              {singleBusiness.isClaimed ? "Claimed" : "Unclaimed"}
             </h1>
           </div>
           <div className="flex items-center gap-2 mb-2">
@@ -721,7 +721,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact Info</h3>
             <div className="space-y-5">
-              {singleBusiness.businessInfo.isClaimed && (
+              {singleBusiness.isClaimed && (
                 <Link href={"/admin-dashboard/messages"}>
                   <div className=" flex items-center gap-2">
                     <span className="text-[#139a8e]">
