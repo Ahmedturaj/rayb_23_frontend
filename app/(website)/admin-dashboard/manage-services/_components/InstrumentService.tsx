@@ -34,11 +34,12 @@ export default function InstrumentService() {
   const [selectedInstrumentType, setSelectedInstrumentType] =
     useState<string>("");
   const [selectedFamilyId, setSelectedFamilyId] = useState<string>("");
-  const [serviceTypes, setServiceTypes] = useState<string[]>([""]); // start with one input
+  const [serviceTypes, setServiceTypes] = useState<string[]>([""]);
+  const [serviceType, setServiceType] = useState<string>("");
 
   // Fetch instrument families
   const {
-    data: instrumentFamiliesRaw,
+    data: instrumentFamiliesRaw = {},
     isLoading,
     isError,
     error,
@@ -60,11 +61,15 @@ export default function InstrumentService() {
     ? instrumentFamiliesRaw
     : [];
 
+  const selectedServiceType = instrumentFamilies
+    .flatMap((family) => family.instrumentTypes)
+    .find((item) => item.type === serviceType);
+
   // Mutation to update service types
   const mutation = useMutation({
     mutationFn: async (newServiceTypes: string[]) => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/instrument-family/${selectedFamilyId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/instrument-family/${selectedFamilyId}/type/${selectedServiceType?._id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -128,6 +133,7 @@ export default function InstrumentService() {
               );
 
               setSelectedInstrumentType(typeName);
+              setServiceType(typeName);
               setSelectedFamilyId(familyId);
               setServiceTypes(
                 selectedType && Array.isArray(selectedType.serviceTypes)
