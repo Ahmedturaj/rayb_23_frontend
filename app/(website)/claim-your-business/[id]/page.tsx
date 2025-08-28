@@ -8,10 +8,12 @@ import { Star } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import AddClaimModal from "./_component/AddClaimModal";
 
 const SingleBusiness = () => {
   const params = useParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddPhotoOpen, setIsAddPhotoOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const id = params?.id;
 
@@ -143,7 +145,7 @@ const SingleBusiness = () => {
           </div>
 
           {/* Phone Verification */}
-          <div className="p-4 md:p-6 bg-gray-50 border border-gray-200 rounded-lg">
+          {/* <div className="p-4 md:p-6 bg-gray-50 border border-gray-200 rounded-lg">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-start space-x-4 w-full">
                 <div className="w-12 h-12 flex-shrink-0">
@@ -176,7 +178,7 @@ const SingleBusiness = () => {
                 Verify
               </button>
             </div>
-          </div>
+          </div> */}
 
           {/* Document Verification */}
           <div className="p-4 md:p-6 bg-gray-50 border border-gray-200 rounded-lg">
@@ -212,9 +214,19 @@ const SingleBusiness = () => {
                   </ul>
                 </div>
               </div>
-              <button className="bg-teal-600 hover:bg-teal-700 text-white px-8 h-[40px] rounded-lg w-full md:w-auto">
+              <button
+                onClick={() => setIsAddPhotoOpen(true)}
+                className="bg-teal-600 hover:bg-teal-700 text-white px-8 h-[40px] rounded-lg w-full md:w-auto"
+              >
                 Verify
               </button>
+
+              {isAddPhotoOpen && (
+                <AddClaimModal
+                  setIsAddPhotoOpen={setIsAddPhotoOpen}
+                  businessID={singleBusiness?._id}
+                />
+              )}
 
               {isModalOpen && (
                 <VerifyBusinessEmail

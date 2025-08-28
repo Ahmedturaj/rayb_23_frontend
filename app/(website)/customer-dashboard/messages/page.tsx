@@ -22,7 +22,7 @@ export default function CustomerInboxPage() {
         getReceiverId: (chat: any) => chat?.bussinessId?.user,
 
         emptyStateText: "You have no messages yet.",
-        emptyStateLink: "/search",
+        emptyStateLink: "/search-result",
         emptyStateLinkText: "Go to Search Results",
     }
 

@@ -19,10 +19,10 @@ export default function Footer() {
           <div>
             <h1 className="font-semibold text-lg mb-3">For Business</h1>
             <ul>
-              <Link href={"add-a-business"}>
+              <Link href={"/add-a-business"}>
                 <li>Add my Business</li>
               </Link>
-              <Link href={"claim-your-business"}>
+              <Link href={"/claim-your-business"}>
                 <li>Claim my Business</li>
               </Link>
             </ul>
@@ -31,10 +31,10 @@ export default function Footer() {
           <div>
             <h1 className="font-semibold text-lg mb-3">For Customers</h1>
             <ul>
-              <Link href={"review-business"}>
+              <Link href={"/review-business"}>
                 <li>Write a Review</li>
               </Link>
-              <Link href={"add-a-business"}>
+              <Link href={"/add-a-business"}>
                 <li>Add a Business</li>
               </Link>
             </ul>
