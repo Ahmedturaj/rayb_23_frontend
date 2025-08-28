@@ -63,6 +63,7 @@ interface BusinessProfileProps {
       email: string;
       website: string;
       description: string;
+      isClaimed: string;
     };
     user: {
       _id: string;
@@ -184,7 +185,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
     otherService: false,
   });
 
-  console.log("singleBusiness : ", singleBusiness);
+  console.log("single business ", singleBusiness);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -221,24 +222,29 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
   }, [address]);
 
   // Custom icon
-const customMarker = new DivIcon({
-  html: ReactDOMServer.renderToString(
-    <LocateFixed className="text-red-600 w-6 h-6" />
-  ),
-  className: "", // remove default styles
-  iconSize: [24, 24],
-  iconAnchor: [12, 24], // bottom center
-});
+  const customMarker = new DivIcon({
+    html: ReactDOMServer.renderToString(
+      <LocateFixed className="text-red-600 w-6 h-6" />
+    ),
+    className: "", // remove default styles
+    iconSize: [24, 24],
+    iconAnchor: [12, 24], // bottom center
+  });
 
-// Optional: auto-fit map view to coordinates
-const SetMapView = ({ coords, zoom }: { coords: { lat: number; lng: number }; zoom: number }) => {
-  const map = useMap();
-  if (coords) {
-    map.setView([coords.lat, coords.lng], zoom);
-  }
-  return null;
-};
-
+  // Optional: auto-fit map view to coordinates
+  const SetMapView = ({
+    coords,
+    zoom,
+  }: {
+    coords: { lat: number; lng: number };
+    zoom: number;
+  }) => {
+    const map = useMap();
+    if (coords) {
+      map.setView([coords.lat, coords.lng], zoom);
+    }
+    return null;
+  };
 
   const toggleSection = (section: SectionKey) => {
     setExpandedSections((prev) => ({
@@ -417,9 +423,15 @@ const SetMapView = ({ coords, zoom }: { coords: { lat: number; lng: number }; zo
 
         {/* Business Info */}
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {singleBusiness.businessInfo.name}
-          </h1>
+          <div className="flex items-center gap-5">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              {singleBusiness.businessInfo.name}
+            </h1>
+
+            <h1 className="text-teal-500 font-medium">
+              {singleBusiness.businessInfo.isClaimed ? "Claimed" : "Unclaimed"}
+            </h1>
+          </div>
           <div className="flex items-center gap-2 mb-2">
             <div className="flex items-center">
               {[1, 2, 3, 4, 5].map((star) => (
@@ -709,16 +721,18 @@ const SetMapView = ({ coords, zoom }: { coords: { lat: number; lng: number }; zo
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact Info</h3>
             <div className="space-y-5">
-              <Link href={"/admin-dashboard/messages"}>
-                <div className=" flex items-center gap-2">
-                  <span className="text-[#139a8e]">
-                    <MessageCircleCodeIcon />
-                  </span>
-                  <span className="text-gray-600 hover:text-[#139a8e]">
-                    Message Business
-                  </span>
-                </div>
-              </Link>
+              {singleBusiness.businessInfo.isClaimed && (
+                <Link href={"/admin-dashboard/messages"}>
+                  <div className=" flex items-center gap-2">
+                    <span className="text-[#139a8e]">
+                      <MessageCircleCodeIcon />
+                    </span>
+                    <span className="text-gray-600 hover:text-[#139a8e]">
+                      Message Business
+                    </span>
+                  </div>
+                </Link>
+              )}
               <div>
                 <Link
                   href={singleBusiness.businessInfo.website}

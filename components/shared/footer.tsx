@@ -1,4 +1,5 @@
 import { Facebook, Instagram, Twitter } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 
 export default function Footer() {
@@ -18,18 +19,24 @@ export default function Footer() {
           <div>
             <h1 className="font-semibold text-lg mb-3">For Business</h1>
             <ul>
-              <li>Add my Business</li>
-              <li>Claim my Business</li>
-              <li>Login</li>
+              <Link href={"add-a-business"}>
+                <li>Add my Business</li>
+              </Link>
+              <Link href={"claim-your-business"}>
+                <li>Claim my Business</li>
+              </Link>
             </ul>
           </div>
 
           <div>
             <h1 className="font-semibold text-lg mb-3">For Customers</h1>
             <ul>
-              <li>Write a Review</li>
-              <li>Add a Business</li>
-              <li>Login</li>
+              <Link href={"review-business"}>
+                <li>Write a Review</li>
+              </Link>
+              <Link href={"add-a-business"}>
+                <li>Add a Business</li>
+              </Link>
             </ul>
           </div>
 
@@ -50,13 +57,17 @@ export default function Footer() {
           </div>
 
           <div className="flex items-center gap-5">
+            <div className="bg-white text-[#139a8e] p-2 rounded-full">
+              <Facebook />
+            </div>
 
-            <div className="bg-white text-[#139a8e] p-2 rounded-full"><Facebook /></div>
+            <div className="bg-white text-[#139a8e] p-2 rounded-full">
+              <Instagram />
+            </div>
 
-            <div className="bg-white text-[#139a8e] p-2 rounded-full"><Instagram /></div>
-
-            <div className="bg-white text-[#139a8e] p-2 rounded-full"><Twitter /></div>
-
+            <div className="bg-white text-[#139a8e] p-2 rounded-full">
+              <Twitter />
+            </div>
           </div>
         </div>
       </div>
