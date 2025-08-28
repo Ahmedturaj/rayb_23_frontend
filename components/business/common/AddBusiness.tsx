@@ -130,6 +130,7 @@ const AddBusiness = () => {
     },
   });
 
+  
   // buy / cell/ trade / rent related state
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
