@@ -13,7 +13,7 @@ import React, { useState } from "react";
 interface BusinessItem {
   email: string;
   name: string;
-  image: string;
+  image: string[];
 }
 
 interface Service {
@@ -40,13 +40,21 @@ const ClaimReviewBusiness = () => {
     queryFn: async () => await getAllbusiness().then((res) => res.data),
   });
 
-  const totalPages = Math.ceil(allBusiness.length / itemsPerPage);
+  // ✅ Filter businesses based on search query
+  const filteredBusiness = allBusiness.filter((business: Business) =>
+    business?.businessInfo?.name
+      ?.toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  );
+
+  // ✅ Pagination applied to filtered list
+  const totalPages = Math.ceil(filteredBusiness.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentBusiness = allBusiness.slice(startIndex, endIndex);
+  const currentBusiness = filteredBusiness.slice(startIndex, endIndex);
 
   const handleSearch = () => {
-    setCurrentPage(1);
+    setCurrentPage(1); // reset to first page after search
   };
 
   const handlePageChange = (page: number) => {
@@ -87,17 +95,28 @@ const ClaimReviewBusiness = () => {
 
         {/* Instructors List */}
         <div className="space-y-6">
+          {/* No Results */}
+          {filteredBusiness.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-500">
+                No instructors found matching your search.
+              </p>
+            </div>
+          )}
+
           {currentBusiness.map((business: Business) => (
             <div
-              key={business?.businessInfo?.email}
+              key={business?._id}
               className="bg-white rounded-lg shadow-[0px_2px_12px_0px_#003d3924] p-6"
             >
               <div className="flex flex-col lg:flex-row items-start lg:items-center gap-5">
                 {/* Profile Image */}
                 <div className="flex-shrink-0 overflow-hidden rounded-lg w-full sm:w-auto">
                   <Image
-                    src={business?.businessInfo?.image[0] || "/placeholder.svg"}
-                    alt={"business.png"}
+                    src={
+                      business?.businessInfo?.image?.[0] || "/placeholder.svg"
+                    }
+                    alt="business.png"
                     width={1000}
                     height={1000}
                     className="rounded-lg object-cover w-full sm:w-[200px] h-[200px] hover:scale-105 transition"
@@ -219,17 +238,12 @@ const ClaimReviewBusiness = () => {
           </div>
         </div>
 
-        {/* No Results */}
-        {currentBusiness.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500">
-              No instructors found matching your search.
-            </p>
-          </div>
-        )}
-
         {isOpen && (
-          <ReviewModal setIsModalOpen={setIsModalOpen} setIsOpen={setIsOpen} businessID={businessID} />
+          <ReviewModal
+            setIsModalOpen={setIsModalOpen}
+            setIsOpen={setIsOpen}
+            businessID={businessID}
+          />
         )}
 
         {isModalOpen && (

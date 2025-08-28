@@ -620,7 +620,7 @@ export default function DashboardPage() {
                                     {notification.message}{" "}
                                     {notification?.metadata?.businessId && (
                                       <a
-                                        href={`/business/${notification.metadata.businessId}`}
+                                        href={`/search-result/${notification.metadata.businessId}`}
                                         className={`font-medium ${linkColor} hover:underline`}
                                       >
                                         View Business
@@ -674,7 +674,7 @@ export default function DashboardPage() {
                                   {notification.message}{" "}
                                   {notification.metadata.businessId && (
                                     <a
-                                      href={`/business/${notification.metadata.businessId}`}
+                                      href={`/search-result/${notification.metadata.businessId}`}
                                       className={`font-medium ${linkColor} hover:underline`}
                                     >
                                       View Business

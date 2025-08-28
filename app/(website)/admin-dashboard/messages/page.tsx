@@ -258,7 +258,7 @@ export default function InboxPage() {
                             <div className="flex flex-col items-center justify-center h-full p-8 text-center">
                                 <p className="mb-4 text-gray-500">You have no messages yet.</p>
                                 <a
-                                    href="/search"
+                                    href="/search-result"
                                     className="inline-block px-4 py-2 bg-[#00998E] text-white rounded-lg hover:bg-[#008A7E] transition-colors"
                                 >
                                     Go to Search Results
