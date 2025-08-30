@@ -30,6 +30,8 @@ import "leaflet/dist/leaflet.css";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import ReactDOMServer from "react-dom/server";
 import { DivIcon } from "leaflet";
+import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 
 interface Review {
   _id: string;
@@ -185,8 +187,6 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
     otherService: false,
   });
 
-  console.log("single business ", singleBusiness);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -195,6 +195,10 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
 
   const session = useSession();
   const token = session?.data?.user?.accessToken;
+  const userId = session?.data?.user?.id;
+
+  const role = session?.data?.user?.userType;
+  const router = useRouter();
 
   const address = singleBusiness.businessInfo.address;
 
@@ -401,6 +405,65 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
         </div>
       </div>
     );
+  };
+
+  const { mutateAsync: chatCreation } = useMutation({
+    mutationKey: ["create-chat"],
+    mutationFn: async (data: { userId: string; bussinessId: string }) => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/chat/create`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(data),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to create chat");
+        }
+
+        const result = await response.json();
+        console.log("✅ Server response:", result);
+        return result;
+      } catch (error) {
+        console.error("❌ Error creating chat:", error);
+        throw error;
+      }
+    },
+  });
+
+  const handleMessage = async () => {
+    if (!userId) {
+      toast.error("You must be logged in to send a message.");
+      return;
+    }
+
+    const data = {
+      userId: userId,
+      bussinessId: singleBusiness._id,
+    };
+
+    try {
+      await chatCreation(data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      if(role === "user") {
+        router.push("/customer-dashboard/messages");
+      }
+      if(role === "businessMan") {
+        router.push("/business-dashboard/messages");
+      }
+      if(role === "admin") {
+        router.push("/admin-dashboard/messages");
+      }
+    }
   };
 
   return (
@@ -722,16 +785,17 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
             <h3 className="text-lg font-semibold mb-4">Contact Info</h3>
             <div className="space-y-5">
               {singleBusiness.isClaimed && (
-                <Link href={"/admin-dashboard/messages"}>
-                  <div className=" flex items-center gap-2">
-                    <span className="text-[#139a8e]">
-                      <MessageCircleCodeIcon />
-                    </span>
-                    <span className="text-gray-600 hover:text-[#139a8e]">
-                      Message Business
-                    </span>
-                  </div>
-                </Link>
+                <button
+                  onClick={handleMessage}
+                  className=" flex items-center gap-2"
+                >
+                  <span className="text-[#139a8e]">
+                    <MessageCircleCodeIcon />
+                  </span>
+                  <span className="text-gray-600 hover:text-[#139a8e]">
+                    Message Business
+                  </span>
+                </button>
               )}
               <div>
                 <Link
