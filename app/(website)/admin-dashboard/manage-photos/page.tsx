@@ -81,9 +81,9 @@ const fetchPhotos = async (
   return data.data.map((entry: ApiPhotoEntry) => ({
     id: entry._id,
     userName: entry.user?.name || "Unknown User",
-    userAvatar: entry.business?.businessInfo.image[0] || "/placeholder.svg?height=40&width=40",
+    userAvatar: entry.business?.businessInfo.image[0],
     userDescription: entry.business?.businessInfo.description || "$$$",
-    images: entry.image.length > 0 ? entry.image : ["/placeholder.svg?height=150&width=150"],
+    images: entry.image.length > 0 ? entry.image : "",
     status: entry.status === "pending" ? "under_review" : (entry.status as "under_review" | "approved" | "rejected"),
   })) as PhotoEntryProps[];
 };

@@ -321,7 +321,9 @@ const Navbar = () => {
                         {isLoading ? (
                           <div className="p-4 text-center">Searching...</div>
                         ) : searchResults.length === 0 && searchQuery ? (
-                          <div className="p-4 text-gray-500">No results found</div>
+                          <div className="p-4 text-gray-500">
+                            No results found
+                          </div>
                         ) : (
                           <ul>
                             {searchResults.slice(0, 5).map((business) => (
@@ -389,9 +391,7 @@ const Navbar = () => {
                   <div className="flex flex-col space-y-4 border-b border-gray-200 pb-4">
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        <AvatarImage
-                          src={userData?.imageLink || "/placeholder.svg"}
-                        />
+                        <AvatarImage src={userData?.imageLink} />
                         <AvatarFallback className="uppercase">
                           {(() => {
                             const name = userData?.name?.trim();
@@ -591,9 +591,7 @@ const Navbar = () => {
                 </Link>
               )}
               <div className="flex items-center justify-center h-12 w-12 bg-[#F7F8F8] rounded-full relative">
-                <Link
-                  href={`/notifications`}
-                >
+                <Link href={`/notifications`}>
                   <Bell className="h-6 w-6" />
                   {notificationCount > 0 && (
                     <span
@@ -608,9 +606,7 @@ const Navbar = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger className="hover:text-teal-400 flex gap-1 items-center outline-none">
                   <Avatar>
-                    <AvatarImage
-                      src={userData?.imageLink || "/placeholder.svg"}
-                    />
+                    <AvatarImage src={userData?.imageLink} />
                     <AvatarFallback className="uppercase">
                       {(() => {
                         const name = userData?.name?.trim();

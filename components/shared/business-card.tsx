@@ -20,7 +20,6 @@ interface Business {
   services: Service[];
 }
 
-
 interface BusinessCardProps {
   business: Business;
 }
@@ -33,7 +32,7 @@ export default function BusinessCard({ business }: BusinessCardProps) {
           {/* Profile Image */}
           <div className="flex-shrink-0 overflow-hidden rounded-lg">
             <Image
-              src={business?.businessInfo?.image[0] || "/placeholder.svg"}
+              src={business?.businessInfo?.image[0]}
               alt={"business.png"}
               width={1000}
               height={1000}

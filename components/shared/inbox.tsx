@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Paperclip, ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 
 export interface Message {
   _id: string;
@@ -241,10 +242,31 @@ export default function InboxComponent({ config }: InboxComponentProps) {
       .slice(0, 2);
   };
 
+  const markAsReadMutation = useMutation({
+    mutationFn: (chatId: string) =>
+      fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/message/update-message-status/${chatId}`,
+        { method: "POST" }
+      ).then((res) => res.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: config.queryKey });
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChatSelect = (chat: any) => {
     setSelectedChat(chat);
     setShowChatList(false);
+
+    // Optimistically update unread dot locally
+    chat.lastMessage = {
+      ...chat.lastMessage,
+      isRead: true,
+    };
+
+    // Call API to mark as read
+    markAsReadMutation.mutate(config.getChatId(chat));
   };
 
   const handleBackToChatList = () => {
@@ -314,9 +336,7 @@ export default function InboxComponent({ config }: InboxComponentProps) {
                   >
                     <div className="flex items-center space-x-3">
                       <Avatar className="h-12 w-12">
-                        <AvatarImage
-                          src={config.getChatImage(chat) || "/placeholder.svg"}
-                        />
+                        <AvatarImage src={config.getChatImage(chat)} />
                         <AvatarFallback className="bg-gray-200 text-gray-600">
                           {getInitials(config.getChatName(chat))}
                         </AvatarFallback>
@@ -398,11 +418,7 @@ export default function InboxComponent({ config }: InboxComponentProps) {
                   </div>
                 </div>
                 <Avatar className="h-12 w-12 mt-1">
-                  <AvatarImage
-                    src={
-                      config.getChatImage(selectedChat) || "/placeholder.svg"
-                    }
-                  />
+                  <AvatarImage src={config.getChatImage(selectedChat)} />
                   <AvatarFallback className="bg-gray-200 text-gray-600 text-xs">
                     {getInitials(config.getChatName(selectedChat))}
                   </AvatarFallback>
@@ -437,9 +453,7 @@ export default function InboxComponent({ config }: InboxComponentProps) {
                           <Avatar className="h-8 w-8 mt-1">
                             <AvatarImage
                               src={
-                                senderImage ||
-                                config.getChatImage(selectedChat) ||
-                                "/placeholder.svg"
+                                senderImage || config.getChatImage(selectedChat)
                               }
                             />
                             <AvatarFallback className="bg-gray-200 text-gray-600 text-xs">
@@ -460,9 +474,7 @@ export default function InboxComponent({ config }: InboxComponentProps) {
                         </div>
                         {isMyMessage && (
                           <Avatar className="h-8 w-8 mt-1">
-                            <AvatarImage
-                              src={session?.user?.image || "/placeholder.svg"}
-                            />
+                            <AvatarImage src={session?.user?.image as string} />
                             <AvatarFallback className="bg-gray-200 text-gray-600 text-xs">
                               {getInitials(session?.user?.name) || "ME"}
                             </AvatarFallback>

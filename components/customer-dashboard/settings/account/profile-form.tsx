@@ -153,7 +153,7 @@ export default function UserProfileForm() {
                             <div className="relative">
                                 <Avatar className="h-16 w-16">
                                     <AvatarImage
-                                        src={previewUrl || userProfile?.imageLink || "/placeholder.svg"}
+                                        src={previewUrl || userProfile?.imageLink }
                                         alt={userProfile?.name || "Profile"}
                                     />
                                     <AvatarFallback className="bg-gray-100">

@@ -454,13 +454,13 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
     } catch (error) {
       console.log(error);
     } finally {
-      if(role === "user") {
+      if (role === "user") {
         router.push("/customer-dashboard/messages");
       }
-      if(role === "businessMan") {
+      if (role === "businessMan") {
         router.push("/business-dashboard/messages");
       }
-      if(role === "admin") {
+      if (role === "admin") {
         router.push("/admin-dashboard/messages");
       }
     }
@@ -473,10 +473,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
         {/* Business Image */}
         <div className="flex-shrink-0">
           <Image
-            src={
-              singleBusiness.businessInfo.image[0] ||
-              "/placeholder.svg?height=120&width=120"
-            }
+            src={singleBusiness.businessInfo.image[0]}
             alt={singleBusiness.businessInfo.name}
             width={1000}
             height={1000}

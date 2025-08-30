@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -88,7 +88,7 @@ export default function ReviewsComponent() {
   // Calculate average rating
   const averageRating =
     (data?.data ?? []).reduce((sum, review) => sum + review.rating, 0) /
-      ((data?.data ?? []).length || 1);
+    ((data?.data ?? []).length || 1);
 
   if (isLoading) return <div>Loading reviews...</div>;
   if (error) return <div>Error loading reviews</div>;
@@ -182,9 +182,7 @@ export default function ReviewsComponent() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage
-                          src={review.user.imageLink || "/placeholder.svg"}
-                        />
+                        <AvatarImage src={review.user.imageLink as string} />
                         <AvatarFallback className="bg-yellow-500 text-white">
                           {review.user.name
                             .split(" ")
