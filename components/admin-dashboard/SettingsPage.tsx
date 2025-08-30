@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { AccountSettingsForm } from "@/components/admin-dashboard/AccountSettingsForm"
-import { NotificationSettings } from "@/components/admin-dashboard/NotificationSettings"
 import { SecuritySettings } from "@/components/admin-dashboard/SecuritySettings"
 
 
@@ -28,8 +27,6 @@ export function SettingsPage() {
         return <AccountSettingsForm/>
       case "security":
         return <SecuritySettings />
-      case "notifications":
-        return <NotificationSettings />
       default:
         return <AccountSettingsForm />
     }
