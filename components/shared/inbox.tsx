@@ -13,8 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Paperclip, ArrowLeft } from "lucide-react";
-import { toast } from "sonner";
-
 export interface Message {
   _id: string;
   senderId: string | { _id: string; name?: string; image?: string };
@@ -78,13 +76,6 @@ export default function InboxComponent({ config }: InboxComponentProps) {
       refetch();
     }
   }, [config.additionalData, refetch]);
-
-  // Get messages for selected chat
-  // const { data: messages = [] } = useQuery({
-  //     queryKey: ["messages", selectedChat?._id],
-  //     queryFn: () => (selectedChat ? getMessages(config.getChatId(selectedChat)).then((res) => res.data) : []),
-  //     enabled: !!selectedChat,
-  // })
 
   // Initialize socket connection
   useEffect(() => {
@@ -243,15 +234,23 @@ export default function InboxComponent({ config }: InboxComponentProps) {
   };
 
   const markAsReadMutation = useMutation({
-    mutationFn: (chatId: string) =>
+    mutationFn: (messageId: string) =>
       fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/message/update-message-status/${chatId}`,
-        { method: "POST" }
-      ).then((res) => res.json()),
+        `${process.env.NEXT_PUBLIC_API_URL}/message/update-message-status/${messageId}`,
+        { method: "PUT" }
+      ).then((res) => {
+        if (!res.ok) {
+          return res.text().then((text) => {
+            throw new Error(text || "Failed to mark message as read");
+          });
+        }
+        return; // nothing to return for 204 No Content
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: config.queryKey });
+      console.log("Message marked as read");
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) => console.error("Failed to mark message as read:", err),
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -259,14 +258,10 @@ export default function InboxComponent({ config }: InboxComponentProps) {
     setSelectedChat(chat);
     setShowChatList(false);
 
-    // Optimistically update unread dot locally
-    chat.lastMessage = {
-      ...chat.lastMessage,
-      isRead: true,
-    };
-
-    // Call API to mark as read
-    markAsReadMutation.mutate(config.getChatId(chat));
+    if (chat.lastMessage?.isRead === false) {
+      chat.lastMessage.isRead = true;
+      markAsReadMutation.mutate(chat.lastMessage._id);
+    }
   };
 
   const handleBackToChatList = () => {
@@ -356,9 +351,10 @@ export default function InboxComponent({ config }: InboxComponentProps) {
                             </span>
 
                             {/* Unread dot */}
-                            {chat?.lastMessage?.isRead === false && (
-                              <span className="h-2 w-2 bg-[#00998E] rounded-full inline-block ml-2" />
-                            )}
+                            {chat.lastMessage?.senderId !== myUserId &&
+                              chat?.lastMessage?.isRead === false && (
+                                <span className="h-2 w-2 bg-[#00998E] rounded-full inline-block ml-2" />
+                              )}
                           </div>
                         </div>
                         <p className="text-sm text-gray-500 truncate mt-1 max-w-[230px]">
