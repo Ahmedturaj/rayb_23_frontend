@@ -49,7 +49,7 @@ export function AccountSettingsForm() {
   const { data, isLoading, isError, error } = useQuery<ApiResponse, Error>({
     queryKey: ['userProfile'],
     queryFn: fetchUserProfile,
-    enabled: !!token // Only fetch when token is available
+    enabled: !!token
   })
 
   if (isLoading) {
