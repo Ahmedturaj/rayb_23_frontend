@@ -283,6 +283,8 @@ export default function InboxComponent({ config }: InboxComponentProps) {
     lastMessage: liveMessages[liveMessages.length - 1]?.message,
   });
 
+  console.log("The chats: ", chats);
+
   return (
     <div className="flex gap-5 h-[70vh] bg-white container">
       {/* Left Sidebar - Chat List */}
@@ -294,48 +296,64 @@ export default function InboxComponent({ config }: InboxComponentProps) {
         <ScrollArea className="flex-1">
           <div className="divide-y divide-gray-100">
             {chats?.length > 0 ? (
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              chats.map((chat: any) => (
-                <div
-                  key={config.getChatId(chat)}
-                  className={`p-4 rounded-xl cursor-pointer hover:bg-[#F7F8F8] transition-colors ${
-                    config.getChatId(selectedChat) === config.getChatId(chat)
-                      ? "bg-[#F7F8F8]"
-                      : ""
-                  }`}
-                  onClick={() => handleChatSelect(chat)}
-                >
-                  <div className="flex items-center space-x-3">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage
-                        src={config.getChatImage(chat) || "/placeholder.svg"}
-                      />
-                      <AvatarFallback className="bg-gray-200 text-gray-600">
-                        {getInitials(config.getChatName(chat))}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {config.getChatName(chat)}
+              // Sort chats by last message date (newest first)
+              [...chats]
+                .sort(
+                  (a, b) =>
+                    new Date(b.lastMessage?.date).getTime() -
+                    new Date(a.lastMessage?.date).getTime()
+                )
+                .map((chat: any) => (
+                  <div
+                    key={config.getChatId(chat)}
+                    className={`p-4 rounded-xl cursor-pointer hover:bg-[#F7F8F8] transition-colors ${
+                      config.getChatId(selectedChat) === config.getChatId(chat)
+                        ? "bg-[#F7F8F8]"
+                        : ""
+                    }`}
+                    onClick={() => handleChatSelect(chat)}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage
+                          src={config.getChatImage(chat) || "/placeholder.svg"}
+                        />
+                        <AvatarFallback className="bg-gray-200 text-gray-600">
+                          {getInitials(config.getChatName(chat))}
+                        </AvatarFallback>
+                      </Avatar>
+
+                      <div className="flex-1 relative">
+                        {/* Chat name and last message */}
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {config.getChatName(chat)}
+                          </p>
+
+                          <div className="">
+                            <span className="text-xs text-gray-500">
+                              {chat.lastMessage &&
+                                formatTime(chat.lastMessage.date)}
+                            </span>
+
+                            {/* Unread dot */}
+                            {chat?.lastMessage?.isRead === false && (
+                              <span className="h-2 w-2 bg-[#00998E] rounded-full inline-block ml-2" />
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-500 truncate mt-1 max-w-[230px]">
+                          <span>
+                            {chat.lastMessage?.senderId === myUserId
+                              ? "You: "
+                              : ""}
+                          </span>
+                          {chat.lastMessage?.message || "No messages yet"}
                         </p>
-                        <span className="text-xs text-gray-500">
-                          {chat.lastMessage &&
-                            formatTime(chat.lastMessage.date)}
-                        </span>
                       </div>
-                      <p className="text-sm text-gray-500 truncate mt-1 max-w-[230px]">
-                        <span>
-                          {chat.lastMessage?.senderId === myUserId
-                            ? "You: "
-                            : ""}
-                        </span>
-                        {chat.lastMessage?.message || "No messages yet"}
-                      </p>
                     </div>
                   </div>
-                </div>
-              ))
+                ))
             ) : (
               <div className="flex flex-col items-center justify-center h-full p-8 text-center">
                 <p className="mb-4 text-gray-500">{config.emptyStateText}</p>
