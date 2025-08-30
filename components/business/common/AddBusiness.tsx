@@ -130,7 +130,6 @@ const AddBusiness = () => {
     },
   });
 
-  
   // buy / cell/ trade / rent related state
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -314,12 +313,17 @@ const AddBusiness = () => {
     mutationFn: async (data: FormData) => {
       const res = await addBusiness(data);
       if (!res.success) {
-        throw new Error(res.error || "Business creation failed");
+        throw new Error(
+          res.response.data.message || "Business creation failed"
+        );
       }
       return res;
     },
-    onSuccess: () => {
-      toast.success("Business added successfully!");
+    onSuccess: (data) => {
+      toast.success(
+        data?.message ||
+          "Business Created Successfully. Please wait for admin approval."
+      );
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {

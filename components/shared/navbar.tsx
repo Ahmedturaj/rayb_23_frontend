@@ -632,10 +632,10 @@ const Navbar = () => {
                     <Link
                       href={
                         userData?.userType === "user"
-                          ? "customer-dashboard/profile"
+                          ? "/customer-dashboard/profile"
                           : userData?.userType === "admin"
-                          ? "admin-dashboard/settings"
-                          : "business-dashboard/profile"
+                          ? "/admin-dashboard/settings"
+                          : "/business-dashboard/profile"
                       }
                       className="flex gap-2 items-center"
                     >

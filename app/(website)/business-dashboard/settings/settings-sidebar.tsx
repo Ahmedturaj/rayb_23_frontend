@@ -24,7 +24,7 @@ export default function SettingsSidebar() {
             icon: Shield,
         },
         {
-            href: "/business-dashboard/settings/notifications",
+            href: "/notifications",
             label: "Notifications",
             description: "Manage your notification settings",
             icon: Bell,
