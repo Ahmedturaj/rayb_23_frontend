@@ -25,6 +25,22 @@ export interface Review {
     createdAt: string;
 }
 
+interface BusinessItem {
+  email: string;
+  name: string;
+  image: string;
+}
+
+interface Service {
+  newInstrumentName: string;
+}
+
+interface Business {
+  _id: string;
+  businessInfo: BusinessItem;
+  services: Service[];
+}
+
 
 export default function ContributionTabs() {
 
@@ -45,8 +61,6 @@ export default function ContributionTabs() {
         queryFn: getUserBusinesses,
         select: (data) => data?.data
     })
-
-    console.log(myBusinesses);
 
     return (
         <div>
@@ -270,7 +284,7 @@ export default function ContributionTabs() {
                         myBusinesses?.length > 0 ?
                             (
                                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                    {myBusinesses.map((business: { _id: string; name: string; image: string[]; status?: string; rating: number | null; reviewsCount: number; address: string; }) => (
+                                    {myBusinesses.map((business: Business) => (
                                         <BusinessCard key={business._id} business={business} />
                                     ))}
                                 </div>
