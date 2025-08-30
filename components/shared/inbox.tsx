@@ -296,7 +296,6 @@ export default function InboxComponent({ config }: InboxComponentProps) {
         <ScrollArea className="flex-1">
           <div className="divide-y divide-gray-100">
             {chats?.length > 0 ? (
-              // Sort chats by last message date (newest first)
               [...chats]
                 .sort(
                   (a, b) =>
