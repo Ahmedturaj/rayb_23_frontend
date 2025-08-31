@@ -120,7 +120,7 @@ export default function UserSavedData() {
               {/* Profile Image */}
               <div className="flex-shrink-0 overflow-hidden rounded-lg">
                 <Image
-                  src={business?.savedBusiness?.businessInfo?.image[0] || "/placeholder.svg"}
+                  src={business?.savedBusiness?.businessInfo?.image[0]}
                   alt={"business.png"}
                   width={1000}
                   height={1000}

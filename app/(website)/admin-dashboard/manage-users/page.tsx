@@ -228,7 +228,7 @@ export default function ManageUsersPage() {
                 >
                   <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 flex items-center gap-3 text-base font-medium text-[#252525]">
                     <Avatar className="w-9 h-9 border">
-                      <AvatarImage src={user.imageLink || "/placeholder.svg"} alt={typeof user.name === 'string' ? user.name : user.name ? String(user.name) : undefined} />
+                      <AvatarImage src={user.imageLink} alt={typeof user.name === 'string' ? user.name : user.name ? String(user.name) : undefined} />
                       <AvatarFallback>{typeof user.name === 'string' && user.name ? user.name.charAt(0) : '?'}</AvatarFallback>
                     </Avatar>
                     {user.name}

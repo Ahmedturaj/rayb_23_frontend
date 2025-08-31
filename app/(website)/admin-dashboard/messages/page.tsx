@@ -232,7 +232,7 @@ export default function InboxPage() {
                                 >
                                     <div className="flex items-center space-x-3">
                                         <Avatar className="h-12 w-12">
-                                            <AvatarImage src={chat?.bussinessId?.businessInfo?.image[0] || "/placeholder.svg"} />
+                                            <AvatarImage src={chat?.bussinessId?.businessInfo?.image[0]} />
                                             <AvatarFallback className="bg-gray-200 text-gray-600">
                                                 {getInitials(chat?.bussinessId?.businessInfo?.name)}
                                             </AvatarFallback>
@@ -291,7 +291,7 @@ export default function InboxPage() {
                                     </div>
                                 </div>
                                 <Avatar className="h-12 w-12 mt-1">
-                                    <AvatarImage src={selectedChat?.bussinessId?.businessInfo?.image[0] || "/placeholder.svg"} />
+                                    <AvatarImage src={selectedChat?.bussinessId?.businessInfo?.image[0]} />
                                     <AvatarFallback className="bg-gray-200 text-gray-600 text-xs">
                                         {getInitials(selectedChat?.senderId?.name || selectedChat?.userId?.name)}
                                     </AvatarFallback>
@@ -313,7 +313,7 @@ export default function InboxPage() {
                                             <div className="flex items-start space-x-2 max-w-xs lg:max-w-md">
                                                 {!isMyMessage && (
                                                     <Avatar className="h-8 w-8 mt-1">
-                                                        <AvatarImage src={msg.senderId?.image || "/placeholder.svg"} />
+                                                        <AvatarImage src={msg.senderId?.image} />
                                                         <AvatarFallback className="bg-gray-200 text-gray-600 text-xs">
                                                             {getInitials(msg?.senderId?.name || selectedChat?.userId?.name)}
                                                         </AvatarFallback>
@@ -329,7 +329,7 @@ export default function InboxPage() {
                                                 </div>
                                                 {isMyMessage && (
                                                     <Avatar className="h-8 w-8 mt-1">
-                                                        <AvatarImage src={msg.senderId?.imageLink || "/placeholder.svg"} />
+                                                        <AvatarImage src={msg.senderId?.imageLink} />
                                                         <AvatarFallback className="bg-gray-200 text-gray-600 text-xs">
                                                             {getInitials(msg?.senderId?.name || selectedChat?.userId?.name)}
                                                         </AvatarFallback>

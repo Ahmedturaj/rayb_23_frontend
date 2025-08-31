@@ -86,9 +86,9 @@ const fetchReviews = async (
   return data.data.map((entry: Review) => ({
     id: entry._id,
     userName: entry.user?.name || "Unknown User",
-    userAvatar: "/placeholder.svg?height=40&width=40",
+    userAvatar: "",
     userDescription: entry.user?.email || entry.feedback || "No description available",
-    images: entry.image.length > 0 ? entry.image : ["/placeholder.svg?height=150&width=150"],
+    images: entry.image.length > 0 ? entry.image : [""],
     status: entry.status === "pending" ? "under_review" : (entry.status as "under_review" | "approved" | "rejected"),
     rating: entry.rating,
   }));

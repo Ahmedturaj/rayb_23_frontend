@@ -160,7 +160,7 @@ export default function BdDashComponent() {
                     <div>
                       <Avatar className="h-10 w-10">
                         <AvatarImage
-                          src={review.user.imageLink || "/placeholder.svg"}
+                          src={review.user.imageLink}
                         />
                         <AvatarFallback className="bg-yellow-500 text-white">
                           {review.user.name
@@ -249,7 +249,7 @@ export default function BdDashComponent() {
                       <div className="flex items-start gap-3">
                         <Avatar className="h-10 w-10">
                           <AvatarImage
-                            src={message.userId.imageLink || "/placeholder.svg"}
+                            src={message.userId.imageLink}
                           />
                           <AvatarFallback className="bg-gray-500 text-white text-xs uppercase">
                             {message.userId.name
