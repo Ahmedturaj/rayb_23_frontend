@@ -184,7 +184,7 @@ export default function ContributionTabs() {
                                     </div>
                                     <Link href="/review-business" className="flex-shrink-0">
                                         <Button>
-                                            Add a Review
+                                            Write a Review
                                         </Button>
                                     </Link>
                                 </div>
