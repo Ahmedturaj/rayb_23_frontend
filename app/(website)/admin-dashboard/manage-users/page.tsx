@@ -261,10 +261,16 @@ export default function ManageUsersPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => handleViewUser(String(user._id))}>
-                          View User
+                          View Profile
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleDeleteUser(String(user._id))}>
-                          Deactivate User
+                          Suspend
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDeleteUser(String(user._id))}>
+                          Unsuspend
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDeleteUser(String(user._id))}>
+                          Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
