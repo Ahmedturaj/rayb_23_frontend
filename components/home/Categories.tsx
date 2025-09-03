@@ -5,32 +5,32 @@ const Categories = () => {
   const categories = [
     {
       link: "/search-result?instrumentFamily=Strings",
-      image: "/images/strings.png",
+      image: "/images/strings.svg",
       title: "Strings",
     },
     {
       link: "/search-result?instrumentFamily=Woodwinds",
-      image: "/images/woodwinds.png",
+      image: "/images/woodwinds.svg",
       title: "Woodwinds",
     },
     {
       link: "/search-result?instrumentFamily=Percussions",
-      image: "/images/percussions.png",
+      image: "/images/percussions.svg",
       title: "Percussions",
     },
     {
       link: "/search-result?instrumentFamily=Brass",
-      image: "/images/brass.png",
+      image: "/images/brass.svg",
       title: "Brass",
     },
     {
       link: "/search-result?instrumentFamily=Keyboard",
-      image: "/images/Keyboard.png",
+      image: "/images/Keyboard.svg",
       title: "Keyboard",
     },
     {
       link: "/search-result?instrumentFamily=Other",
-      image: "/images/others.png",
+      image: "/images/others.svg",
       title: "Other",
     },
   ];
@@ -39,10 +39,10 @@ const Categories = () => {
     <section className="bg-[#f0f9f9] py-20">
       <div className="container">
         <div className="text-center">
-          <h1 className="text-[40px] text-gray-700 font-semibold">
+          <h1 className="text-[40px] font-bold">
             Instrument Families
           </h1>
-          <p className="text-[20px] text-gray-600">
+          <p className="text-[20px] text-gray-600 font-medium">
             Explore the six major families of instruments and find out where
             your instrument belongs.
           </p>
@@ -61,7 +61,7 @@ const Categories = () => {
                   />
                 </div>
 
-                <h1 className="mt-4 font-semibold text-gray-700">
+                <h1 className="mt-4 font-semibold">
                   {category.title}
                 </h1>
               </div>

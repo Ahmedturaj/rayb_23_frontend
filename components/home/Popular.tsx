@@ -81,12 +81,11 @@ const Popular = () => {
     <section className="py-20">
       <div className="container">
         <div className="text-center">
-          <h1 className="text-[40px] text-gray-700 font-semibold">
-            Popular Instrument Shop
+          <h1 className="text-[40px] font-bold">
+            Popular Instrument Repair Shops
           </h1>
-          <p className="text-[20px] text-gray-600">
-            Explore the six major families of instruments and find out where
-            your instrument belongs.
+          <p className="text-[20px] text-gray-600 font-medium">
+            Explore the most popular music instrument repair shops in your area
           </p>
         </div>
 

@@ -6,7 +6,7 @@ export default function Footer() {
   return (
     <footer className="py-20 bg-[#139a8e]">
       <div className="container text-white">
-        <div className="grid grid-cols-1 lg:grid-cols-7 gap-10 border-b-2 pb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 border-b-2 pb-10">
           <div className="col-span-2">
             <h1 className="font-bold text-2xl mb-3">Instrufix</h1>
             <p>
@@ -14,6 +14,21 @@ export default function Footer() {
               it’s a violin, guitar, or piano, we connect you to experts who’ll
               bring your instrument back to life. Start your search today!
             </p>
+          </div>
+
+          <div>
+            <h1 className="font-semibold text-lg mb-3">For Customer</h1>
+            <ul>
+              <Link href={"/review-business"}>
+                <li>Write a Review</li>
+              </Link>
+              <Link href={"/add-a-business"}>
+                <li>Add a Business</li>
+              </Link>
+              <Link href={"/login"}>
+                <li>Login</li>
+              </Link>
+            </ul>
           </div>
 
           <div>
@@ -25,17 +40,8 @@ export default function Footer() {
               <Link href={"/claim-your-business"}>
                 <li>Claim my Business</li>
               </Link>
-            </ul>
-          </div>
-
-          <div>
-            <h1 className="font-semibold text-lg mb-3">For Customers</h1>
-            <ul>
-              <Link href={"/review-business"}>
-                <li>Write a Review</li>
-              </Link>
-              <Link href={"/add-a-business"}>
-                <li>Add a Business</li>
+              <Link href={"/login"}>
+                <li>Login</li>
               </Link>
             </ul>
           </div>
@@ -43,8 +49,9 @@ export default function Footer() {
           <div>
             <h1 className="font-semibold text-lg mb-3">Contact</h1>
             <ul>
-              <li>+33 7 71 74 73 27</li>
-              <li>contact@instrufix.com</li>
+              <Link href={'/'}>
+                <li>contact@instrufix.com</li>
+              </Link>
             </ul>
           </div>
         </div>

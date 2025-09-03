@@ -513,32 +513,41 @@ const Navbar = () => {
           {sessionStatus === "unauthenticated" && (
             <div className="flex gap-5 items-center">
               <DropdownMenu>
-                <DropdownMenuTrigger className="hover:text-teal-400 flex gap-1 items-center outline-none">
+                <DropdownMenuTrigger className="hover:text-primary flex gap-1 items-center outline-none">
                   For Customer <ChevronDown className="ml-1 h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white border-gray-700 border-none">
-                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
-                    Write a Review
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
-                    Add a Business
-                  </DropdownMenuItem>
+                  <Link href={"/review-business"}>
+                    <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                      Write a Review
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link href={"/add-a-business"}>
+                    <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                      Add a Business
+                    </DropdownMenuItem>
+                  </Link>
                   <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
                     <Link href="/auth/login">Log In</Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               <DropdownMenu>
-                <DropdownMenuTrigger className="hover:text-teal-400 flex gap-1 items-center outline-none">
+                <DropdownMenuTrigger className="hover:text-primary flex gap-1 items-center outline-none">
                   For Business <ChevronDown className="ml-1 h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white border-gray-700 border-none">
-                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
-                    Add My Business
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
-                    Claim My Business
-                  </DropdownMenuItem>
+                  <Link href={"/add-a-business"}>
+                    <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                      Add My Business
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link href={'/claim-your-business'}>
+                    {" "}
+                    <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                      Claim My Business
+                    </DropdownMenuItem>
+                  </Link>
                   <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
                     <Link href="/auth/login">Log In</Link>
                   </DropdownMenuItem>
