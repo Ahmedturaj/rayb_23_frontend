@@ -321,7 +321,9 @@ const Navbar = () => {
                         {isLoading ? (
                           <div className="p-4 text-center">Searching...</div>
                         ) : searchResults.length === 0 && searchQuery ? (
-                          <div className="p-4 text-gray-500">No results found</div>
+                          <div className="p-4 text-gray-500">
+                            No results found
+                          </div>
                         ) : (
                           <ul>
                             {searchResults.slice(0, 5).map((business) => (
@@ -513,32 +515,41 @@ const Navbar = () => {
           {sessionStatus === "unauthenticated" && (
             <div className="flex gap-5 items-center">
               <DropdownMenu>
-                <DropdownMenuTrigger className="hover:text-teal-400 flex gap-1 items-center outline-none">
+                <DropdownMenuTrigger className="hover:text-primary flex gap-1 items-center outline-none">
                   For Customer <ChevronDown className="ml-1 h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white border-gray-700 border-none">
-                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
-                    Write a Review
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
-                    Add a Business
-                  </DropdownMenuItem>
+                  <Link href={"/review-business"}>
+                    <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                      Write a Review
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link href={"/add-a-business"}>
+                    <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                      Add a Business
+                    </DropdownMenuItem>
+                  </Link>
                   <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
                     <Link href="/auth/login">Log In</Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               <DropdownMenu>
-                <DropdownMenuTrigger className="hover:text-teal-400 flex gap-1 items-center outline-none">
+                <DropdownMenuTrigger className="hover:text-primary flex gap-1 items-center outline-none">
                   For Business <ChevronDown className="ml-1 h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white border-gray-700 border-none">
-                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
-                    Add My Business
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
-                    Claim My Business
-                  </DropdownMenuItem>
+                  <Link href={"/add-a-business"}>
+                    <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                      Add My Business
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link href={'/claim-your-business'}>
+                    {" "}
+                    <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                      Claim My Business
+                    </DropdownMenuItem>
+                  </Link>
                   <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
                     <Link href="/auth/login">Log In</Link>
                   </DropdownMenuItem>
@@ -591,9 +602,7 @@ const Navbar = () => {
                 </Link>
               )}
               <div className="flex items-center justify-center h-12 w-12 bg-[#F7F8F8] rounded-full relative">
-                <Link
-                  href={`/notifications`}
-                >
+                <Link href={`/notifications`}>
                   <Bell className="h-6 w-6" />
                   {notificationCount > 0 && (
                     <span

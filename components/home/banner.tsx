@@ -46,7 +46,7 @@ export default function BannerHome() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [showResults, setShowResults] = useState<boolean>(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [location, setLocation] = useState<string>("Central Park, NY");
+  const [location, setLocation] = useState<string>("San Francisco, CA");
   const [searchResults, setSearchResults] = useState<Business[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
@@ -118,13 +118,13 @@ export default function BannerHome() {
       <div className="container flex flex-col lg:flex-row lg:justify-between items-center gap-8">
         {/* Text Section */}
         <div className="text-center lg:text-left">
-          <h1 className="text-3xl sm:text-4xl md:text-[40px] lg:text-[48px] font-semibold leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-[40px] lg:text-[48px] font-bold leading-tight">
             Bring Your Instrument
           </h1>
-          <h1 className="text-3xl sm:text-4xl md:text-[40px] lg:text-[48px] font-semibold text-[#139a8e] leading-tight my-5">
+          <h1 className="text-3xl sm:text-4xl md:text-[40px] lg:text-[48px] font-bold text-[#139a8e] leading-tight my-5">
             Back to Life
           </h1>
-          <p className="text-lg sm:text-xl md:text-2xl text-gray-800 mb-4">
+          <p className="text-lg sm:text-xl md:text-2xl text-gray-800 font-medium mb-4">
             Find the best instrument repair shops near you.
           </p>
 
@@ -143,7 +143,7 @@ export default function BannerHome() {
                 }}
                 onKeyDown={handleKeyPress}
                 onFocus={() => setShowResults(searchQuery.length > 0)}
-                placeholder="Guitar, strings, restringing..."
+                placeholder="Search By Business Name"
                 className="pl-10 w-full h-[48px] border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 bg-[#F7F8F8] rounded-lg border border-gray-200 shadow-inner"
               />
               {searchQuery && (
@@ -234,7 +234,6 @@ export default function BannerHome() {
             <Button
               className="h-[48px] w-full sm:w-[250px]"
               onClick={handleSearch}
-              disabled={!searchQuery.trim()}
             >
               Search
             </Button>
@@ -244,11 +243,11 @@ export default function BannerHome() {
         {/* Image Section */}
         <div className="w-full lg:w-1/2 flex justify-center lg:justify-end lg:-mr-7">
           <Image
-            src={"/images/banner.png"}
+            src={"/images/banner.svg"}
             alt="Instrument repair services"
             width={1000}
             height={1000}
-            className="w-full max-w-[400px] md:max-w-[500px] lg:max-w-[579px] h-auto object-cover"
+            className="w-full max-w-[400px] md:max-w-[500px] lg:max-w-[800px] h-auto object-cover"
             priority
           />
         </div>
