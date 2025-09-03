@@ -42,26 +42,55 @@ export default function LoginForm() {
   });
 
   const onSubmit = async (values: z.infer<typeof signUpFormSchema>) => {
+    const email = values.email.toLowerCase();
+
+    // get stored attempts (object)
+    const stored = localStorage.getItem("failedAttempts");
+    const attemptsObj = stored ? JSON.parse(stored) : {};
+
+    const attempts = attemptsObj[email] || 0;
+
+    // already locked out for this email
+    if (attempts >= 4) {
+      toast.error("Too many failed attempts. Please reset your password.");
+      router.push("/auth/forgot-password");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const res = await signIn("credentials", {
-        email: values.email,
+        email,
         password: values.password,
         redirect: false,
       });
 
       if (res?.ok) {
+        // reset attempts only for this email
+        attemptsObj[email] = 0;
+        localStorage.setItem("failedAttempts", JSON.stringify(attemptsObj));
+
         router.push("/");
         router.refresh();
         return;
       }
 
       if (res?.ok === false) {
+        // increment attempts for this email
+        attemptsObj[email] = (attemptsObj[email] || 0) + 1;
+        localStorage.setItem("failedAttempts", JSON.stringify(attemptsObj));
+
+        if (attemptsObj[email] >= 4) {
+          toast.error("Too many failed attempts. Please reset your password.");
+          router.push("/auth/forgot-password");
+          return;
+        }
+
         if (res.error?.startsWith("VERIFY_EMAIL:")) {
           const token = res.error.split(":")[1];
           router.push(`/auth/verify-email?token=${token}&type=login`);
         } else {
-          toast.error(res.error || "Login failed");
+          toast.error(res.error || "Invalid credentials");
         }
       }
     } catch (error) {

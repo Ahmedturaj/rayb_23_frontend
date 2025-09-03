@@ -34,7 +34,7 @@ export default function UserData() {
 
     return (
         <div>
-            <div className="p-6 bg-white rounded-lg border relative max-w-md mx-auto">
+            <div className="h-72 p-6 bg-white rounded-lg border relative max-w-md mx-auto">
                 <div className="absolute top-5 right-5">
                     <Link href="/customer-dashboard/settings">
                         <Button
