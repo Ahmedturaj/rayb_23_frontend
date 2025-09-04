@@ -92,7 +92,7 @@ async function fetchBusinesses({
   return data.data.map((entry) => ({
     id: entry._id,
     name: entry.businessInfo.name || "Unknown Business",
-    image: entry.businessInfo.image[0] || "/placeholder.svg?height=200&width=200&query=business image",
+    image: entry.businessInfo.image[0],
     address: entry.businessInfo.address || "No address available",
     status: entry.status === "pending" ? "under_review" : (entry.status as "under_review" | "approved" | "rejected"),
   }))

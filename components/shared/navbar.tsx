@@ -391,9 +391,7 @@ const Navbar = () => {
                   <div className="flex flex-col space-y-4 border-b border-gray-200 pb-4">
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        <AvatarImage
-                          src={userData?.imageLink || "/placeholder.svg"}
-                        />
+                        <AvatarImage src={userData?.imageLink} />
                         <AvatarFallback className="uppercase">
                           {(() => {
                             const name = userData?.name?.trim();
@@ -617,9 +615,7 @@ const Navbar = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger className="hover:text-teal-400 flex gap-1 items-center outline-none">
                   <Avatar>
-                    <AvatarImage
-                      src={userData?.imageLink || "/placeholder.svg"}
-                    />
+                    <AvatarImage src={userData?.imageLink} />
                     <AvatarFallback className="uppercase">
                       {(() => {
                         const name = userData?.name?.trim();

@@ -57,9 +57,9 @@ const reviews = [
     date: "2 days ago",
     text: "Excellent service! My guitar was repaired quickly and sounds amazing. The staff was very knowledgeable and friendly. Highly recommend!",
     images: [
-      "/placeholder.svg?height=60&width=60",
-      "/placeholder.svg?height=60&width=60",
-      "/placeholder.svg?height=60&width=60",
+      "",
+      "",
+      "",
     ],
     helpful: 12,
   },
@@ -127,7 +127,7 @@ export default function BusinessProfile() {
             <CardContent className="p-6">
               <div className="flex items-start space-x-4">
                 <Image
-                  src="/placeholder.svg?height=80&width=80"
+                  src=""
                   alt="Brookston Music"
                   width={80}
                   height={80}
@@ -279,7 +279,7 @@ export default function BusinessProfile() {
                             {review.images.map((image, index) => (
                               <Image
                                 key={index}
-                                src={image || "/placeholder.svg"}
+                                src={image}
                                 alt={`Review image ${index + 1}`}
                                 width={60}
                                 height={60}

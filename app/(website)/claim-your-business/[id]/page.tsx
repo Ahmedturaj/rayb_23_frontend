@@ -45,7 +45,7 @@ const SingleBusiness = () => {
           {/* Profile Image */}
           <div className="flex-shrink-0 overflow-hidden rounded-lg w-full max-w-[200px]">
             <Image
-              src={singleBusiness?.businessInfo?.image[0] || "/placeholder.svg"}
+              src={singleBusiness?.businessInfo?.image[0]}
               alt={"business.png"}
               width={1000}
               height={1000}

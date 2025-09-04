@@ -39,7 +39,7 @@ export interface SavedBusiness {
   savedBusiness: {
     businessInfo: BusinessInfo;
   };
-  services: Service[]
+  services: Service[];
   user: UserInfo;
   __v: number;
 }
@@ -85,7 +85,7 @@ export default function UserSavedData() {
       </div>
     );
 
-  if (!savedData) {
+  if (savedData.length === 0) {
     return (
       <div className="flex justify-between items-center bg-[#F7F8F8] p-6 rounded-md">
         <div className="flex items-center gap-4">
@@ -120,7 +120,7 @@ export default function UserSavedData() {
               {/* Profile Image */}
               <div className="flex-shrink-0 overflow-hidden rounded-lg">
                 <Image
-                  src={business?.savedBusiness?.businessInfo?.image[0] || "/placeholder.svg"}
+                  src={business?.savedBusiness?.businessInfo?.image[0]}
                   alt={"business.png"}
                   width={1000}
                   height={1000}
@@ -145,7 +145,7 @@ export default function UserSavedData() {
                     {/* Services */}
                     <div className="flex items-center gap-2">
                       <div className="flex flex-wrap items-center gap-2 mb-2">
-                        {business?.services?.map((service : Service, index) => (
+                        {business?.services?.map((service: Service, index) => (
                           <button
                             className="h-[48px] px-5 rounded-lg bg-[#F8F8F8]"
                             key={index}

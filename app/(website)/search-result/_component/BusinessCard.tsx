@@ -30,7 +30,7 @@ const BusinessCard = ({ business }: { business: Business }) => {
       <div className="flex flex-col sm:flex-row items-start gap-4 lg:gap-5">
         <div className="flex-shrink-0 overflow-hidden rounded-lg w-full sm:w-auto">
           <Image
-            src={business.businessInfo.image?.[0] || "/placeholder.svg"}
+            src={business.businessInfo.image?.[0]}
             alt={business.businessInfo.name || "Business image"}
             width={200}
             height={200}

@@ -4,7 +4,7 @@ import React from 'react'
 
 export default function ProfileLinks() {
     return (
-        <div className='lg:p-8 p-4 rounded-md border space-y-5'>
+        <div className='h-full lg:p-8 p-4 rounded-md border space-y-5'>
             <div className="bg-[#F7F8F8] p-5 rounded-md">
                 <Link href="/customer-dashboard/my-contributions" className='flex items-center justify-between'>
                     <div className="space-y-2">

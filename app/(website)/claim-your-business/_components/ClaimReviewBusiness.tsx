@@ -113,9 +113,7 @@ const ClaimReviewBusiness = () => {
                 {/* Profile Image */}
                 <div className="flex-shrink-0 overflow-hidden rounded-lg w-full sm:w-auto">
                   <Image
-                    src={
-                      business?.businessInfo?.image?.[0] || "/placeholder.svg"
-                    }
+                    src={business?.businessInfo?.image?.[0]}
                     alt="business.png"
                     width={1000}
                     height={1000}
