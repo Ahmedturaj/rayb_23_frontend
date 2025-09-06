@@ -5,6 +5,7 @@ import { getAllInstrument } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import SelectInstrument from "./select-instrument";
 import ServiceType from "./service-type";
+import PriceRange from "./price-range";
 
 const FilterInfo = () => {
   const { data: instrumentFamilies = [], isLoading } = useQuery({
@@ -19,7 +20,7 @@ const FilterInfo = () => {
     <div>
       <h1 className="text-2xl font-bold">Filters</h1>
 
-      <div className="mt-6">
+      <div className="mt-6 border-b">
         <InstrumentFamily
           instrumentFamilies={instrumentFamilies}
           isLoading={isLoading}
@@ -34,6 +35,10 @@ const FilterInfo = () => {
           instrumentFamilies={instrumentFamilies}
           isLoading={isLoading}
         />
+      </div>
+
+      <div className="mt-3">
+        <PriceRange />
       </div>
     </div>
   );

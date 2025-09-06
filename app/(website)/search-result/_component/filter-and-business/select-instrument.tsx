@@ -27,9 +27,6 @@ const SelectInstrument: React.FC<InstrumentFamilyProps> = ({
   instrumentFamilies,
   isLoading,
 }) => {
-
-    console.log(instrumentFamilies)
-
   return (
     <div>
       <Accordion
@@ -39,7 +36,7 @@ const SelectInstrument: React.FC<InstrumentFamilyProps> = ({
         className="w-full"
       >
         <AccordionItem className="border-none" value="item-1">
-          <AccordionTrigger className="hover:no-underline text-xl gap-2">
+          <AccordionTrigger className="hover:no-underline text-xl gap-2 justify-normal">
             Select Instrument
           </AccordionTrigger>
 

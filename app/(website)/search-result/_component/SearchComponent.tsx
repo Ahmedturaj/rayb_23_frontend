@@ -9,8 +9,8 @@ const SearchComponent = () => {
       {/* for desktop version */}
       <div className="hidden lg:block">
         <div className="flex items-start gap-8 ">
-          <div className="w-[20%] flex items-start justify-between sticky top-36 z-40">
-            <div >
+          <div className="w-[23%] flex items-start justify-between sticky top-36 z-40">
+            <div className="pr-8">
               <FilterInfo />
             </div>
 

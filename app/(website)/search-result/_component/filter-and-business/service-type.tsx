@@ -37,7 +37,7 @@ const ServiceType: React.FC<InstrumentFamilyProps> = ({
         className="w-full"
       >
         <AccordionItem className="border-none" value="item-1">
-          <AccordionTrigger className="hover:no-underline text-xl gap-2">
+          <AccordionTrigger className="hover:no-underline text-xl gap-2 justify-normal">
             Service Type
           </AccordionTrigger>
 
