@@ -8,12 +8,14 @@ const SearchComponent = () => {
     <div className="min-h-[calc(100vh-300px)]">
       {/* for desktop version */}
       <div className="hidden lg:block">
-        <div className="flex items-start gap-8">
-          <div className="w-[25%] ">
-            <FilterInfo />
-          </div>
+        <div className="flex items-start gap-8 ">
+          <div className="w-[20%] flex items-start justify-between sticky top-36 z-40">
+            <div >
+              <FilterInfo />
+            </div>
 
-          <div className="border-r-2 border-[#e7e9e9] min-h-screen"></div>
+            <div className="border-r-2 border-[#e7e9e9] min-h-screen"></div>
+          </div>
 
           <div className="flex-1">
             <BusinessInfo />
