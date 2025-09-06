@@ -61,7 +61,7 @@ const BusinessCard = ({ business }: { business: Business }) => {
                 </div>
                 <div>
                   <Link href={`/search-result/${business._id}`}>
-                    <button className="text-teal-500 text-sm lg:text-base">
+                    <button className="text-primary text-sm lg:text-base">
                       See More
                     </button>
                   </Link>

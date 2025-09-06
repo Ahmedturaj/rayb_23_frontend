@@ -175,9 +175,9 @@ export async function addBusiness(payload: any) {
 }
 
 //get all business
-export async function getAllbusiness(params = {}) {
+export async function getAllbusiness() {
   try {
-    const res = await api.get("/business", { params });
+    const res = await api.get("/business");
     return res.data;
   } catch (error) {
     console.error("error fetching all business", error);
