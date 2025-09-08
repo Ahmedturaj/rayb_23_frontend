@@ -30,8 +30,8 @@ const BusinessCard = ({ business }: { business: Business }) => {
       <div className="flex flex-col sm:flex-row items-start gap-4 lg:gap-5">
         <div className="flex-shrink-0 overflow-hidden rounded-lg w-full sm:w-auto">
           <Image
-            src={business.businessInfo.image?.[0]}
-            alt={business.businessInfo.name || "Business image"}
+            src={business.businessInfo?.image?.[0]}
+            alt={business.businessInfo?.name || "Business image"}
             width={200}
             height={200}
             className="rounded-lg object-cover w-full sm:w-[200px] h-[160px] sm:h-[200px] hover:scale-105 transition"
@@ -41,7 +41,7 @@ const BusinessCard = ({ business }: { business: Business }) => {
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
             <div>
               <h3 className="text-lg font-semibold text-gray-900">
-                {business.businessInfo.name}
+                {business.businessInfo?.name}
               </h3>
               <div className="flex items-center gap-1 my-2 lg:my-3">
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />

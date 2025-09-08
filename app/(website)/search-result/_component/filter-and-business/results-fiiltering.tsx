@@ -5,9 +5,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useFilterStore } from "@/zustand/stores/search-store";
 import React from "react";
 
 const ResultsFiltering = () => {
+  const { setSort } = useFilterStore();
+
   return (
     <div className="flex items-center justify-between">
       <div>
@@ -17,12 +20,15 @@ const ResultsFiltering = () => {
 
       <div>
         <h1 className="text-gray-500">Sort by</h1>
-        <Select defaultValue="hight-to-low">
+        <Select
+          defaultValue="high-to-low"
+          onValueChange={(value) => setSort(value)}
+        >
           <SelectTrigger className="border-none focus:ring-offset-0 p-0 h-5 focus:ring-0 shadow-none justify-normal gap-2 focus:border-0">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="hight-to-low">Rated High to Low</SelectItem>
+            <SelectItem value="high-to-low">Rated High to Low</SelectItem>
             <SelectItem value="low-to-high">Rated Low to High</SelectItem>
           </SelectContent>
         </Select>
