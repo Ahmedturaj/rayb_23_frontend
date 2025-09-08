@@ -54,7 +54,6 @@ const Navbar = () => {
 
   const pathname = usePathname();
   const router = useRouter();
-  const isAuthPage = pathname.startsWith("/auth");
 
   // Search functionality state
   const { search, setSearch } = useFilterStore();
@@ -144,8 +143,6 @@ const Navbar = () => {
 
   const notificationCount = notifications.length;
 
-  console.log("searchResults : ", searchResults);
-
   return (
     <nav className="p-4 border-b sticky top-0 z-50 bg-white">
       <div className="container flex items-center justify-between h-14">
@@ -155,7 +152,7 @@ const Navbar = () => {
         </Link>
 
         {/* Search Bar (hidden on mobile, visible on desktop) */}
-        {!isAuthPage && (
+        {pathname === "/search-result" && (
           <div
             className="hidden md:flex flex-1 max-w-xl mx-auto items-center relative"
             ref={searchRef}
@@ -300,7 +297,7 @@ const Navbar = () => {
             >
               <div className="flex flex-col space-y-6 p-4">
                 {/* Mobile Search Bar */}
-                {!isAuthPage && (
+                {pathname === "/search-result" && (
                   <div className="relative" ref={searchRef}>
                     <div className="flex items-center bg-[#F7F8F8] rounded-xl shadow-inner overflow-hidden">
                       <Search className="ml-3 text-gray-500 h-5 w-5" />
