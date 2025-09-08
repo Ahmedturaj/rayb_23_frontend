@@ -25,6 +25,9 @@ interface Business {
 }
 
 const BusinessCard = ({ business }: { business: Business }) => {
+
+  console.log("single business : ", business)
+
   return (
     <div className="bg-white rounded-lg shadow-[0px_2px_12px_0px_#003d3924] p-4 lg:p-6">
       <div className="flex flex-col sm:flex-row items-start gap-4 lg:gap-5">
