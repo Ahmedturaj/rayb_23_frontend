@@ -28,10 +28,22 @@ const SelectInstrument: React.FC<InstrumentFamilyProps> = ({
   instrumentFamilies,
   isLoading,
 }) => {
-  const { setInstrumentTag, instrumentTag } = useFilterStore();
+  const {
+    setInstrumentTag,
+    instrumentTag,
+    setSelectService,
+    instrument,
+    setService,
+  } = useFilterStore();
+
+  const filteredInstrument = instrumentFamilies.filter(
+    (item) => item.instrumentFamily === instrument
+  );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInstrumentTag(e.target.value);
+    setService(e.target.value);
+    setSelectService(true);
   };
 
   return (
@@ -54,7 +66,7 @@ const SelectInstrument: React.FC<InstrumentFamilyProps> = ({
               ))}
             </div>
           ) : (
-            instrumentFamilies.map((family) => (
+            filteredInstrument.map((family) => (
               <AccordionContent
                 key={family._id}
                 className="flex flex-col gap-2 text-balance"

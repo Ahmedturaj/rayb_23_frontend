@@ -29,7 +29,22 @@ const ServiceType: React.FC<InstrumentFamilyProps> = ({
   instrumentFamilies,
   isLoading,
 }) => {
-  const { serviceTag, setServiceTag } = useFilterStore();
+  const { serviceTag, setServiceTag, service } = useFilterStore();
+
+  console.log("service : ", service);
+
+  const filteredServices = instrumentFamilies
+  .map((family) => ({
+    ...family,
+    instrumentTypes: family.instrumentTypes.filter(
+      (type) => type.type === service
+    ),
+  }))
+  .filter((family) => family.instrumentTypes.length > 0);
+
+  console.log("service : ", service);
+
+  console.log("filteredServices : ", filteredServices);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setServiceTag(e.target.value);
@@ -55,7 +70,7 @@ const ServiceType: React.FC<InstrumentFamilyProps> = ({
               ))}
             </div>
           ) : (
-            instrumentFamilies.map((family) => (
+            filteredServices.map((family) => (
               <AccordionContent
                 key={family._id}
                 className="flex flex-col gap-2 text-balance"

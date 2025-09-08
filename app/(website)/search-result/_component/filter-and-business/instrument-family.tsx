@@ -17,10 +17,13 @@ const InstrumentFamily: React.FC<InstrumentFamilyProps> = ({
   instrumentFamilies,
   isLoading,
 }) => {
-  const { setFamilyTag, familyTag } = useFilterStore();
+  const { setFamilyTag, familyTag, setSelectInstrument, setInstrument } =
+    useFilterStore();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFamilyTag(e.target.value);
+    setInstrument(e.target.value);
+    setSelectInstrument(true);
   };
 
   return (
@@ -37,7 +40,7 @@ const InstrumentFamily: React.FC<InstrumentFamilyProps> = ({
           </AccordionTrigger>
 
           {isLoading ? (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col pb-5 gap-2">
               {[1, 2, 3].map((_, idx) => (
                 <FilterSkeleton key={idx} />
               ))}
