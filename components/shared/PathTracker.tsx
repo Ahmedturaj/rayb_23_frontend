@@ -70,7 +70,7 @@ const PathTracker = ({
           <h1 className="font-semibold text-[32px] my-3">
             {segments.length
               ? capitalize(header ? header : segments[segments.length - 1])
-              : "Home"}
+              : "Home'"}
           </h1>
         )}
 
