@@ -26,6 +26,14 @@ interface IFilterStore {
   setSort: (value: string) => void;
   search: string;
   setSearch: (value: string) => void;
+  selectInstrument: boolean;
+  setSelectInstrument: (value: boolean) => void;
+  selectService: boolean;
+  setSelectService: (value: boolean) => void;
+  instrument: string;
+  setInstrument: (value: string) => void;
+  service: string;
+  setService: (value: string) => void;
 }
 
 const initialState: Pick<
@@ -39,6 +47,10 @@ const initialState: Pick<
   | "open"
   | "sort"
   | "search"
+  | "selectInstrument"
+  | "selectService"
+  | "instrument"
+  | "service"
 > = {
   familyTag: [],
   instrumentTag: [],
@@ -49,6 +61,10 @@ const initialState: Pick<
   open: false,
   sort: "",
   search: "",
+  selectInstrument: false,
+  selectService: false,
+  instrument: "",
+  service: "",
 };
 
 export const useFilterStore = create<IFilterStore>((set) => ({
@@ -100,6 +116,30 @@ export const useFilterStore = create<IFilterStore>((set) => ({
   setSearch: (value) => {
     set({
       search: value,
+    });
+  },
+
+  setSelectInstrument: (value) => {
+    set({
+      selectInstrument: value,
+    });
+  },
+
+  setSelectService: (value) => {
+    set({
+      selectService: value,
+    });
+  },
+
+  setInstrument: (value) => {
+    set({
+      instrument: value,
+    });
+  },
+
+  setService: (value) => {
+    set({
+      service: value,
     });
   },
 }));

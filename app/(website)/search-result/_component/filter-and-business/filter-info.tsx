@@ -7,8 +7,11 @@ import SelectInstrument from "./select-instrument";
 import ServiceType from "./service-type";
 import PriceRange from "./price-range";
 import AlsoOffers from "./also-offers";
+import { useFilterStore } from "@/zustand/stores/search-store";
 
 const FilterInfo = () => {
+  const { selectInstrument, selectService } = useFilterStore();
+
   const { data: instrumentFamilies = [], isLoading } = useQuery({
     queryKey: ["all-instrument"],
     queryFn: async () => {
@@ -27,15 +30,19 @@ const FilterInfo = () => {
           isLoading={isLoading}
         />
 
-        <SelectInstrument
-          instrumentFamilies={instrumentFamilies}
-          isLoading={isLoading}
-        />
+        {selectInstrument && (
+          <SelectInstrument
+            instrumentFamilies={instrumentFamilies}
+            isLoading={isLoading}
+          />
+        )}
 
-        <ServiceType
-          instrumentFamilies={instrumentFamilies}
-          isLoading={isLoading}
-        />
+        {selectService && (
+          <ServiceType
+            instrumentFamilies={instrumentFamilies}
+            isLoading={isLoading}
+          />
+        )}
       </div>
 
       <div className="mt-3">
