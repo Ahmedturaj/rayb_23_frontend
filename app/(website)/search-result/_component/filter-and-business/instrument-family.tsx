@@ -5,6 +5,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useFilterStore } from "@/zustand/stores/search-store";
 import React from "react";
 
 interface InstrumentFamilyProps {
@@ -16,6 +17,12 @@ const InstrumentFamily: React.FC<InstrumentFamilyProps> = ({
   instrumentFamilies,
   isLoading,
 }) => {
+  const { setFamilyTag, familyTag } = useFilterStore();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFamilyTag(e.target.value);
+  };
+
   return (
     <div>
       <Accordion
@@ -41,7 +48,16 @@ const InstrumentFamily: React.FC<InstrumentFamilyProps> = ({
                 key={index}
                 className="flex items-center gap-2 text-balance"
               >
-                <input name="family" type="radio" className="h-4 w-4 accent-primary" />
+                <input
+                  checked={familyTag.some(
+                    (family) => family.label === item.instrumentFamily
+                  )}
+                  name="family"
+                  type="radio"
+                  className="h-4 w-4 accent-primary"
+                  value={item.instrumentFamily}
+                  onChange={handleInputChange}
+                />
                 <h1 className="text-base">{item?.instrumentFamily}</h1>
               </AccordionContent>
             ))

@@ -20,8 +20,8 @@ const PriceRange = ({}) => {
             Price Range
           </AccordionTrigger>
 
-          <AccordionContent className="flex flex-col gap-2 text-balance">
-            <h1 className="text-gray-600">
+          <AccordionContent className="flex flex-col gap-2">
+            <h1 className="text-gray-600 w-full text-sm">
               Pricing is an estimate and subject to change. Contact the shop for
               an accurate quote.
             </h1>
