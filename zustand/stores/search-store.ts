@@ -20,6 +20,12 @@ interface IFilterStore {
   setMaxPriceRange: (value: string) => void;
   offers: boolean;
   setOffers: (value: boolean) => void;
+  open: boolean;
+  setOpen: (value: boolean) => void;
+  sort: string;
+  setSort: (value: string) => void;
+  search: string;
+  setSearch: (value: string) => void;
 }
 
 const initialState: Pick<
@@ -30,6 +36,9 @@ const initialState: Pick<
   | "minPriceRange"
   | "offers"
   | "maxPriceRange"
+  | "open"
+  | "sort"
+  | "search"
 > = {
   familyTag: [],
   instrumentTag: [],
@@ -37,6 +46,9 @@ const initialState: Pick<
   minPriceRange: "",
   offers: false,
   maxPriceRange: "",
+  open: false,
+  sort: "",
+  search: "",
 };
 
 export const useFilterStore = create<IFilterStore>((set) => ({
@@ -74,5 +86,20 @@ export const useFilterStore = create<IFilterStore>((set) => ({
   },
   setOffers: (value) => {
     set({ offers: value });
+  },
+  setOpen: (value) => {
+    set({ open: value });
+  },
+
+  setSort: (value) => {
+    set({
+      sort: value,
+    });
+  },
+
+  setSearch: (value) => {
+    set({
+      search: value,
+    });
   },
 }));

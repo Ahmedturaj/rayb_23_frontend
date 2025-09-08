@@ -1,4 +1,3 @@
-import { Checkbox } from "@/components/ui/checkbox";
 import { useFilterStore } from "@/zustand/stores/search-store";
 import { X } from "lucide-react";
 import React from "react";
@@ -11,6 +10,7 @@ const TagsAndOpenNow = () => {
     removeInstrumentTag,
     serviceTag,
     removeServiceTag,
+    setOpen,
   } = useFilterStore();
 
   return (
@@ -56,8 +56,13 @@ const TagsAndOpenNow = () => {
           ))}
       </div>
 
-      <div>
-        <Checkbox className="border border-gray-500" /> Open Now
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          onChange={() => setOpen(true)}
+          className="border border-gray-500 h-4 w-4 accent-primary"
+        />{" "}
+        Open Now
       </div>
     </div>
   );

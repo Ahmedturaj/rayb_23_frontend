@@ -29,6 +29,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import Image from "next/image";
+import { useFilterStore } from "@/zustand/stores/search-store";
 
 interface Business {
   _id: string;
@@ -56,12 +57,19 @@ const Navbar = () => {
   const isAuthPage = pathname.startsWith("/auth");
 
   // Search functionality state
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const { search, setSearch } = useFilterStore();
+  const [searchQuery, setSearchQuery] = useState<string>(search);
   const [showResults, setShowResults] = useState<boolean>(false);
   const [searchResults, setSearchResults] = useState<Business[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const searchRef = useRef<HTMLDivElement>(null);
+
   const debouncedQuery = useDebounce(searchQuery, 300);
+
+  // Update local state when store changes
+  useEffect(() => {
+    setSearchQuery(search);
+  }, [search]);
 
   // Fetch businesses based on search query
   useEffect(() => {
@@ -107,6 +115,7 @@ const Navbar = () => {
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
+      setSearch(searchQuery.trim());
       router.push(`/search-result`);
       setShowResults(false);
     }
@@ -120,6 +129,7 @@ const Navbar = () => {
 
   const clearSearch = () => {
     setSearchQuery("");
+    setSearch("");
     setShowResults(false);
     setSearchResults([]);
   };
@@ -134,6 +144,8 @@ const Navbar = () => {
 
   const notificationCount = notifications.length;
 
+  console.log("searchResults : ", searchResults);
+
   return (
     <nav className="p-4 border-b sticky top-0 z-50 bg-white">
       <div className="container flex items-center justify-between h-14">
@@ -143,7 +155,7 @@ const Navbar = () => {
         </Link>
 
         {/* Search Bar (hidden on mobile, visible on desktop) */}
-        {!isAuthPage && pathname === "/search-result" && (
+        {!isAuthPage && (
           <div
             className="hidden md:flex flex-1 max-w-xl mx-auto items-center relative"
             ref={searchRef}
@@ -542,7 +554,7 @@ const Navbar = () => {
                       Add My Business
                     </DropdownMenuItem>
                   </Link>
-                  <Link href={'/claim-your-business'}>
+                  <Link href={"/claim-your-business"}>
                     {" "}
                     <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
                       Claim My Business
@@ -577,7 +589,7 @@ const Navbar = () => {
             </div>
           ) : (
             <div className="flex gap-3">
-              <div className="flex items-center justify-center h-12 w-12 bg-[#F7F8F8] rounded-full relative">
+              <div className="flex items-center justify-center h-12 w-12 bg-[#F7F8F8] rounded-full">
                 <Link
                   href={
                     session?.user?.userType === "admin"
