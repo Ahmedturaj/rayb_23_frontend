@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useFilterStore } from "@/zustand/stores/search-store";
 import React from "react";
 
 const AlsoOffers = ({}) => {
@@ -13,6 +14,8 @@ const AlsoOffers = ({}) => {
     { label: "Rental" },
     { label: "Lessons" },
   ];
+
+  const { setOffers } = useFilterStore();
 
   return (
     <div>
@@ -31,7 +34,11 @@ const AlsoOffers = ({}) => {
             <div className=" space-y-3">
               {items.map((item, index) => (
                 <label key={index} className="flex items-center gap-2">
-                  <input type="checkbox" className="h-4 w-4 accent-primary" />
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 accent-primary"
+                    onChange={() => setOffers(true)}
+                  />
                   <span className="text-base">{item.label}</span>
                 </label>
               ))}

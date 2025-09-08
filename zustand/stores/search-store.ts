@@ -14,15 +14,29 @@ interface IFilterStore {
   serviceTag: TagType[];
   setServiceTag: (value: string) => void;
   removeServiceTag: (value: string) => void;
+  minPriceRange: string;
+  setMinPriceRange: (value: string) => void;
+  maxPriceRange: string;
+  setMaxPriceRange: (value: string) => void;
+  offers: boolean;
+  setOffers: (value: boolean) => void;
 }
 
 const initialState: Pick<
   IFilterStore,
-  "familyTag" | "instrumentTag" | "serviceTag"
+  | "familyTag"
+  | "instrumentTag"
+  | "serviceTag"
+  | "minPriceRange"
+  | "offers"
+  | "maxPriceRange"
 > = {
   familyTag: [],
   instrumentTag: [],
   serviceTag: [],
+  minPriceRange: "",
+  offers: false,
+  maxPriceRange: "",
 };
 
 export const useFilterStore = create<IFilterStore>((set) => ({
@@ -51,4 +65,14 @@ export const useFilterStore = create<IFilterStore>((set) => ({
     set((state) => ({
       serviceTag: state.serviceTag.filter((t) => t.label !== value),
     })),
+
+  setMinPriceRange: (value) => {
+    set({ minPriceRange: value });
+  },
+  setMaxPriceRange: (value) => {
+    set({ maxPriceRange: value });
+  },
+  setOffers: (value) => {
+    set({ offers: value });
+  },
 }));

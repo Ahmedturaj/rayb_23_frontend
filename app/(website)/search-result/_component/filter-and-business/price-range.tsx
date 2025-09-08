@@ -4,9 +4,12 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useFilterStore } from "@/zustand/stores/search-store";
 import React from "react";
 
 const PriceRange = ({}) => {
+  const { setMinPriceRange, setMaxPriceRange } = useFilterStore();
+
   return (
     <div>
       <Accordion
@@ -30,6 +33,7 @@ const PriceRange = ({}) => {
               <input
                 className="border border-gray-200 focus:outline-none h-[50px] p-2 rounded-md bg-[#f7f8f8] w-[110px]"
                 placeholder="Min"
+                onChange={(e) => setMinPriceRange(e.target.value)}
               />
 
               <div className="border w-[25px]"></div>
@@ -37,6 +41,7 @@ const PriceRange = ({}) => {
               <input
                 className="border border-gray-200 focus:outline-none h-[50px] p-2 rounded-md bg-[#f7f8f8] w-[110px]"
                 placeholder="Max"
+                onChange={(e) => setMaxPriceRange(e.target.value)}
               />
             </div>
           </AccordionContent>
