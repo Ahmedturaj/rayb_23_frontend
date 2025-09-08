@@ -167,7 +167,7 @@ const ClaimReviewBusiness = () => {
                           }}
                           className="w-full sm:w-[180px] bg-[#e0f2f1] h-[48px] text-[#139a8e] px-5 rounded-lg"
                         >
-                          Review Business
+                          Review Business 
                         </button>
                       )}
                     </div>

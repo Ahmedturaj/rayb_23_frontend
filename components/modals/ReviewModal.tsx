@@ -1,3 +1,6 @@
+
+
+
 "use client";
 
 import { useState } from "react";
@@ -22,15 +25,21 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   setIsModalOpen,
 }) => {
   const [rating, setRating] = useState<number>();
-
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const maxImages = 5;
 
   const ratingChanged = (newRating: number) => {
     setRating(newRating);
   };
 
   const handleUploadImage = () => {
+    if (imageFiles.length >= maxImages) {
+      toast.error(`You can only upload a maximum of ${maxImages} images.`);
+      return;
+    }
     const input = document.getElementById("image_input");
     if (input) input.click();
   };
@@ -40,10 +49,50 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
     if (!files) return;
 
     const newFiles = Array.from(files);
-    const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+    const totalImages = imageFiles.length + newFiles.length;
 
+    if (totalImages > maxImages) {
+      toast.error(`You can only upload a maximum of ${maxImages} images.`);
+      return;
+    }
+
+    const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
     setImageFiles((prev) => [...prev, ...newFiles]);
     setImagePreviews((prev) => [...prev, ...newPreviews]);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (!files) return;
+
+    const newFiles = Array.from(files).filter((file) => file.type.startsWith("image/"));
+    const totalImages = imageFiles.length + newFiles.length;
+
+    if (totalImages > maxImages) {
+      toast.error(`You can only upload a maximum of ${maxImages} images.`);
+      return;
+    }
+
+    if (newFiles.length === 0) {
+      toast.error("Please drop valid image files.");
+      return;
+    }
+
+    const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+    setImageFiles((prev) => [...prev, ...newFiles]);
+    setImagePreviews((prev) => [...prev, ...newPreviews]);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
   };
 
   const handleRemoveImage = (index: number) => {
@@ -91,7 +140,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
         <form onSubmit={handleSubmit}>
           <div className="space-y-6">
             <div className="text-center">
-              <h1 className="text-[28px] font-semibold">Write a Review</h1>
+              <h1 className="text-[28px] font-semibold">Write a Review </h1>
               <p className="text-lg text-gray-600">
                 Please leave your feedback for this music repair shop
               </p>
@@ -116,8 +165,12 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
               <textarea
                 placeholder="Please write your feedback"
                 name="feedback"
+                maxLength={200}
                 className="mt-2 w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:outline-none h-[100px]"
               />
+              <p className="text-sm text-gray-500 mt-1">
+                {200 - ((document.querySelector('textarea[name="feedback"]') as HTMLTextAreaElement)?.value.length || 0)} characters remaining
+              </p>
             </div>
 
             {/* upload image */}
@@ -132,11 +185,14 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
                 onChange={handleFileChange}
               />
               <div
-                className="w-full h-full flex items-center justify-center flex-col gap-4 rounded-md cursor-pointer bg-[#F8F8F8] mt-4 text-teal-600 border border-dashed border-teal-600"
+                className={`w-full h-full flex items-center justify-center flex-col gap-4 rounded-md cursor-pointer bg-[#F8F8F8] mt-4 text-teal-600 border border-dashed border-teal-600 ${isDragging ? "bg-teal-100" : ""}`}
                 onClick={handleUploadImage}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
               >
                 <ImageUp className="text-5xl" />
-                <p className="text-center text-xl">Upload Photos</p>
+                <p className="text-center text-xl">Upload Photos or Drag & Drop (Max {maxImages})</p>
               </div>
             </div>
 
