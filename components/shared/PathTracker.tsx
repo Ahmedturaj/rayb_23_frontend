@@ -19,10 +19,12 @@ const PathTracker = ({
   title,
   header,
   id,
+  isLoading,
 }: {
   title: string;
   header?: string;
   id?: string;
+  isLoading?: boolean;
 }) => {
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
@@ -48,7 +50,7 @@ const PathTracker = ({
                   <BreadcrumbItem>
                     {isLast ? (
                       <BreadcrumbPage>
-                        {capitalize(header ? header : segment)}
+                        {isLoading ? "" : capitalize(header ? header : segment)}
                       </BreadcrumbPage>
                     ) : (
                       <BreadcrumbLink asChild>
@@ -63,19 +65,21 @@ const PathTracker = ({
         </Breadcrumb>
       </div>
 
-      <div>
-        {pathname === `/search-result/${id}` ? (
-          <h1 className="font-semibold text-[32px] my-3"></h1>
-        ) : (
-          <h1 className="font-semibold text-[32px] my-3">
-            {segments.length
-              ? capitalize(header ? header : segments[segments.length - 1])
-              : "Home'"}
-          </h1>
-        )}
+      {!pathname.startsWith("/search-result") && (
+        <div className="border border-red-600">
+          {pathname === `/search-result/${id}` ? (
+            <h1 className="font-semibold text-[32px] my-3"></h1>
+          ) : (
+            <h1 className="font-semibold text-[32px] my-3">
+              {segments.length
+                ? capitalize(header ? header : segments[segments.length - 1])
+                : "Home'"}
+            </h1>
+          )}
 
-        <p className="text-sm text-gray-500">{title}</p>
-      </div>
+          <p className="text-sm text-gray-500">{title}</p>
+        </div>
+      )}
     </div>
   );
 };

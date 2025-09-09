@@ -9,7 +9,7 @@ import BusinessDetails from "../_component/BusinessDetails";
 const Page = () => {
   const { id } = useParams();
 
-  const { data: singleBusiness = {} } = useQuery({
+  const { data: singleBusiness = {}, isLoading } = useQuery({
     queryKey: ["get-single-business"],
     queryFn: async () => {
       const res = await getSingleBusiness(id);
@@ -24,6 +24,7 @@ const Page = () => {
           title=""
           header={singleBusiness?.businessInfo?.name}
           id={singleBusiness?._id}
+          isLoading={isLoading}
         />
       </div>
 
