@@ -13,7 +13,11 @@ import {
 import { Fragment } from "react";
 
 const capitalize = (str: string) =>
-  str.charAt(0).toUpperCase() + str.slice(1).replace(/-/g, " ");
+  str
+    .replace(/-/g, " ")
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // capitalize each
+    .join(" ");
 
 const PathTracker = ({
   title,
@@ -66,7 +70,7 @@ const PathTracker = ({
       </div>
 
       {!pathname.startsWith("/search-result") && (
-        <div className="border border-red-600">
+        <div>
           {pathname === `/search-result/${id}` ? (
             <h1 className="font-semibold text-[32px] my-3"></h1>
           ) : (
@@ -77,7 +81,7 @@ const PathTracker = ({
             </h1>
           )}
 
-          <p className="text-sm text-gray-500">{title}</p>
+          <p className="text-md text-gray-500">{title}</p>
         </div>
       )}
     </div>

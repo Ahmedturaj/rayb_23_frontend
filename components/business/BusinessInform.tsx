@@ -44,7 +44,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({
     <div>
       {/* upload photos */}
       <div className="mt-8">
-        <label className="text-[24px]">Business Photos</label>
+        <label className="text-[24px] font-medium">Business Photos</label>
         <div className="flex gap-5 flex-wrap">
           {/* Upload button */}
           <div className="w-[200px] h-[200px]">
@@ -90,13 +90,13 @@ const BusinessInform: React.FC<BusinessInformProps> = ({
 
       {/* business details */}
       <div className="mt-10">
-        <label className="text-[24px]">Business Details</label>
+        <label className="text-[24px] font-medium">Business Details</label>
 
         <div className="space-y-6 mt-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-md font-medium text-gray-700">
                 Name
               </label>
               <input
@@ -110,7 +110,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({
 
             {/* Address */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-md font-medium text-gray-700">
                 Address
               </label>
               <div className="relative">
@@ -131,7 +131,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-md font-medium text-gray-700">
               Description
             </label>
             <textarea
@@ -146,7 +146,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({
           {/* Phone + Email */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-md font-medium text-gray-700">
                 Phone Number
               </label>
               <input
@@ -159,7 +159,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-md font-medium text-gray-700">
                 Email
               </label>
               <input
@@ -174,7 +174,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({
 
           {/* Website */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-md font-medium text-gray-700">
               Website
             </label>
             <input
