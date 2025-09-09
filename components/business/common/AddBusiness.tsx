@@ -154,7 +154,7 @@ const AddBusiness = () => {
   //get single Business by selected ID
   const {
     data: singleBusiness = {},
-    isLoading,
+    // isLoading,
     refetch,
   } = useQuery({
     queryKey: ["get-single-business", selectedBusinessId],
@@ -345,8 +345,6 @@ const AddBusiness = () => {
     ) as HTMLInputElement;
     const imageFiles = imageInput?.files ? Array.from(imageInput.files) : [];
 
-    console.log(imageFiles);
-
     imageFiles.forEach((file) => {
       formData.append("image", file);
     });
@@ -489,12 +487,12 @@ const AddBusiness = () => {
     await updateBusinessData({ id: selectedBusinessId, formData });
   };
 
-  if (isLoading)
-    return (
-      <div className="min-h-[calc(100vh-500px)] flex flex-col items-center justify-center">
-        Loading...
-      </div>
-    );
+  // if (isLoading)
+  //   return (
+  //     <div className="min-h-[calc(100vh-500px)] flex flex-col items-center justify-center">
+  //       Loading...
+  //     </div>
+  //   );
 
   return (
     <div>
