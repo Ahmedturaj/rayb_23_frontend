@@ -140,7 +140,7 @@ const Page = () => {
   };
 
   return (
-    <div className="container max-w-2xl mx-auto py-8">
+    <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold">Notifications</h2>
         <button className="font-semibold text-teal-600 hover:underline">

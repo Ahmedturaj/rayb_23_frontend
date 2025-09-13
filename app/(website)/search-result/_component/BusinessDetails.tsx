@@ -32,6 +32,7 @@ import ReactDOMServer from "react-dom/server";
 import { DivIcon } from "leaflet";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
+import LoginModal from "@/components/business/modal/login-modal";
 
 interface Review {
   _id: string;
@@ -193,11 +194,14 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [isAddPhoto, setIsAddPhotoOpen] = useState(false);
 
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
   const session = useSession();
   const token = session?.data?.user?.accessToken;
   const userId = session?.data?.user?.id;
 
   const role = session?.data?.user?.userType;
+  const status = session?.status;
   const router = useRouter();
 
   const address = singleBusiness.businessInfo.address;
@@ -438,6 +442,14 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
     },
   });
 
+  const handleReview = () => {
+    if (status === "unauthenticated") {
+      return setIsLoginModalOpen(true);
+    }
+
+    setIsOpen(true);
+  };
+
   const handleMessage = async () => {
     if (!userId) {
       toast.error("You must be logged in to send a message.");
@@ -521,7 +533,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-5">
           <button
-            onClick={() => setIsOpen(true)}
+            onClick={handleReview}
             className="bg-[#e0f2f1] hover:bg-[#139a8e] flex items-center gap-2 px-5 py-3 rounded-lg text-[#139a8e] hover:text-white font-semibold"
           >
             <Star className="w-4 h-4 mr-1" />
@@ -870,6 +882,13 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
             )}
           </div>
         </div>
+
+        {isLoginModalOpen && (
+          <LoginModal
+            isLoginModalOpen={isLoginModalOpen}
+            setIsLoginModalOpen={setIsLoginModalOpen}
+          />
+        )}
       </div>
     </div>
   );
