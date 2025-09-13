@@ -38,14 +38,14 @@ const InstrumentGroups = ({
     <div className="grid grid-cols-2 gap-8 mt-5">
       {allInstrument?.map((instruments: Instruments) => (
         <div key={instruments._id}>
-          <h4 className="font-medium text-gray-900 mb-3">
+          <h4 className="font-medium text-lg mb-3">
             {instruments.instrumentFamily}
           </h4>
           <div className="space-y-2">
             {instruments.instrumentTypes.map((instrument) => (
               <label
                 key={instrument._id}
-                className="flex items-center gap-2 text-sm text-gray-800 cursor-pointer"
+                className="flex items-center gap-2 text-sm font-medium cursor-pointer"
               >
                 <input
                   type="checkbox"
