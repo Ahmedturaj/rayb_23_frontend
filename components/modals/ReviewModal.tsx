@@ -136,7 +136,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/25 flex items-center justify-center px-4">
-      <div className="bg-white w-full max-w-md lg:max-w-[720px] h-[600px] overflow-y-auto rounded-lg shadow-lg p-6 ">
+      <div className="bg-white w-full max-w-md lg:max-w-[720px] h-[630px] overflow-y-auto rounded-lg shadow-lg p-6 ">
         <form onSubmit={handleSubmit}>
           <div className="space-y-6">
             <div className="text-center">

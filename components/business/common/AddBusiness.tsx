@@ -12,6 +12,7 @@ import { usePathname } from "next/navigation";
 import { useBusinessContext } from "@/lib/business-context";
 import axios from "axios";
 import LoginModal from "../modal/login-modal";
+import BusinessSuccessModal from "../modal/bussiness-success-modal";
 
 interface ServiceType {
   newInstrumentName: string;
@@ -55,6 +56,8 @@ const AddBusiness = () => {
   const [instrumentFamily, setInstrumentFamily] = useState<string>("");
   const [ServiceModalMusic, setServiceModalMusic] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isBusinessSuccessModalOpen, setIsBusinessSuccessModalOpen] =
+    useState(false);
 
   // control instrument family
   const [selectedInstruments, setSelectedInstruments] = useState<string[]>([]);
@@ -319,11 +322,8 @@ const AddBusiness = () => {
       }
       return res;
     },
-    onSuccess: (data) => {
-      toast.success(
-        data?.message ||
-          "Business Created Successfully. Please wait for admin approval."
-      );
+    onSuccess: () => {
+      return setIsBusinessSuccessModalOpen(true);
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
@@ -667,6 +667,13 @@ const AddBusiness = () => {
         <LoginModal
           isLoginModalOpen={isLoginModalOpen}
           setIsLoginModalOpen={setIsLoginModalOpen}
+        />
+      )}
+
+      {isBusinessSuccessModalOpen && (
+        <BusinessSuccessModal
+          isBusinessSuccessModalOpen={isBusinessSuccessModalOpen}
+          setIsBusinessSuccessModalOpen={setIsBusinessSuccessModalOpen}
         />
       )}
     </div>
