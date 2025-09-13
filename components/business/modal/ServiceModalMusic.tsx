@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Select,
   SelectContent,
@@ -7,7 +9,7 @@ import {
 } from "@/components/ui/select";
 import { getInstrumentTypes } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import React, { useState } from "react";
 
 interface ServiceModalProps {
   newInstrumentName: string;
@@ -57,9 +59,111 @@ const ServiceModalMusic: React.FC<ServiceModalProps> = ({
     },
   });
 
+  // State for validation errors
+  const [errors, setErrors] = useState({
+    instrumentName: "",
+    price: "",
+    minPrice: "",
+    maxPrice: "",
+  });
+
+  // Validate numeric input (positive numbers only)
+  const validateNumber = (value: string): boolean => {
+    if (value === "") return true;
+    const numValue = parseFloat(value);
+    return !isNaN(numValue) && numValue >= 0;
+  };
+
+  // Handle price change with validation
+  const handlePriceChange = (value: string) => {
+    // Allow empty string or valid numbers
+    if (value === "" || validateNumber(value)) {
+      setPrice(value);
+      setErrors({ ...errors, price: "" });
+    }
+  };
+
+  // Handle min price change with validation
+  const handleMinPriceChange = (value: string) => {
+    if (value === "" || validateNumber(value)) {
+      setMinPrice(value);
+      
+      // Validate if max price exists and is less than min price
+      if (maxPrice && value && parseFloat(value) > parseFloat(maxPrice)) {
+        setErrors({ ...errors, minPrice: "Min price cannot be higher than max price", maxPrice: "Max price cannot be lower than min price" });
+      } else {
+        setErrors({ ...errors, minPrice: "", maxPrice: "" });
+      }
+    }
+  };
+
+  // Handle max price change with validation
+  const handleMaxPriceChange = (value: string) => {
+    if (value === "" || validateNumber(value)) {
+      setMaxPrice(value);
+      
+      // Validate if min price exists and is greater than max price
+      if (minPrice && value && parseFloat(value) < parseFloat(minPrice)) {
+        setErrors({ ...errors, maxPrice: "Max price cannot be lower than min price", minPrice: "Min price cannot be higher than max price" });
+      } else {
+        setErrors({ ...errors, maxPrice: "", minPrice: "" });
+      }
+    }
+  };
+
+  // Validate the entire form before submission
+  const validateForm = (): boolean => {
+    const newErrors = {
+      instrumentName: "",
+      price: "",
+      minPrice: "",
+      maxPrice: "",
+    };
+
+    let isValid = true;
+
+    // Validate service name
+    if (!newInstrumentName) {
+      newErrors.instrumentName = "Please select a service";
+      isValid = false;
+    }
+
+    // Validate pricing based on type
+    if (pricingType === "exact" || pricingType === "hourly") {
+      if (!price || !validateNumber(price)) {
+        newErrors.price = "Please enter a valid price";
+        isValid = false;
+      }
+    } else if (pricingType === "range") {
+      if (!minPrice || !validateNumber(minPrice)) {
+        newErrors.minPrice = "Please enter a valid minimum price";
+        isValid = false;
+      }
+      if (!maxPrice || !validateNumber(maxPrice)) {
+        newErrors.maxPrice = "Please enter a valid maximum price";
+        isValid = false;
+      }
+      if (minPrice && maxPrice && parseFloat(minPrice) > parseFloat(maxPrice)) {
+        newErrors.minPrice = "Min price cannot be higher than max price";
+        newErrors.maxPrice = "Max price cannot be lower than min price";
+        isValid = false;
+      }
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  // Handle form submission with validation
+  const handleSubmit = () => {
+    if (validateForm()) {
+      handleAddInstrumentMusic();
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
-      <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-6 space-y-6">
+      <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-6 space-y-4">
         <h2 className="text-xl font-semibold">Add A Service</h2>
 
         {/* Service Name Input - Updated to Select dropdown */}
@@ -69,7 +173,10 @@ const ServiceModalMusic: React.FC<ServiceModalProps> = ({
           </label>
           <Select
             value={newInstrumentName}
-            onValueChange={(value) => setNewInstrumentName(value)}
+            onValueChange={(value) => {
+              setNewInstrumentName(value);
+              setErrors({ ...errors, instrumentName: "" });
+            }}
           >
             <SelectTrigger className="w-full h-[48px] text-sm bg-gray-50 border border-gray-300 rounded-md px-4 py-2 focus:outline-none">
               <SelectValue placeholder="Select instrument" />
@@ -82,6 +189,9 @@ const ServiceModalMusic: React.FC<ServiceModalProps> = ({
               ))}
             </SelectContent>
           </Select>
+          {errors.instrumentName && (
+            <p className="text-red-500 text-xs mt-1">{errors.instrumentName}</p>
+          )}
         </div>
 
         {/* Service Pricing Input */}
@@ -113,40 +223,68 @@ const ServiceModalMusic: React.FC<ServiceModalProps> = ({
 
           {/* Conditional Pricing Inputs */}
           {pricingType === "range" ? (
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Min Price"
-                value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value)}
-                className="w-1/2 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none h-[48px] bg-gray-50"
-              />
-              <input
-                type="text"
-                placeholder="Max Price"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-                className="w-1/2 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none h-[48px] bg-gray-50"
-              />
+            <div>
+              <div className="flex gap-2">
+                <div className="w-1/2">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="Min Price"
+                    value={minPrice}
+                    onChange={(e) => handleMinPriceChange(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none h-[48px] bg-gray-50"
+                  />
+                  {errors.minPrice && (
+                    <p className="text-red-500 text-xs mt-1">{errors.minPrice}</p>
+                  )}
+                </div>
+                <div className="w-1/2">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="Max Price"
+                    value={maxPrice}
+                    onChange={(e) => handleMaxPriceChange(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none h-[48px] bg-gray-50"
+                  />
+                  {errors.maxPrice && (
+                    <p className="text-red-500 text-xs mt-1">{errors.maxPrice}</p>
+                  )}
+                </div>
+              </div>
+              {minPrice && maxPrice && parseFloat(minPrice) > parseFloat(maxPrice) && (
+                <p className="text-red-500 text-xs mt-1">
+                  Minimum price cannot be higher than maximum price
+                </p>
+              )}
             </div>
           ) : (
-            <input
-              type="text"
-              placeholder="$  Service Price"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none h-[48px] bg-gray-50"
-            />
+            <div>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="$ Service Price"
+                value={price}
+                onChange={(e) => handlePriceChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none h-[48px] bg-gray-50"
+              />
+              {errors.price && (
+                <p className="text-red-500 text-xs mt-1">{errors.price}</p>
+              )}
+            </div>
           )}
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3">
+        <div className="flex gap-3 pt-2">
           <button
-            onClick={handleAddInstrumentMusic}
+            onClick={handleSubmit}
             className="flex-1 bg-teal-600 text-white py-2 rounded-md hover:bg-teal-700 transition"
           >
-            Add Instrument
+            Add
           </button>
           <button
             onClick={() => setServiceModalMusic(false)}

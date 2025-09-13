@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import ServiceModal from "./modal/ServiceModal";
 import ServiceSectionHeader from "./ServiceSectionHeader";
 import AddInstrumentTitle from "./AddInstrumentTitle";
@@ -57,9 +57,9 @@ interface PropsTypes {
   maxPrice: string;
   setMaxPrice: (value: string) => void;
   selected: Service[];
-  setSelected: (value: Service[]) => void;
+  setSelected: React.Dispatch<React.SetStateAction<Service[]>>;
   selectedMusic: Service[];
-  setSelectedMusic: (value: Service[]) => void;
+  setSelectedMusic: React.Dispatch<React.SetStateAction<Service[]>>;
   serviceModal: boolean;
   setServiceModal: (value: boolean) => void;
   serviceModalMusic: boolean;
@@ -94,11 +94,13 @@ const Service = ({
   maxPrice,
   setMaxPrice,
   selected,
+  setSelected,
   serviceModal,
   setServiceModal,
   serviceModalMusic,
   setServiceModalMusic,
   selectedMusic,
+  setSelectedMusic,
   selectedOptions,
   setSelectedOptions,
   setInstrumentFamily,
@@ -122,6 +124,16 @@ const Service = ({
     } else {
       setServiceModalMusic(true);
     }
+  };
+
+  // Helper function to remove a service
+  const removeService = (serviceName: string) => {
+    setSelected(prev => prev.filter(item => item.newInstrumentName !== serviceName));
+  };
+
+  // Helper function to remove a music service
+  const removeMusicService = (serviceName: string) => {
+    setSelectedMusic(prev => prev.filter(item => item.newInstrumentName !== serviceName));
   };
 
   return (
@@ -150,7 +162,7 @@ const Service = ({
           {/* category select */}
           <div>
             {selectedInstruments.length > 0 ? (
-              <div className="my-5 grid grid-cols-3 lg:grid-cols-5 gap-2 max-w-[800px]">
+              <div className="my-5 grid grid-cols-3 lg:grid-cols-5 gap-4 max-w-[500px]">
                 {selectedInstruments.map((service, index) => (
                   <button
                     type="button"
@@ -203,24 +215,33 @@ const Service = ({
 
                       {/* Service Pricing Input */}
                       <div className="lg:col-span-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4 mb-3">
-                            {["Exact", "Range", "Hourly"].map((type) => (
-                              <label
-                                key={type}
-                                className="flex items-center space-x-1 text-sm text-gray-600"
-                              >
-                                <input
-                                  type="radio"
-                                  checked={
-                                    select.pricingType === type.toLowerCase()
-                                  }
-                                  readOnly
-                                  className="accent-teal-500 cursor-not-allowed"
-                                />
-                                <span>{type}</span>
-                              </label>
-                            ))}
+                        <div className="flex items-center">
+                          <div className="flex items-center justify-between w-full space-x-4 mb-3">
+                            <div className="flex items-center gap-4">
+                              {["Exact", "Range", "Hourly"].map((type) => (
+                                <label
+                                  key={type}
+                                  className="flex items-center space-x-1 text-sm text-gray-600"
+                                >
+                                  <input
+                                    type="radio"
+                                    checked={
+                                      select.pricingType === type.toLowerCase()
+                                    }
+                                    readOnly
+                                    className="accent-primary cursor-not-allowed"
+                                  />
+                                  <span>{type}</span>
+                                </label>
+                              ))}
+                            </div>
+
+                            <div
+                              className="cursor-pointer"
+                              onClick={() => removeService(select.newInstrumentName)}
+                            >
+                              <Trash className="h-5 w-5 text-red-500" />
+                            </div>
                           </div>
                         </div>
 
@@ -358,25 +379,37 @@ const Service = ({
 
                             {/* Service Pricing Input */}
                             <div className="lg:col-span-2">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-4 mb-3">
-                                  {["Exact", "Range", "Hourly"].map((type) => (
-                                    <label
-                                      key={type}
-                                      className="flex items-center space-x-1 text-sm text-gray-600"
-                                    >
-                                      <input
-                                        type="radio"
-                                        checked={
-                                          select.pricingType ===
-                                          type.toLowerCase()
-                                        }
-                                        readOnly
-                                        className="accent-teal-500 cursor-not-allowed"
-                                      />
-                                      <span>{type}</span>
-                                    </label>
-                                  ))}
+                              <div className="flex items-center">
+                                <div className="flex items-center justify-between w-full space-x-4 mb-3">
+                                  <div className="flex items-center gap-4">
+                                    {["Exact", "Range", "Hourly"].map(
+                                      (type) => (
+                                        <label
+                                          key={type}
+                                          className="flex items-center space-x-1 text-sm text-gray-600"
+                                        >
+                                          <input
+                                            type="radio"
+                                            checked={
+                                              select.pricingType ===
+                                              type.toLowerCase()
+                                            }
+                                            readOnly
+                                            className="accent-primary cursor-not-allowed"
+                                          />
+                                          <span>{type}</span>
+                                        </label>
+                                      )
+                                    )}
+                                  </div>
+
+                                  {/* Trash Icon to remove selected service */}
+                                  <div
+                                    className="cursor-pointer"
+                                    onClick={() => removeMusicService(select.newInstrumentName)}
+                                  >
+                                    <Trash className="h-5 w-5 text-red-500" />
+                                  </div>
                                 </div>
                               </div>
 
