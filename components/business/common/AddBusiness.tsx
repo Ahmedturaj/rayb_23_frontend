@@ -8,9 +8,10 @@ import { addBusiness, getAllInstrument, updateBusiness } from "@/lib/api";
 import { Loader } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useBusinessContext } from "@/lib/business-context";
 import axios from "axios";
+import LoginModal from "../modal/login-modal";
 
 interface ServiceType {
   newInstrumentName: string;
@@ -47,14 +48,13 @@ const AddBusiness = () => {
   const isLoggedIn = session?.status;
   const pathName = usePathname();
 
-  const router = useRouter();
-
   const { selectedBusinessId } = useBusinessContext();
 
   // modal control
   const [serviceModal, setServiceModal] = useState(false);
   const [instrumentFamily, setInstrumentFamily] = useState<string>("");
   const [ServiceModalMusic, setServiceModalMusic] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   // control instrument family
   const [selectedInstruments, setSelectedInstruments] = useState<string[]>([]);
@@ -336,7 +336,7 @@ const AddBusiness = () => {
     e.preventDefault();
 
     if (isLoggedIn === "unauthenticated") {
-      return router.push("/auth/login");
+      return setIsLoginModalOpen(true);
     }
 
     const formData = new FormData();
@@ -662,6 +662,13 @@ const AddBusiness = () => {
           )}
         </div>
       </form>
+
+      {isLoginModalOpen && (
+        <LoginModal
+          isLoginModalOpen={isLoginModalOpen}
+          setIsLoginModalOpen={setIsLoginModalOpen}
+        />
+      )}
     </div>
   );
 };
