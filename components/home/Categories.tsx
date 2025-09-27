@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { useFilterStore } from "@/zustand/stores/search-store";
 import Image from "next/image";
 import Link from "next/link";
@@ -58,7 +58,13 @@ const Categories = () => {
               onClick={() => setFamilyTag(category.title)}
             >
               <div className="bg-white flex flex-col justify-center items-center py-5 shadow-[0px_2px_12px_0px_#003D3914] rounded-lg h-[250px]  hover:scale-105 transition-all duration-200">
-                <div className="w-[150px] h-[150px] relative">
+                <div
+                  className={`relative ${
+                    category.title === "Woodwinds"
+                      ? "w-[270px] h-[150px] "
+                      : "w-[150px] h-[150px] "
+                  }`}
+                >
                   <Image
                     src={category.image}
                     alt={`${category.title} Image`}
