@@ -20,13 +20,13 @@ export default function Footer() {
             <h1 className="font-semibold text-lg mb-3">For Customer</h1>
             <ul>
               <Link href={"/review-business"}>
-                <li>Write a Review</li>
+                <li className="hover:underline">Write a Review</li>
               </Link>
               <Link href={"/add-a-business"}>
-                <li>Add a Business</li>
+                <li className="hover:underline">Add a Business</li>
               </Link>
               <Link href={"/login"}>
-                <li>Login</li>
+                <li className="hover:underline">Login</li>
               </Link>
             </ul>
           </div>
@@ -35,13 +35,13 @@ export default function Footer() {
             <h1 className="font-semibold text-lg mb-3">For Business</h1>
             <ul>
               <Link href={"/add-a-business"}>
-                <li>Add my Business</li>
+                <li className="hover:underline">Add my Business</li>
               </Link>
               <Link href={"/claim-your-business"}>
-                <li>Claim my Business</li>
+                <li className="hover:underline">Claim my Business</li>
               </Link>
               <Link href={"/login"}>
-                <li>Login</li>
+                <li className="hover:underline">Login</li>
               </Link>
             </ul>
           </div>
@@ -49,8 +49,8 @@ export default function Footer() {
           <div>
             <h1 className="font-semibold text-lg mb-3">Contact</h1>
             <ul>
-              <Link href={'/'}>
-                <li>contact@instrufix.com</li>
+              <Link href={'https://mail.google.com/mail/'} target="_blank">
+                <li className="hover:underline">contact@instrufix.com</li>
               </Link>
             </ul>
           </div>

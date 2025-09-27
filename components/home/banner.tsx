@@ -143,7 +143,7 @@ export default function BannerHome() {
                 }}
                 onKeyDown={handleKeyPress}
                 onFocus={() => setShowResults(searchQuery.length > 0)}
-                placeholder="Search By Business Name"
+                placeholder="Guitar, strings, restringing..."
                 className="pl-10 w-full h-[48px] border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 bg-[#F7F8F8] rounded-lg border border-gray-200 shadow-inner"
               />
               {searchQuery && (
