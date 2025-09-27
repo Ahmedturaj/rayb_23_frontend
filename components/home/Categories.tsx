@@ -57,7 +57,7 @@ const Categories = () => {
               href={category.link}
               onClick={() => setFamilyTag(category.title)}
             >
-              <div className="bg-white flex flex-col justify-center items-center py-5 shadow-[0px_2px_12px_0px_#003D3914] rounded-lg h-[250px]">
+              <div className="bg-white flex flex-col justify-center items-center py-5 shadow-[0px_2px_12px_0px_#003D3914] rounded-lg h-[250px]  hover:scale-105 transition-all duration-200">
                 <div className="w-[150px] h-[150px] relative">
                   <Image
                     src={category.image}
