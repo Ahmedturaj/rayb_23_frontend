@@ -1,6 +1,5 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +8,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
-  Search,
   ChevronDown,
   Menu,
   Bell,
@@ -18,30 +16,14 @@ import {
   User2Icon,
   Settings,
   LogOut,
-  X,
 } from "lucide-react";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { getAllNotification, getUserProfile } from "@/lib/api";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect, useRef, KeyboardEvent } from "react";
-import { useDebounce } from "@/hooks/use-debounce";
-import Image from "next/image";
-import { useFilterStore } from "@/zustand/stores/search-store";
-
-interface Business {
-  _id: string;
-  businessInfo?: {
-    image?: string[];
-    name?: string;
-  };
-  services?: {
-    newInstrumentName: string;
-    selectedInstrumentsGroup?: string;
-  }[];
-}
+import { usePathname } from "next/navigation";
+import SearchBar from "./SearchBar";
 
 const Navbar = () => {
   const { data: session, status: sessionStatus } = useSession();
@@ -53,85 +35,6 @@ const Navbar = () => {
   });
 
   const pathname = usePathname();
-  const router = useRouter();
-
-  // Search functionality state
-  const { search, setSearch } = useFilterStore();
-  const [searchQuery, setSearchQuery] = useState<string>(search);
-  const [showResults, setShowResults] = useState<boolean>(false);
-  const [searchResults, setSearchResults] = useState<Business[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const searchRef = useRef<HTMLDivElement>(null);
-
-  const debouncedQuery = useDebounce(searchQuery, 300);
-
-  // Update local state when store changes
-  useEffect(() => {
-    setSearchQuery(search);
-  }, [search]);
-
-  // Fetch businesses based on search query
-  useEffect(() => {
-    const fetchBusinesses = async () => {
-      if (!debouncedQuery) {
-        setSearchResults([]);
-        return;
-      }
-
-      setIsLoading(true);
-      try {
-        const response = await fetch(
-          `${
-            process.env.NEXT_PUBLIC_API_URL
-          }/business?search=${encodeURIComponent(debouncedQuery)}`
-        );
-        const data = await response.json();
-        setSearchResults(data.data || []);
-      } catch (error) {
-        console.error("Error fetching businesses:", error);
-        setSearchResults([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchBusinesses();
-  }, [debouncedQuery]);
-
-  // Handle click outside to close results
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        searchRef.current &&
-        !searchRef.current.contains(event.target as Node)
-      ) {
-        setShowResults(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      setSearch(searchQuery.trim());
-      router.push(`/search-result`);
-      setShowResults(false);
-    }
-  };
-
-  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
-  };
-
-  const clearSearch = () => {
-    setSearchQuery("");
-    setSearch("");
-    setShowResults(false);
-    setSearchResults([]);
-  };
 
   const { data: notifications = [] } = useQuery({
     queryKey: ["all-notifications"],
@@ -145,110 +48,15 @@ const Navbar = () => {
 
   return (
     <nav className="p-4 border-b sticky top-0 z-50 bg-white">
-      <div className="container flex items-center justify-between h-14">
+      <div className="container flex items-center justify-between gap-10 h-14">
         {/* Logo */}
-        <Link href="/">
+        <button onClick={() => window.location.reload()}>
           <h1 className="font-bold text-3xl lg:text-5xl">Instrufix</h1>
-        </Link>
+        </button>
 
         {/* Search Bar (hidden on mobile, visible on desktop) */}
         {pathname === "/search-result" && (
-          <div
-            className="hidden md:flex flex-1 max-w-xl mx-auto items-center relative"
-            ref={searchRef}
-          >
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-5 w-5" />
-              <Input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setShowResults(e.target.value.length > 0);
-                }}
-                onKeyDown={handleKeyPress}
-                onFocus={() => setShowResults(searchQuery.length > 0)}
-                placeholder="Guitar, strings, restringing..."
-                className="pl-10 w-full h-[48px] border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 bg-[#F7F8F8] rounded-lg border border-gray-200 shadow-inner"
-              />
-              {searchQuery && (
-                <button
-                  onClick={clearSearch}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                  aria-label="Clear search"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              )}
-            </div>
-
-            {/* Search Results Dropdown */}
-            {showResults && (
-              <div className="absolute z-50 top-14 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-[400px] overflow-y-auto">
-                {isLoading ? (
-                  <div className="p-4 text-center">Searching...</div>
-                ) : searchResults.length === 0 && searchQuery ? (
-                  <div className="p-4 text-gray-500">No results found</div>
-                ) : (
-                  <ul>
-                    {searchResults.slice(0, 5).map((business) => (
-                      <Link
-                        href={`/search-result/${business?._id}`}
-                        key={business._id}
-                      >
-                        <li
-                          className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 cursor-pointer"
-                          onClick={() => {
-                            router.push(`/business/${business._id}`);
-                            setShowResults(false);
-                          }}
-                        >
-                          <div className="p-4">
-                            <div className="flex items-center gap-3">
-                              {business.businessInfo?.image?.[0] && (
-                                <div className="w-10 h-10 rounded-full overflow-hidden">
-                                  <Image
-                                    src={business.businessInfo.image[0]}
-                                    alt={
-                                      business.businessInfo.name ||
-                                      "Business image"
-                                    }
-                                    width={40}
-                                    height={40}
-                                    className="object-cover"
-                                  />
-                                </div>
-                              )}
-                              <div>
-                                <h3 className="font-medium">
-                                  {business.businessInfo?.name ||
-                                    "Unknown Business"}
-                                </h3>
-                                <p className="text-sm text-gray-600">
-                                  {business.services
-                                    ?.slice(0, 2)
-                                    .map((s) => s.newInstrumentName)
-                                    .join(", ")}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </li>
-                      </Link>
-                    ))}
-                    {searchResults.length > 5 && (
-                      <li
-                        className="p-3 text-center text-sm text-blue-600 hover:bg-gray-50 cursor-pointer"
-                        onClick={handleSearch}
-                      >
-                        View all {searchResults.length} results
-                      </li>
-                    )}
-                  </ul>
-                )}
-              </div>
-            )}
-          </div>
+          <SearchBar variant="desktop" />
         )}
 
         {/* Mobile Sign Up Button and Menu (visible on mobile only) */}
@@ -298,101 +106,12 @@ const Navbar = () => {
               <div className="flex flex-col space-y-6 p-4">
                 {/* Mobile Search Bar */}
                 {pathname === "/search-result" && (
-                  <div className="relative" ref={searchRef}>
-                    <div className="flex items-center bg-[#F7F8F8] rounded-xl shadow-inner overflow-hidden">
-                      <Search className="ml-3 text-gray-500 h-5 w-5" />
-                      <Input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => {
-                          setSearchQuery(e.target.value);
-                          setShowResults(e.target.value.length > 0);
-                        }}
-                        onKeyDown={handleKeyPress}
-                        onFocus={() => setShowResults(searchQuery.length > 0)}
-                        placeholder="Guitar, strings, restringing..."
-                        className="flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 px-4 bg-transparent outline-none"
-                      />
-                      {searchQuery && (
-                        <button
-                          onClick={clearSearch}
-                          className="px-3 text-gray-500 hover:text-gray-700"
-                          aria-label="Clear search"
-                        >
-                          <X className="h-5 w-5" />
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Mobile Search Results Dropdown */}
-                    {showResults && (
-                      <div className="absolute z-10 mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-[300px] overflow-y-auto">
-                        {isLoading ? (
-                          <div className="p-4 text-center">Searching...</div>
-                        ) : searchResults.length === 0 && searchQuery ? (
-                          <div className="p-4 text-gray-500">
-                            No results found
-                          </div>
-                        ) : (
-                          <ul>
-                            {searchResults.slice(0, 5).map((business) => (
-                              <Link
-                                href={`/search-result/${business?._id}`}
-                                key={business._id}
-                              >
-                                <li
-                                  className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 cursor-pointer"
-                                  onClick={() => setShowResults(false)}
-                                >
-                                  <div className="p-4">
-                                    <div className="flex items-center gap-3">
-                                      {business.businessInfo?.image?.[0] && (
-                                        <div className="w-10 h-10 rounded-full overflow-hidden">
-                                          <Image
-                                            src={business.businessInfo.image[0]}
-                                            alt={
-                                              business.businessInfo.name ||
-                                              "Business image"
-                                            }
-                                            width={40}
-                                            height={40}
-                                            className="object-cover"
-                                          />
-                                        </div>
-                                      )}
-                                      <div>
-                                        <h3 className="font-medium">
-                                          {business.businessInfo?.name ||
-                                            "Unknown Business"}
-                                        </h3>
-                                        <p className="text-sm text-gray-600">
-                                          {business.services
-                                            ?.slice(0, 2)
-                                            .map((s) => s.newInstrumentName)
-                                            .join(", ")}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </li>
-                              </Link>
-                            ))}
-                            {searchResults.length > 5 && (
-                              <li
-                                className="p-3 text-center text-sm text-blue-600 hover:bg-gray-50 cursor-pointer"
-                                onClick={() => {
-                                  handleSearch();
-                                  setShowResults(false);
-                                }}
-                              >
-                                View all {searchResults.length} results
-                              </li>
-                            )}
-                          </ul>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                  <SearchBar 
+                    variant="mobile" 
+                    onResultClick={() => {
+                      (document.querySelector('[data-state="open"]') as HTMLElement | null)?.click();
+                    }}
+                  />
                 )}
 
                 {/* User Profile Section (if authenticated) */}
@@ -546,7 +265,7 @@ const Navbar = () => {
                   For Business <ChevronDown className="ml-1 h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white border-gray-700 border-none">
-                  <Link href={"/add-a-business"}>
+                  <Link href={"/add-my-business"}>
                     <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
                       Add My Business
                     </DropdownMenuItem>

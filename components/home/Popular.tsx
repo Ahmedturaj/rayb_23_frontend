@@ -1,8 +1,9 @@
 "use client";
 import { getAllbusiness } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
-import { Star } from "lucide-react";
 import Image from "next/image";
+import { Rating } from "@smastrom/react-rating";
+import "@smastrom/react-rating/style.css";
 
 // Import Swiper styles and modules
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -24,6 +25,7 @@ interface Service {
 
 interface Business {
   _id: string;
+  review: string;
   businessInfo: BusinessItem;
   services: Service[];
 }
@@ -142,12 +144,12 @@ const Popular = () => {
                                 {business?.businessInfo?.name}
                               </h3>
 
-                              {/* Rating */}
-                              <div className="flex items-center gap-1 my-3">
-                                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                <span className="text-sm font-medium">
-                                  {"3.7"}
-                                </span>
+                              <div className="my-3">
+                                <Rating
+                                  style={{ maxWidth: 100 }}
+                                  value={business?.review.length}
+                                  readOnly
+                                />
                               </div>
 
                               {/* Services */}
