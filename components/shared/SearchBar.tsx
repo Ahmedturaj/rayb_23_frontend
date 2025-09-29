@@ -1,6 +1,6 @@
 "use client";
 import { Input } from "@/components/ui/input";
-import { Search, X } from "lucide-react";
+import { Search, X, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
@@ -13,6 +13,7 @@ interface Business {
   businessInfo?: {
     image?: string[];
     name?: string;
+    location?: string;
   };
   services?: {
     newInstrumentName: string;
@@ -27,36 +28,46 @@ interface SearchBarProps {
 
 const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
   const router = useRouter();
-  
+
   // Search functionality state
   const { search, setSearch } = useFilterStore();
   const [searchQuery, setSearchQuery] = useState<string>(search);
+  const [location, setLocation] = useState<string>("");
   const [showResults, setShowResults] = useState<boolean>(false);
   const [searchResults, setSearchResults] = useState<Business[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
   const debouncedQuery = useDebounce(searchQuery, 300);
+  const debouncedLocation = useDebounce(location, 300);
 
   // Update local state when store changes
   useEffect(() => {
     setSearchQuery(search);
   }, [search]);
 
-  // Fetch businesses based on search query
+  // Fetch businesses based on search query and location
   useEffect(() => {
     const fetchBusinesses = async () => {
-      if (!debouncedQuery) {
+      if (!debouncedQuery && !debouncedLocation) {
         setSearchResults([]);
         return;
       }
 
       setIsLoading(true);
       try {
+        const queryParams = new URLSearchParams();
+        
+        if (debouncedQuery) {
+          queryParams.append('search', encodeURIComponent(debouncedQuery));
+        }
+        
+        if (debouncedLocation) {
+          queryParams.append('location', encodeURIComponent(debouncedLocation));
+        }
+
         const response = await fetch(
-          `${
-            process.env.NEXT_PUBLIC_API_URL
-          }/business?search=${encodeURIComponent(debouncedQuery)}`
+          `${process.env.NEXT_PUBLIC_API_URL}/business?${queryParams}`
         );
         const data = await response.json();
         setSearchResults(data.data || []);
@@ -69,7 +80,7 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
     };
 
     fetchBusinesses();
-  }, [debouncedQuery]);
+  }, [debouncedQuery, debouncedLocation]);
 
   // Handle click outside to close results
   useEffect(() => {
@@ -86,7 +97,7 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
   }, []);
 
   const handleSearch = () => {
-    if (searchQuery.trim()) {
+    if (searchQuery.trim() || location.trim()) {
       setSearch(searchQuery.trim());
       router.push(`/search-result`);
       setShowResults(false);
@@ -107,64 +118,119 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
     setSearchResults([]);
   };
 
+  const clearLocation = () => {
+    setLocation("");
+  };
+
   const handleResultClick = () => {
     setShowResults(false);
     onResultClick?.();
   };
 
   const handleInputFocus = () => {
-    setShowResults(searchQuery.length > 0);
+    setShowResults(searchQuery.length > 0 || location.length > 0);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setShowResults(e.target.value.length > 0);
+    setShowResults(e.target.value.length > 0 || location.length > 0);
+  };
+
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocation(e.target.value);
+    setShowResults(searchQuery.length > 0 || e.target.value.length > 0);
+  };
+
+  const handleLocationFocus = () => {
+    setShowResults(searchQuery.length > 0 || location.length > 0);
   };
 
   // Styles based on variant
-  const containerClass = variant === "mobile" 
-    ? "relative" 
-    : "hidden md:flex flex-1 max-w-xl mx-auto items-center relative";
+  const containerClass =
+    variant === "mobile"
+      ? "relative"
+      : "hidden md:flex flex-1 max-w-2xl mx-auto items-center relative";
 
-  const inputContainerClass = variant === "mobile"
-    ? "flex items-center bg-[#F7F8F8] rounded-xl shadow-inner overflow-hidden"
-    : "relative w-full";
+  const inputContainerClass =
+    variant === "mobile"
+      ? "flex flex-col gap-2"
+      : "flex items-center gap-2 w-full";
 
-  const inputClass = variant === "mobile"
-    ? "flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 px-4 bg-transparent outline-none"
-    : "pl-10 w-full h-[48px] border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 bg-[#F7F8F8] rounded-lg border border-gray-200 shadow-inner";
+  const searchInputClass =
+    variant === "mobile"
+      ? "flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 px-4 bg-transparent outline-none"
+      : "pl-10 w-full h-[48px] border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 bg-[#F7F8F8] rounded-lg border border-gray-200 shadow-inner";
 
-  const resultsClass = variant === "mobile"
-    ? "absolute z-10 mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-[300px] overflow-y-auto"
-    : "absolute z-50 top-14 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-[400px] overflow-y-auto";
+  const locationInputClass =
+    variant === "mobile"
+      ? "flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 px-4 bg-transparent outline-none"
+      : "pl-10 w-full md:w-48 h-[48px] border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 bg-[#F7F8F8] rounded-lg border border-gray-200 shadow-inner";
+
+  const resultsClass =
+    variant === "mobile"
+      ? "absolute z-10 mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-[300px] overflow-y-auto top-full"
+      : "absolute z-50 top-14 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-[400px] overflow-y-auto";
 
   return (
     <div className={containerClass} ref={searchRef}>
       <div className={inputContainerClass}>
-        {variant === "desktop" && (
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-5 w-5" />
-        )}
+        {/* Search Input */}
+        <div className="flex-1 relative">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-5 w-5" />
+            <Input
+              type="text"
+              value={searchQuery}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyPress}
+              onFocus={handleInputFocus}
+              placeholder="Guitar, strings, restringing..."
+              className={searchInputClass}
+            />
+            {searchQuery && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                aria-label="Clear search"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Location Input */}
+        <div className="flex-1 md:flex-none relative">
+          <div className="relative">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-5 w-5" />
+            <Input
+              type="text"
+              value={location}
+              onChange={handleLocationChange}
+              onKeyDown={handleKeyPress}
+              onFocus={handleLocationFocus}
+              placeholder="Location"
+              className={locationInputClass}
+            />
+            {location && (
+              <button
+                onClick={clearLocation}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                aria-label="Clear location"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Search Button for Mobile */}
         {variant === "mobile" && (
-          <Search className="ml-3 text-gray-500 h-5 w-5" />
-        )}
-        
-        <Input
-          type="text"
-          value={searchQuery}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyPress}
-          onFocus={handleInputFocus}
-          placeholder="Guitar, strings, restringing..."
-          className={inputClass}
-        />
-        
-        {searchQuery && (
           <button
-            onClick={clearSearch}
-            className={variant === "mobile" ? "px-3 text-gray-500 hover:text-gray-700" : "absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"}
-            aria-label="Clear search"
+            onClick={handleSearch}
+            className="bg-[#00998E] text-white rounded-lg px-4 py-2 hover:bg-teal-700 transition-colors"
           >
-            <X className="h-5 w-5" />
+            <Search className="h-5 w-5" />
           </button>
         )}
       </div>
@@ -174,8 +240,10 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
         <div className={resultsClass}>
           {isLoading ? (
             <div className="p-4 text-center">Searching...</div>
-          ) : searchResults.length === 0 && searchQuery ? (
-            <div className="p-4 text-gray-500">No results found</div>
+          ) : searchResults.length === 0 && (searchQuery || location) ? (
+            <div className="p-4 text-gray-500">
+              No results found {location && `in ${location}`}
+            </div>
           ) : (
             <ul>
               {searchResults.slice(0, 5).map((business) => (
@@ -194,8 +262,7 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
                             <Image
                               src={business.businessInfo.image[0]}
                               alt={
-                                business.businessInfo.name ||
-                                "Business image"
+                                business.businessInfo.name || "Business image"
                               }
                               width={40}
                               height={40}
@@ -203,10 +270,9 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
                             />
                           </div>
                         )}
-                        <div>
+                        <div className="flex-1">
                           <h3 className="font-medium">
-                            {business.businessInfo?.name ||
-                              "Unknown Business"}
+                            {business.businessInfo?.name || "Unknown Business"}
                           </h3>
                           <p className="text-sm text-gray-600">
                             {business.services
@@ -214,6 +280,11 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
                               .map((s) => s.newInstrumentName)
                               .join(", ")}
                           </p>
+                          {business.businessInfo?.location && (
+                            <p className="text-xs text-gray-500 mt-1">
+                              📍 {business.businessInfo.location}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
