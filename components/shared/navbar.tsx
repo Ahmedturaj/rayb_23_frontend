@@ -147,9 +147,9 @@ const Navbar = () => {
     <nav className="p-4 border-b sticky top-0 z-50 bg-white">
       <div className="container flex items-center justify-between h-14">
         {/* Logo */}
-        <Link href="/">
+        <button onClick={() => window.location.reload()}>
           <h1 className="font-bold text-3xl lg:text-5xl">Instrufix</h1>
-        </Link>
+        </button>
 
         {/* Search Bar (hidden on mobile, visible on desktop) */}
         {pathname === "/search-result" && (
