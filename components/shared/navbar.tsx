@@ -546,7 +546,7 @@ const Navbar = () => {
                   For Business <ChevronDown className="ml-1 h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white border-gray-700 border-none">
-                  <Link href={"/add-a-business"}>
+                  <Link href={"/add-my-business"}>
                     <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
                       Add My Business
                     </DropdownMenuItem>
