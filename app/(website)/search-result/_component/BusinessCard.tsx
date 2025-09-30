@@ -1,6 +1,6 @@
 "use client";
-import { Rating } from "@smastrom/react-rating";
 import "@smastrom/react-rating/style.css";
+import { Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -46,12 +46,9 @@ const BusinessCard = ({ business }: { business: Business }) => {
                 {business.businessInfo?.name}
               </h3>
 
-              <div className="my-3">
-                <Rating
-                  style={{ maxWidth: 100 }}
-                  value={business.review ? business.review.length : 0}
-                  readOnly
-                />
+              <div className="my-3 flex items-center gap-2">
+                <Star className="fill-yellow-400 text-yellow-400 font-bold h-4 w-4 " />{" "}
+                <span>{business.review ? business.review.length : 0}</span>
               </div>
 
               <div className="flex flex-col gap-2">
