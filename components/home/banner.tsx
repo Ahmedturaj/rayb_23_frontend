@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/use-debounce";
 import Link from "next/link";
+import { useSearchStore } from "./states/useSearchStore";
 
 interface Service {
   newInstrumentName: string;
@@ -40,7 +41,7 @@ interface Business {
 
 export default function BannerHome() {
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [location, setLocation] = useState<string>("");
+  const { location, setLocation } = useSearchStore();
   const [showResults, setShowResults] = useState<boolean>(false);
   const [searchResults, setSearchResults] = useState<Business[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -48,12 +49,13 @@ export default function BannerHome() {
   const searchRef = useRef<HTMLDivElement>(null);
 
   const debouncedQuery = useDebounce(searchQuery, 300);
-  const debouncedLocation = useDebounce(location, 300);
+  // Remove debouncedLocation since we don't want location to trigger search
 
-  // Fetch businesses based on search query and location
+  // Fetch businesses based on search query only (not location)
   useEffect(() => {
     const fetchBusinesses = async () => {
-      if (!debouncedQuery && !debouncedLocation) {
+      // Only fetch if there's a search query (not for location)
+      if (!debouncedQuery) {
         setSearchResults([]);
         return;
       }
@@ -66,10 +68,7 @@ export default function BannerHome() {
           queryParams.append("search", encodeURIComponent(debouncedQuery));
         }
 
-        if (debouncedLocation) {
-          queryParams.append("location", encodeURIComponent(debouncedLocation));
-        }
-
+        // Don't include location in the search for dropdown results
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/business?${queryParams}`
         );
@@ -84,7 +83,7 @@ export default function BannerHome() {
     };
 
     fetchBusinesses();
-  }, [debouncedQuery, debouncedLocation]);
+  }, [debouncedQuery]); // Remove debouncedLocation from dependencies
 
   // Handle click outside to close results
   useEffect(() => {
@@ -102,7 +101,16 @@ export default function BannerHome() {
 
   const handleSearch = () => {
     if (searchQuery.trim() || location.trim()) {
-      router.push(`/search-result`);
+      // Navigate to search result page with both query and location as query parameters
+      const queryParams = new URLSearchParams();
+      if (searchQuery.trim()) {
+        queryParams.append("q", searchQuery.trim());
+      }
+      if (location.trim()) {
+        queryParams.append("location", location.trim());
+      }
+
+      router.push(`/search-result?${queryParams.toString()}`);
       setShowResults(false);
     }
   };
@@ -124,11 +132,14 @@ export default function BannerHome() {
   };
 
   const handleInputFocus = () => {
-    setShowResults(searchQuery.length > 0 || location.length > 0);
+    // Only show results if there's a search query (not for location)
+    setShowResults(searchQuery.length > 0);
   };
 
-  const handleLocationFocus = () => {
-    setShowResults(searchQuery.length > 0 || location.length > 0);
+  // Remove handleLocationFocus or modify it to not show results
+  const handleLocationInput = () => {
+    // Don't show results dropdown when interacting with location input
+    setShowResults(false);
   };
 
   return (
@@ -160,9 +171,8 @@ export default function BannerHome() {
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value);
-                      setShowResults(
-                        e.target.value.length > 0 || location.length > 0
-                      );
+                      // Only show results if there's a search query
+                      setShowResults(e.target.value.length > 0);
                     }}
                     onKeyDown={handleKeyPress}
                     onFocus={handleInputFocus}
@@ -186,11 +196,8 @@ export default function BannerHome() {
                 <div className="absolute z-10 mt-32 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-[400px] overflow-y-auto">
                   {isLoading ? (
                     <div className="p-4 text-center">Searching...</div>
-                  ) : searchResults.length === 0 &&
-                    (searchQuery || location) ? (
-                    <div className="p-4 text-gray-500">
-                      No results found {location && `in ${location}`}
-                    </div>
+                  ) : searchResults.length === 0 && searchQuery ? (
+                    <div className="p-4 text-gray-500">No results found</div>
                   ) : (
                     <ul>
                       {searchResults.slice(0, 5).map((business) => (
@@ -267,12 +274,11 @@ export default function BannerHome() {
                     value={location}
                     onChange={(e) => {
                       setLocation(e.target.value);
-                      setShowResults(
-                        searchQuery.length > 0 || e.target.value.length > 0
-                      );
+                      // Don't show results when typing location
+                      setShowResults(false);
                     }}
                     onKeyDown={handleKeyPress}
-                    onFocus={handleLocationFocus}
+                    onFocus={handleLocationInput}
                     placeholder="San Francisco, CA"
                     className="pl-10 w-full h-[48px] border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 bg-[#F7F8F8] rounded-lg border border-gray-200 shadow-inner"
                   />

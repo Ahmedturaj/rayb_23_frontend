@@ -1,3 +1,6 @@
+"use client";
+
+import { useSearchStore } from "@/components/home/states/useSearchStore";
 import {
   Select,
   SelectContent,
@@ -10,12 +13,13 @@ import React from "react";
 
 const ResultsFiltering = () => {
   const { setSort } = useFilterStore();
+  const { location } = useSearchStore();
 
   return (
     <div className="flex items-center justify-between">
       <div>
         <h1 className="text-gray-500">24 Results for</h1>
-        <h1 className="text-xl font-bold">“Guitar Cleaning”</h1>
+        <h1 className="text-xl font-bold">{`${location}`}</h1>
       </div>
 
       <div>
@@ -30,6 +34,8 @@ const ResultsFiltering = () => {
           <SelectContent>
             <SelectItem value="high-to-low">Rated High to Low</SelectItem>
             <SelectItem value="low-to-high">Rated Low to High</SelectItem>
+            <SelectItem value="price-low-to-high">Price Low to High</SelectItem>
+            <SelectItem value="price-high-to-low">Price High to Low</SelectItem>
           </SelectContent>
         </Select>
       </div>
