@@ -128,12 +128,16 @@ const Service = ({
 
   // Helper function to remove a service
   const removeService = (serviceName: string) => {
-    setSelected(prev => prev.filter(item => item.newInstrumentName !== serviceName));
+    setSelected((prev) =>
+      prev.filter((item) => item.newInstrumentName !== serviceName)
+    );
   };
 
   // Helper function to remove a music service
   const removeMusicService = (serviceName: string) => {
-    setSelectedMusic(prev => prev.filter(item => item.newInstrumentName !== serviceName));
+    setSelectedMusic((prev) =>
+      prev.filter((item) => item.newInstrumentName !== serviceName)
+    );
   };
 
   return (
@@ -238,7 +242,9 @@ const Service = ({
 
                             <div
                               className="cursor-pointer"
-                              onClick={() => removeService(select.newInstrumentName)}
+                              onClick={() =>
+                                removeService(select.newInstrumentName)
+                              }
                             >
                               <Trash className="h-5 w-5 text-red-500" />
                             </div>
@@ -307,7 +313,15 @@ const Service = ({
             <div className="mt-5">
               {/* Instrument Services */}
               <div>
-                <AddInstrumentTitle />
+                <h3 className="text-xl font-semibold mb-2">
+                  Select / Add Instruments
+                </h3>
+                <p className="text-[#485150] text-[16px] lg:max-w-6xl">
+                  Help customers understand the types of instruments the
+                  business services by selecting the relevant instrument
+                  families. These categories help us match the services with
+                  customers’ needs.
+                </p>
 
                 {/* Instrument Groups */}
                 <InstrumentGroupsMusic
@@ -406,7 +420,11 @@ const Service = ({
                                   {/* Trash Icon to remove selected service */}
                                   <div
                                     className="cursor-pointer"
-                                    onClick={() => removeMusicService(select.newInstrumentName)}
+                                    onClick={() =>
+                                      removeMusicService(
+                                        select.newInstrumentName
+                                      )
+                                    }
                                   >
                                     <Trash className="h-5 w-5 text-red-500" />
                                   </div>

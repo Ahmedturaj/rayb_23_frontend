@@ -50,14 +50,15 @@ const Navbar = () => {
     <nav className="p-4 border-b sticky top-0 z-50 bg-white">
       <div className="container flex items-center justify-between gap-10 h-14">
         {/* Logo */}
-        <button onClick={() => window.location.reload()}>
-          <h1 className="font-bold text-3xl lg:text-5xl">Instrufix</h1>
-        </button>
+        <Link href={"/"}>
+          {" "}
+          <button>
+            <h1 className="font-bold text-3xl lg:text-5xl">Instrufix</h1>
+          </button>
+        </Link>
 
         {/* Search Bar (hidden on mobile, visible on desktop) */}
-        {pathname === "/search-result" && (
-          <SearchBar variant="desktop" />
-        )}
+        {pathname === "/search-result" && <SearchBar variant="desktop" />}
 
         {/* Mobile Sign Up Button and Menu (visible on mobile only) */}
         <div className="md:hidden flex items-center gap-3">
@@ -106,10 +107,14 @@ const Navbar = () => {
               <div className="flex flex-col space-y-6 p-4">
                 {/* Mobile Search Bar */}
                 {pathname === "/search-result" && (
-                  <SearchBar 
-                    variant="mobile" 
+                  <SearchBar
+                    variant="mobile"
                     onResultClick={() => {
-                      (document.querySelector('[data-state="open"]') as HTMLElement | null)?.click();
+                      (
+                        document.querySelector(
+                          '[data-state="open"]'
+                        ) as HTMLElement | null
+                      )?.click();
                     }}
                   />
                 )}
