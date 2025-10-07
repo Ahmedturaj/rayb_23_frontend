@@ -232,7 +232,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
   // Custom icon
   const customMarker = new DivIcon({
     html: ReactDOMServer.renderToString(
-      <MapPin fill="#139a8e" className="text-white w-6 h-6" />
+      <MapPin fill="#139a8e" className="text-white w-8 h-8" />
     ),
     className: "", // remove default styles
     iconSize: [24, 24],
@@ -517,18 +517,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
             </h1>
           </div>
           <div className="flex items-center gap-2 mb-2">
-            <div className="flex items-center">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  className={`w-4 h-4 ${
-                    star <= Math.round(Number(averageRating))
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "text-gray-300"
-                  }`}
-                />
-              ))}
-            </div>
+            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
             <span className="text-gray-600 font-medium">{averageRating}</span>
             <span className="text-gray-500">
               ({singleBusiness.review.length} Reviews)
