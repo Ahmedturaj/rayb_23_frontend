@@ -4,7 +4,6 @@ import { Search, X, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
-import { useDebounce } from "@/hooks/use-debounce";
 import Image from "next/image";
 import { useFilterStore } from "@/zustand/stores/search-store";
 import { Button } from "../ui/button";
@@ -39,49 +38,44 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  const debouncedQuery = useDebounce(searchQuery, 300);
-  const debouncedLocation = useDebounce(location, 300);
-
   // Update local state when store changes
   useEffect(() => {
     setSearchQuery(search);
   }, [search]);
 
   // Fetch businesses based on search query and location
-  useEffect(() => {
-    const fetchBusinesses = async () => {
-      if (!debouncedQuery && !debouncedLocation) {
-        setSearchResults([]);
-        return;
+  const fetchBusinesses = async () => {
+    if (!searchQuery.trim() && !location.trim()) {
+      setSearchResults([]);
+      setShowResults(false);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const queryParams = new URLSearchParams();
+
+      if (searchQuery.trim()) {
+        queryParams.append("search", encodeURIComponent(searchQuery.trim()));
       }
 
-      setIsLoading(true);
-      try {
-        const queryParams = new URLSearchParams();
-
-        if (debouncedQuery) {
-          queryParams.append("search", encodeURIComponent(debouncedQuery));
-        }
-
-        if (debouncedLocation) {
-          queryParams.append("location", encodeURIComponent(debouncedLocation));
-        }
-
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/business?${queryParams}`
-        );
-        const data = await response.json();
-        setSearchResults(data.data || []);
-      } catch (error) {
-        console.error("Error fetching businesses:", error);
-        setSearchResults([]);
-      } finally {
-        setIsLoading(false);
+      if (location.trim()) {
+        queryParams.append("location", encodeURIComponent(location.trim()));
       }
-    };
 
-    fetchBusinesses();
-  }, [debouncedQuery, debouncedLocation]);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/business?${queryParams}`
+      );
+      const data = await response.json();
+      setSearchResults(data.data || []);
+      setShowResults(true); // Show results after fetching
+    } catch (error) {
+      console.error("Error fetching businesses:", error);
+      setSearchResults([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Handle click outside to close results
   useEffect(() => {
@@ -100,6 +94,13 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
   const handleSearch = () => {
     if (searchQuery.trim() || location.trim()) {
       setSearch(searchQuery.trim());
+      fetchBusinesses(); // Fetch and show results on button click
+    }
+  };
+
+  const handleSearchAndNavigate = () => {
+    if (searchQuery.trim() || location.trim()) {
+      setSearch(searchQuery.trim());
       router.push(`/search-result`);
       setShowResults(false);
       onResultClick?.();
@@ -108,7 +109,7 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      handleSearch();
+      handleSearch(); // Only fetch results, don't navigate
     }
   };
 
@@ -121,6 +122,7 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
 
   const clearLocation = () => {
     setLocation("");
+    setShowResults(false);
   };
 
   const handleResultClick = () => {
@@ -129,21 +131,27 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
   };
 
   const handleInputFocus = () => {
-    setShowResults(searchQuery.length > 0 || location.length > 0);
+    // Only show existing results if they're already loaded
+    if (searchResults.length > 0) {
+      setShowResults(true);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setShowResults(e.target.value.length > 0 || location.length > 0);
+    // Don't automatically show results when typing
   };
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocation(e.target.value);
-    setShowResults(searchQuery.length > 0 || e.target.value.length > 0);
+    // Don't automatically show results when typing
   };
 
   const handleLocationFocus = () => {
-    setShowResults(searchQuery.length > 0 || location.length > 0);
+    // Only show existing results if they're already loaded
+    if (searchResults.length > 0) {
+      setShowResults(true);
+    }
   };
 
   // Styles based on variant
@@ -226,7 +234,10 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
         </div>
 
         <div>
-          <Button className="h-[48px] -ml-1">
+          <Button
+            className="h-[48px] -ml-1"
+            onClick={handleSearch} // Fetch and show results on click
+          >
             <Search />
           </Button>
         </div>
@@ -302,7 +313,7 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
                 <li
                   className="p-3 text-center text-sm text-blue-600 hover:bg-gray-50 cursor-pointer"
                   onClick={() => {
-                    handleSearch();
+                    handleSearchAndNavigate(); // Navigate to full results page
                     handleResultClick();
                   }}
                 >
