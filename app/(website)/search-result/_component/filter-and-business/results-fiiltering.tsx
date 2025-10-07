@@ -8,18 +8,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useFilterStore } from "@/zustand/stores/search-store";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const ResultsFiltering = () => {
   const { setSort } = useFilterStore();
   const { location } = useSearchStore();
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  if (!hydrated) {
+    return (
+      <div className="flex items-center justify-between">
+        <div>
+          <Skeleton className="h-4 w-32 mb-2" />
+          <Skeleton className="h-6 w-48" />
+        </div>
+
+        <div className="flex flex-col items-end">
+          <Skeleton className="h-4 w-16 mb-2" />
+          <Skeleton className="h-5 w-32" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-between">
       <div>
         <h1 className="text-gray-500">24 Results for</h1>
-        <h1 className="text-xl font-bold">{`${location}`}</h1>
+        <h1 className="text-xl font-bold">{`"${location}"`}</h1>
       </div>
 
       <div>

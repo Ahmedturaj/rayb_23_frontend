@@ -3,11 +3,10 @@ import SearchComponent from "./_component/SearchComponent";
 
 const page = () => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-
-    <div className="container py-12">
-      <SearchComponent />
-    </div>
+    <Suspense>
+      <div className="container py-12">
+        <SearchComponent />
+      </div>
     </Suspense>
   );
 };
