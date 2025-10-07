@@ -7,6 +7,7 @@ import { useState, useEffect, useRef, KeyboardEvent } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import Image from "next/image";
 import { useFilterStore } from "@/zustand/stores/search-store";
+import { Button } from "../ui/button";
 
 interface Business {
   _id: string;
@@ -57,13 +58,13 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
       setIsLoading(true);
       try {
         const queryParams = new URLSearchParams();
-        
+
         if (debouncedQuery) {
-          queryParams.append('search', encodeURIComponent(debouncedQuery));
+          queryParams.append("search", encodeURIComponent(debouncedQuery));
         }
-        
+
         if (debouncedLocation) {
-          queryParams.append('location', encodeURIComponent(debouncedLocation));
+          queryParams.append("location", encodeURIComponent(debouncedLocation));
         }
 
         const response = await fetch(
@@ -152,19 +153,17 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
       : "hidden md:flex flex-1 max-w-2xl mx-auto items-center relative";
 
   const inputContainerClass =
-    variant === "mobile"
-      ? "flex flex-col gap-2"
-      : "flex items-center gap-2 w-full";
+    variant === "mobile" ? "flex flex-col" : "flex items-center w-full";
 
   const searchInputClass =
     variant === "mobile"
       ? "flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 px-4 bg-transparent outline-none"
-      : "pl-10 w-full h-[48px] border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 bg-[#F7F8F8] rounded-lg border border-gray-200 shadow-inner";
+      : "pl-10 w-full h-[48px] focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 bg-[#F7F8F8] rounded-lg border border-gray-200 shadow-inner rounded-none rounded-l-lg border-none";
 
   const locationInputClass =
     variant === "mobile"
-      ? "flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 px-4 bg-transparent outline-none"
-      : "pl-10 w-full md:w-48 h-[48px] border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 bg-[#F7F8F8] rounded-lg border border-gray-200 shadow-inner";
+      ? "flex-1 border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 px-4 bg-transparent outline-none "
+      : "pl-10 w-full md:w-48 h-[48px] border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 bg-[#F7F8F8] rounded-lg shadow-inner rounded-none";
 
   const resultsClass =
     variant === "mobile"
@@ -199,6 +198,8 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
           </div>
         </div>
 
+        <div className="h-[48px] border-r border-r-gray-300 bg-[#f7f8f8]"></div>
+
         {/* Location Input */}
         <div className="flex-1 md:flex-none relative">
           <div className="relative">
@@ -222,6 +223,12 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
               </button>
             )}
           </div>
+        </div>
+
+        <div>
+          <Button className="h-[48px] -ml-1">
+            <Search />
+          </Button>
         </div>
 
         {/* Search Button for Mobile */}
