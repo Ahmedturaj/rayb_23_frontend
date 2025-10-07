@@ -277,6 +277,10 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
   };
 
   const handleSaveBusiness = async () => {
+    if (status === "unauthenticated") {
+      return setIsLoginModalOpen(true);
+    }
+
     setIsSaving(true);
     try {
       const response = await fetch(
@@ -450,6 +454,14 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
     setIsOpen(true);
   };
 
+  const handleAddPhoto = () => {
+    if (status === "unauthenticated") {
+      return setIsLoginModalOpen(true);
+    }
+
+    setIsAddPhotoOpen(true);
+  };
+
   const handleMessage = async () => {
     if (!userId) {
       toast.error("You must be logged in to send a message.");
@@ -540,7 +552,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
             Write Review
           </button>
           <button
-            onClick={() => setIsAddPhotoOpen(true)}
+            onClick={handleAddPhoto}
             className="bg-[#e0f2f1] hover:bg-[#139a8e] flex items-center gap-2 px-5 py-3 rounded-lg text-[#139a8e] hover:text-white font-semibold"
           >
             <LocateIcon className="w-4 h-4 mr-1" />
