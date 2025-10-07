@@ -282,7 +282,7 @@ export default function BannerHome() {
                     placeholder="San Francisco, CA"
                     className="pl-10 w-full h-[48px] border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 bg-[#F7F8F8] rounded-lg border border-gray-200 shadow-inner"
                   />
-                  {location && (
+                  {location && location !== "San Francisco, CA" && (
                     <button
                       onClick={clearLocation}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"

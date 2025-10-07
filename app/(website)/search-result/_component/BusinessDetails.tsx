@@ -15,7 +15,7 @@ import {
   Loader2,
   Copy,
   X,
-  LocateFixed,
+  MapPin,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -232,7 +232,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
   // Custom icon
   const customMarker = new DivIcon({
     html: ReactDOMServer.renderToString(
-      <LocateFixed className="text-red-600 w-6 h-6" />
+      <MapPin fill="#139a8e" className="text-white w-8 h-8" />
     ),
     className: "", // remove default styles
     iconSize: [24, 24],
@@ -277,6 +277,10 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
   };
 
   const handleSaveBusiness = async () => {
+    if (status === "unauthenticated") {
+      return setIsLoginModalOpen(true);
+    }
+
     setIsSaving(true);
     try {
       const response = await fetch(
@@ -450,6 +454,14 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
     setIsOpen(true);
   };
 
+  const handleAddPhoto = () => {
+    if (status === "unauthenticated") {
+      return setIsLoginModalOpen(true);
+    }
+
+    setIsAddPhotoOpen(true);
+  };
+
   const handleMessage = async () => {
     if (!userId) {
       toast.error("You must be logged in to send a message.");
@@ -505,18 +517,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
             </h1>
           </div>
           <div className="flex items-center gap-2 mb-2">
-            <div className="flex items-center">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  className={`w-4 h-4 ${
-                    star <= Math.round(Number(averageRating))
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "text-gray-300"
-                  }`}
-                />
-              ))}
-            </div>
+            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
             <span className="text-gray-600 font-medium">{averageRating}</span>
             <span className="text-gray-500">
               ({singleBusiness.review.length} Reviews)
@@ -540,7 +541,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
             Write Review
           </button>
           <button
-            onClick={() => setIsAddPhotoOpen(true)}
+            onClick={handleAddPhoto}
             className="bg-[#e0f2f1] hover:bg-[#139a8e] flex items-center gap-2 px-5 py-3 rounded-lg text-[#139a8e] hover:text-white font-semibold"
           >
             <LocateIcon className="w-4 h-4 mr-1" />
@@ -861,6 +862,12 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
 
           {/* Location */}
           <div className="h-[300px] w-[300px]">
+            <style jsx global>{`
+              .leaflet-control-container {
+                display: none !important;
+              }
+            `}</style>
+
             {coords && (
               <MapContainer
                 center={[coords.lat, coords.lng]}
@@ -869,8 +876,8 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
                 className="h-full w-full rounded-xl shadow-lg"
               >
                 <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                  attribution=""
                 />
                 <Marker position={[coords.lat, coords.lng]} icon={customMarker}>
                   <Popup>{singleBusiness.businessInfo.name}</Popup>

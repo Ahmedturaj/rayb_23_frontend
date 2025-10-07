@@ -1,11 +1,19 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface ISearchStore {
   location: string;
   setLocation: (value: string) => void;
 }
 
-export const useSearchStore = create<ISearchStore>((set) => ({
-  location: "",
-  setLocation: (value: string) => set({ location: value }),
-}));
+export const useSearchStore = create<ISearchStore>()(
+  persist(
+    (set) => ({
+      location: "San Francisco, CA",
+      setLocation: (value: string) => set({ location: value }),
+    }),
+    {
+      name: "search-location",
+    }
+  )
+);
