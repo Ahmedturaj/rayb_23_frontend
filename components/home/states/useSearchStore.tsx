@@ -6,6 +6,6 @@ interface ISearchStore {
 }
 
 export const useSearchStore = create<ISearchStore>((set) => ({
-  location: "",
+  location: "San Francisco, CA",
   setLocation: (value: string) => set({ location: value }),
 }));
