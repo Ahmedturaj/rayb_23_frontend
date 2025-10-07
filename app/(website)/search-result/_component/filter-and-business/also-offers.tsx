@@ -9,10 +9,10 @@ import React from "react";
 
 const AlsoOffers = ({}) => {
   const items = [
+    { label: "Buy" },
     { label: "Sell" },
     { label: "Trade" },
     { label: "Rental" },
-    { label: "Lessons" },
   ];
 
   const { setOffers } = useFilterStore();
