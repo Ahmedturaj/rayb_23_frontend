@@ -28,7 +28,7 @@ export interface Review {
 interface BusinessItem {
   email: string;
   name: string;
-  image: string;
+  image: string[];
 }
 
 interface Service {
