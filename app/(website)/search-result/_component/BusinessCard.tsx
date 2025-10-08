@@ -1,8 +1,8 @@
 "use client";
-import "@smastrom/react-rating/style.css";
-import { Star } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 interface BusinessItem {
   email: string;
@@ -27,20 +27,93 @@ interface Business {
 }
 
 const BusinessCard = ({ business }: { business: Business }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const images = business.businessInfo?.image || [];
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const goToImage = (index: number) => {
+    setCurrentImageIndex(index);
+  };
+
   return (
     <div>
       <Link href={`/search-result/${business._id}`}>
         <div className="bg-white rounded-lg shadow-[0px_2px_12px_0px_#003d3924] p-4 lg:p-6">
           <div className="flex flex-col sm:flex-row items-start gap-4 lg:gap-5">
-            <div className="flex-shrink-0 overflow-hidden rounded-lg w-full sm:w-auto">
-              <Image
-                src={business.businessInfo?.image?.[0]}
-                alt={business.businessInfo?.name || "Business image"}
-                width={200}
-                height={200}
-                className="rounded-lg object-cover w-full sm:w-[200px] h-[160px] sm:h-[200px] hover:scale-105 transition"
-              />
+            <div className="flex-shrink-0 overflow-hidden rounded-lg w-full sm:w-auto relative group">
+              {/* Image Slider */}
+              <div className="relative w-full sm:w-[200px] h-[160px] sm:h-[200px] rounded-lg overflow-hidden">
+                <Image
+                  src={images[currentImageIndex] || "/placeholder-image.jpg"}
+                  alt={business.businessInfo?.name || "Business image"}
+                  width={200}
+                  height={200}
+                  className="rounded-lg object-cover w-full h-full transition-transform duration-300 hover:scale-105"
+                />
+
+                {/* Navigation Arrows - Show only if multiple images */}
+                {images.length > 1 && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        prevImage();
+                      }}
+                      className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        nextImage();
+                      }}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </>
+                )}
+
+                {/* Image Counter */}
+                {images.length > 1 && (
+                  <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                    {currentImageIndex + 1} / {images.length}
+                  </div>
+                )}
+              </div>
+
+              {/* Dot Indicators */}
+              {images.length > 1 && (
+                <div className="flex justify-center mt-3 space-x-1">
+                  {images.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        goToImage(index);
+                      }}
+                      className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                        index === currentImageIndex
+                          ? "bg-primary"
+                          : "bg-gray-300 hover:bg-gray-400"
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
+
             <div className="flex-1 w-full">
               <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                 <div>
@@ -49,7 +122,7 @@ const BusinessCard = ({ business }: { business: Business }) => {
                   </h3>
 
                   <div className="my-3 flex items-center gap-2">
-                    <Star className="fill-yellow-400 text-yellow-400 font-bold h-4 w-4 " />{" "}
+                    <Star className="fill-yellow-400 text-yellow-400 font-bold h-4 w-4" />
                     <span>{business.review ? business.review.length : 0}</span>
                   </div>
 
