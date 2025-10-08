@@ -1,13 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { Star } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 interface BusinessItem {
   email: string;
   name: string;
-  image: string;
+  image: string[];
 }
 
 interface Service {
@@ -25,19 +26,84 @@ interface BusinessCardProps {
 }
 
 export default function BusinessCard({ business }: BusinessCardProps) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const images = business?.businessInfo?.image || [];
+
+  const nextImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const goToImage = (e: React.MouseEvent, index: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex(index);
+  };
+
   return (
     <Link href={`/search-result/${business?._id}`}>
       <div className="bg-white rounded-lg border border-gray-100 shadow-lg p-6 h-full">
         <div className="flex flex-col gap-5 h-full">
-          {/* Profile Image */}
-          <div className="flex-shrink-0 overflow-hidden rounded-lg">
-            <Image
-              src={business?.businessInfo?.image[0]}
-              alt={"business.png"}
-              width={1000}
-              height={1000}
-              className="rounded-lg object-cover w-full h-[250px] hover:scale-105 transition"
-            />
+          {/* Profile Image with Slider */}
+          <div className="flex-shrink-0 overflow-hidden rounded-lg relative group">
+            <div className="relative w-full h-[250px] rounded-lg overflow-hidden">
+              <Image
+                src={images[currentImageIndex] || "/placeholder-image.jpg"}
+                alt={`${business?.businessInfo?.name} - Image ${currentImageIndex + 1}`}
+                width={1000}
+                height={1000}
+                className="rounded-lg object-cover w-full h-full hover:scale-105 transition duration-300"
+              />
+
+              {/* Navigation Arrows - Show only if multiple images */}
+              {images.length > 1 && (
+                <>
+                  <button
+                    onClick={prevImage}
+                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </>
+              )}
+
+              {/* Image Counter */}
+              {images.length > 1 && (
+                <div className="absolute top-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                  {currentImageIndex + 1} / {images.length}
+                </div>
+              )}
+            </div>
+
+            {/* Dot Indicators */}
+            {images.length > 1 && (
+              <div className="flex justify-center mt-3 space-x-2">
+                {images.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={(e) => goToImage(e, index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                      index === currentImageIndex
+                        ? "bg-blue-600"
+                        : "bg-gray-300 hover:bg-gray-400"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Content */}
@@ -59,7 +125,7 @@ export default function BusinessCard({ business }: BusinessCardProps) {
                   <div className="flex flex-wrap items-center gap-2 mb-2">
                     {business?.services?.map((service, index) => (
                       <button
-                        className="h-[48px] px-5 rounded-lg bg-[#F8F8F8]"
+                        className="h-[48px] px-5 rounded-lg bg-[#F8F8F8] text-sm transition-colors hover:bg-gray-200"
                         key={index}
                       >
                         {service?.newInstrumentName}

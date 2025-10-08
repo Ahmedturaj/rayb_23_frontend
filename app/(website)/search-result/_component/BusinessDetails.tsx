@@ -16,6 +16,8 @@ import {
   Copy,
   X,
   MapPin,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -174,6 +176,89 @@ const ShareModal = ({
 };
 
 type SectionKey = "repair" | "lessons" | "otherService";
+
+// Image Slider Component
+const ImageSlider = ({ images, businessName }: { images: string[]; businessName: string }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const goToImage = (index: number) => {
+    setCurrentImageIndex(index);
+  };
+
+  if (!images || images.length === 0) {
+    return (
+      <div className="flex-shrink-0">
+        <div className="rounded-lg bg-gray-200 h-[172px] w-[172px] flex items-center justify-center">
+          <span className="text-gray-500">No Image</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-shrink-0 relative group">
+      <div className="relative rounded-lg overflow-hidden h-[172px] w-[172px]">
+        <Image
+          src={images[currentImageIndex]}
+          alt={`${businessName} - Image ${currentImageIndex + 1}`}
+          width={172}
+          height={172}
+          className="rounded-lg object-cover h-full w-full"
+        />
+
+        {/* Navigation Arrows - Show only if multiple images */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={prevImage}
+              className="absolute left-1 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-1 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100 z-10"
+            >
+              <ChevronLeft className="h-3 w-3" />
+            </button>
+            <button
+              onClick={nextImage}
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-1 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100 z-10"
+            >
+              <ChevronRight className="h-3 w-3" />
+            </button>
+          </>
+        )}
+
+        {/* Image Counter */}
+        {images.length > 1 && (
+          <div className="absolute top-1 right-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded-full z-10">
+            {currentImageIndex + 1} / {images.length}
+          </div>
+        )}
+      </div>
+
+      {/* Dot Indicators */}
+      {images.length > 1 && (
+        <div className="flex justify-center mt-2 space-x-1">
+          {images.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToImage(index)}
+              className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
+                index === currentImageIndex
+                  ? "bg-[#139a8e]"
+                  : "bg-gray-300 hover:bg-gray-400"
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const BusinessDetails: React.FC<BusinessProfileProps> = ({
   singleBusiness,
@@ -494,16 +579,11 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
     <div>
       {/* Business Header */}
       <div className="flex items-center gap-6 border-b border-gray-200 pb-8">
-        {/* Business Image */}
-        <div className="flex-shrink-0">
-          <Image
-            src={singleBusiness.businessInfo.image[0]}
-            alt={singleBusiness.businessInfo.name}
-            width={1000}
-            height={1000}
-            className="rounded-lg object-cover h-[172px] w-[172px]"
-          />
-        </div>
+        {/* Business Image Slider */}
+        <ImageSlider 
+          images={singleBusiness.businessInfo.image} 
+          businessName={singleBusiness.businessInfo.name}
+        />
 
         {/* Business Info */}
         <div className="flex-1">

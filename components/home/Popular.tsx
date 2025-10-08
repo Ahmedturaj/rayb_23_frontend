@@ -6,17 +6,17 @@ import "@smastrom/react-rating/style.css";
 
 // Import Swiper styles and modules
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay } from "swiper/modules";
+import { Autoplay, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import Link from "next/link";
-import { Star } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface BusinessItem {
   email: string;
   name: string;
-  image: string;
+  image: string[];
 }
 
 interface Service {
@@ -121,19 +121,53 @@ const Popular = () => {
               loop={true}
             >
               {allBusiness?.slice(0, 12)?.map((business: Business) => (
-                <SwiperSlide key={business?.businessInfo?.email}>
+                <SwiperSlide key={business?._id}>
                   <Link href={`search-result/${business?._id}`}>
                     <div className="bg-white rounded-lg border border-gray-100 shadow-lg p-6 h-full">
                       <div className="flex flex-col gap-5 h-full">
-                        {/* Profile Image */}
-                        <div className="flex-shrink-0 overflow-hidden rounded-lg">
-                          <Image
-                            src={business?.businessInfo?.image[0]}
-                            alt={"business.png"}
-                            width={1000}
-                            height={1000}
-                            className="rounded-lg object-cover w-full h-[250px] hover:scale-105 transition"
-                          />
+                        {/* Profile Image Slider with Arrows */}
+                        <div className="flex-shrink-0 overflow-hidden rounded-lg relative group">
+                          <Swiper
+                            modules={[Navigation, Autoplay]}
+                            navigation={{
+                              nextEl: `.next-${business?._id}`,
+                              prevEl: `.prev-${business?._id}`,
+                            }}
+                            autoplay={{
+                              delay: 4000,
+                              disableOnInteraction: false,
+                            }}
+                            loop={business?.businessInfo?.image?.length > 1}
+                            className="w-full h-[250px] rounded-lg"
+                          >
+                            {business?.businessInfo?.image?.map((img, index) => (
+                              <SwiperSlide key={index}>
+                                <Image
+                                  src={img}
+                                  alt={`${business?.businessInfo?.name} - Image ${index + 1}`}
+                                  width={1000}
+                                  height={1000}
+                                  className="rounded-lg object-cover w-full h-full hover:scale-105 transition duration-500"
+                                />
+                              </SwiperSlide>
+                            ))}
+                          </Swiper>
+
+                          {/* Custom Arrow Buttons */}
+                          {business?.businessInfo?.image?.length > 1 && (
+                            <>
+                              <button
+                                className={`prev-${business?._id} absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100 z-10`}
+                              >
+                                <ChevronLeft className="h-4 w-4" />
+                              </button>
+                              <button
+                                className={`next-${business?._id} absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100 z-10`}
+                              >
+                                <ChevronRight className="h-4 w-4" />
+                              </button>
+                            </>
+                          )}
                         </div>
 
                         {/* Content */}
@@ -146,7 +180,7 @@ const Popular = () => {
 
                               <div className="my-3 flex items-center gap-2">
                                 <Star className="fill-yellow-400 text-yellow-400 font-bold h-4 w-4 " />{" "}
-                                <span>{business?.review.length}</span>
+                                <span>{business?.review?.length || 0}</span>
                               </div>
 
                               {/* Services */}

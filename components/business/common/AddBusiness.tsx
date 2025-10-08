@@ -13,6 +13,8 @@ import { useBusinessContext } from "@/lib/business-context";
 import axios from "axios";
 import LoginModal from "../modal/login-modal";
 import BusinessSuccessModal from "../modal/bussiness-success-modal";
+import LogOutBusinessSuccessModal from "../modal/log-out-business-success-modal";
+import TrackSubmissionModal from "../modal/track-submission-modal";
 
 interface ServiceType {
   newInstrumentName: string;
@@ -57,6 +59,12 @@ const AddBusiness = () => {
   const [ServiceModalMusic, setServiceModalMusic] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isBusinessSuccessModalOpen, setIsBusinessSuccessModalOpen] =
+    useState(false);
+  const [
+    isLogoutBusinessSuccessModalOpen,
+    setIsLogoutBusinessSuccessModalOpen,
+  ] = useState(false);
+  const [isTrackSubmissionModalOpen, setIsTrackSubmissionModalOpen] =
     useState(false);
 
   // control instrument family
@@ -310,6 +318,11 @@ const AddBusiness = () => {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handelOkay = () => {
+    setIsTrackSubmissionModalOpen(true);
+    setIsLogoutBusinessSuccessModalOpen(false);
+  };
+
   //post form data
   const { mutateAsync: addBusinessData, isPending } = useMutation({
     mutationKey: ["add-business"],
@@ -323,7 +336,9 @@ const AddBusiness = () => {
       return res;
     },
     onSuccess: () => {
-      return setIsBusinessSuccessModalOpen(true);
+      return pathName === "/add-my-business"
+        ? setIsBusinessSuccessModalOpen(true)
+        : setIsLogoutBusinessSuccessModalOpen(true);
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
@@ -338,6 +353,65 @@ const AddBusiness = () => {
     if (isLoggedIn === "unauthenticated") {
       return setIsLoginModalOpen(true);
     }
+
+    const formData = new FormData();
+    const imageInput = document.getElementById(
+      "image_input"
+    ) as HTMLInputElement;
+    const imageFiles = imageInput?.files ? Array.from(imageInput.files) : [];
+
+    imageFiles.forEach((file) => {
+      formData.append("image", file);
+    });
+
+    const businessData = {
+      businessInfo: {
+        name: businessMan,
+        address: addressName,
+        description,
+        phone: phoneNumber,
+        email,
+        website,
+      },
+      services: selected.map((service) => ({
+        newInstrumentName: service.newInstrumentName,
+        pricingType: service.pricingType,
+        price: service.price,
+        minPrice: service.minPrice,
+        maxPrice: service.maxPrice,
+        selectedInstrumentsGroup: service.selectedInstrumentsGroup,
+        instrumentFamily: service.instrumentFamily,
+      })),
+      musicLessons: selectedMusic.map((lesson) => ({
+        newInstrumentName: lesson.newInstrumentName,
+        pricingType: lesson.pricingType,
+        price: lesson.price,
+        minPrice: lesson.minPrice,
+        maxPrice: lesson.maxPrice,
+        selectedInstrumentsGroupMusic: lesson.selectedInstrumentsGroupMusic,
+      })),
+      businessHours: businessHours.map((hour) => ({
+        day: hour.day, // Must match enum values exactly
+        startTime: hour.startTime,
+        startMeridiem: hour.startMeridiem,
+        endTime: hour.endTime,
+        endMeridiem: hour.endMeridiem,
+        enabled: hour.enabled,
+      })),
+      buyInstruments: selectedOptions.buy,
+      sellInstruments: selectedOptions.sell,
+      offerMusicLessons: selectedMusic.length > 0,
+      status: "pending",
+      isVerified: false,
+    };
+
+    formData.append("data", JSON.stringify(businessData));
+
+    await addBusinessData(formData);
+  };
+
+  const handleLogOutSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
     const formData = new FormData();
     const imageInput = document.getElementById(
@@ -500,7 +574,9 @@ const AddBusiness = () => {
         onSubmit={
           pathName === "/business-dashboard/profile"
             ? handleUpdate
-            : handleSubmit
+            : pathName === "/add-my-business"
+            ? handleSubmit
+            : handleLogOutSubmit
         }
       >
         {/* business information */}
@@ -674,6 +750,23 @@ const AddBusiness = () => {
         <BusinessSuccessModal
           isBusinessSuccessModalOpen={isBusinessSuccessModalOpen}
           setIsBusinessSuccessModalOpen={setIsBusinessSuccessModalOpen}
+        />
+      )}
+
+      {isLogoutBusinessSuccessModalOpen && (
+        <LogOutBusinessSuccessModal
+          isLogoutBusinessSuccessModalOpen={isLogoutBusinessSuccessModalOpen}
+          setIsLogoutBusinessSuccessModalOpen={
+            setIsLogoutBusinessSuccessModalOpen
+          }
+          handelOkay={handelOkay}
+        />
+      )}
+
+      {isTrackSubmissionModalOpen && (
+        <TrackSubmissionModal
+          isModalOpen={isTrackSubmissionModalOpen}
+          setIsModalOpen={setIsTrackSubmissionModalOpen}
         />
       )}
     </div>
