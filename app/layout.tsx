@@ -6,6 +6,7 @@ import QueryProvider from "@/providers/query-provider";
 import SessionWrapper from "@/providers/session-provider";
 import { Toaster } from "sonner";
 import { BusinessContextProvider } from "@/lib/business-context";
+import NextTopLoader from "nextjs-toploader";
 
 const font = DM_Sans({
   subsets: ["latin"],
@@ -31,6 +32,7 @@ export default function RootLayout({
               <LayoutVisibilityWrapper>
                 <main className="min-h-[calc(100vh-510px)]">{children}</main>
                 <Toaster position="top-right" />
+                <NextTopLoader color="#0f766e" showSpinner={false} />
               </LayoutVisibilityWrapper>
             </BusinessContextProvider>
           </QueryProvider>

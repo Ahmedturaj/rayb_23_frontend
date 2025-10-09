@@ -53,7 +53,7 @@ const Navbar = () => {
     <nav className="p-4 border-b sticky top-0 z-50 bg-white">
       <div className="container flex items-center justify-between gap-10 h-14">
         {/* Logo */}
-        <Link onClick={() => window.location.reload()} href={"/"}>
+        <Link href={"/"}>
           {" "}
           <button>
             <h1 className="font-bold text-3xl lg:text-5xl">Instrufix</h1>
