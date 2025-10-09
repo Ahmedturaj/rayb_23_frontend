@@ -35,6 +35,7 @@ import { DivIcon } from "leaflet";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import LoginModal from "@/components/business/modal/login-modal";
+import ClaimModal from "./modal/claim-modal";
 
 interface Review {
   _id: string;
@@ -300,6 +301,8 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
     null
   );
+
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchLocation = async () => {
@@ -599,7 +602,13 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
             </h1>
 
             <h1 className="text-teal-500 font-medium">
-              {singleBusiness.isClaimed ? "Claimed" : "Unclaimed"}
+              {singleBusiness.isClaimed ? (
+                <button>Claimed</button>
+              ) : (
+                <button onClick={() => setIsClaimModalOpen(true)}>
+                  Unclaimed
+                </button>
+              )}
             </h1>
           </div>
           <div className="flex items-center gap-2 mb-2">
@@ -934,7 +943,9 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
                     {hour.day.slice(0, 3)}
                   </span>
                   <span
-                    className={`${hour.enabled ? "text-gray-700" : "text-red-500"} font-medium`}
+                    className={`${
+                      hour.enabled ? "text-gray-700" : "text-red-500"
+                    } font-medium`}
                   >
                     {hour.enabled
                       ? `${formatTime(
@@ -982,6 +993,13 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
           <LoginModal
             isLoginModalOpen={isLoginModalOpen}
             setIsLoginModalOpen={setIsLoginModalOpen}
+          />
+        )}
+
+        {isClaimModalOpen && (
+          <ClaimModal
+            isClaimModalOpen={isClaimModalOpen}
+            setIsClaimModalOpen={setIsClaimModalOpen}
           />
         )}
       </div>
