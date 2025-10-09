@@ -46,6 +46,9 @@ const Navbar = () => {
 
   const notificationCount = notifications.length;
 
+  // Check if search bar should be shown (show on all pages except landing page)
+  const shouldShowSearchBar = pathname !== "/";
+
   return (
     <nav className="p-4 border-b sticky top-0 z-50 bg-white">
       <div className="container flex items-center justify-between gap-10 h-14">
@@ -58,7 +61,7 @@ const Navbar = () => {
         </Link>
 
         {/* Search Bar (hidden on mobile, visible on desktop) */}
-        {pathname === "/search-result" && <SearchBar variant="desktop" />}
+        {shouldShowSearchBar && <SearchBar variant="desktop" />}
 
         {/* Mobile Sign Up Button and Menu (visible on mobile only) */}
         <div className="md:hidden flex items-center gap-3">
@@ -106,7 +109,7 @@ const Navbar = () => {
             >
               <div className="flex flex-col space-y-6 p-4">
                 {/* Mobile Search Bar */}
-                {pathname === "/search-result" && (
+                {shouldShowSearchBar && (
                   <SearchBar
                     variant="mobile"
                     onResultClick={() => {
