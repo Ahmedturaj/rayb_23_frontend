@@ -178,7 +178,13 @@ const ShareModal = ({
 type SectionKey = "repair" | "lessons" | "otherService";
 
 // Image Slider Component
-const ImageSlider = ({ images, businessName }: { images: string[]; businessName: string }) => {
+const ImageSlider = ({
+  images,
+  businessName,
+}: {
+  images: string[];
+  businessName: string;
+}) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const nextImage = () => {
@@ -580,8 +586,8 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
       {/* Business Header */}
       <div className="flex items-center gap-6 border-b border-gray-200 pb-8">
         {/* Business Image Slider */}
-        <ImageSlider 
-          images={singleBusiness.businessInfo.image} 
+        <ImageSlider
+          images={singleBusiness.businessInfo.image}
           businessName={singleBusiness.businessInfo.name}
         />
 
@@ -600,14 +606,16 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
             <span className="text-gray-600 font-medium">{averageRating}</span>
             <span className="text-gray-500">
-              ({singleBusiness.review.length} Reviews)
+              ({singleBusiness.review.length} Reviews ){" "}
+              <span className="text-xs">by google</span>
             </span>
           </div>
           <div className="text-gray-600 mb-1">
             {singleBusiness.businessInfo.address}
           </div>
           <div className="text-gray-600">
-            {singleBusiness.businessInfo.phone}
+            {singleBusiness.businessHours[0].startTime} AM -{" "}
+            {singleBusiness.businessHours[0].endTime} PM
           </div>
         </div>
 
@@ -695,7 +703,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
                   onClick={() => toggleSection("repair")}
                   className="w-full flex items-center justify-between text-left  mb-4"
                 >
-                  <h3 className="font-medium text-lg">Repair</h3>
+                  <h3 className="font-medium text-xl">Repair</h3>
                   {expandedSections.repair ? (
                     <ChevronUp className="w-5 h-5" />
                   ) : (
@@ -708,7 +716,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
                     {Object.entries(groupedServices).map(
                       ([family, services]: [string, any]) => (
                         <div key={family}>
-                          <h4 className="font-medium text-teal-600">
+                          <h4 className="font-medium text-teal-600 text-lg">
                             {family}
                           </h4>
                           <div className="space-y-2">
@@ -871,7 +879,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
         {/* Right Column */}
         <div className="space-y-8  pl-8">
           {/* Contact Info */}
-          <div>
+          <div className="border-b border-gray-300 pb-8">
             <h3 className="text-lg font-semibold mb-4">Contact Info</h3>
             <div className="space-y-5">
               {singleBusiness.isClaimed && (
@@ -890,7 +898,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
               <div>
                 <Link
                   href={singleBusiness.businessInfo.website}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 font-medium"
                 >
                   <span>
                     <Globe className="text-[#139a8e] " />
@@ -903,7 +911,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
 
               <div>
                 <Link href={""}>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 font-medium">
                     <span>
                       <Phone className="text-[#139a8e] " />
                     </span>
@@ -917,7 +925,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
           </div>
 
           {/* Working Hours */}
-          <div>
+          <div className="border-b border-gray-300 pb-6">
             <h3 className="text-lg font-semibold mb-4">Working Hours</h3>
             <div className="space-y-2">
               {singleBusiness.businessHours.map((hour, index) => (
@@ -926,7 +934,7 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
                     {hour.day.slice(0, 3)}
                   </span>
                   <span
-                    className={hour.enabled ? "text-gray-700" : "text-red-500"}
+                    className={`${hour.enabled ? "text-gray-700" : "text-red-500"} font-medium`}
                   >
                     {hour.enabled
                       ? `${formatTime(
