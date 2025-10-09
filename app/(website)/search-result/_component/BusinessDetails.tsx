@@ -987,6 +987,10 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
               </MapContainer>
             )}
           </div>
+
+          <div>
+            <Button className="w-full bg-primary/20 hover:bg-primary/15 text-primary">Get Directions</Button>
+          </div>
         </div>
 
         {isLoginModalOpen && (
