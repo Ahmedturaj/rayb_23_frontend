@@ -18,6 +18,7 @@ import {
   MapPin,
   ChevronLeft,
   ChevronRight,
+  Search,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -285,8 +286,10 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isAddPhoto, setIsAddPhotoOpen] = useState(false);
-
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("mostRecent");
+  const [filteredReviews, setFilteredReviews] = useState<Review[]>([]);
 
   const session = useSession();
   const token = session?.data?.user?.accessToken;
@@ -322,6 +325,50 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
 
     fetchLocation();
   }, [address]);
+
+  // Calculate star distribution
+  const calculateStarDistribution = () => {
+    const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+
+    singleBusiness.review.forEach((review) => {
+      if (review.rating >= 1 && review.rating <= 5) {
+        distribution[review.rating as keyof typeof distribution]++;
+      }
+    });
+
+    return distribution;
+  };
+
+  const starDistribution = calculateStarDistribution();
+
+  // Filter and sort reviews
+  useEffect(() => {
+    let reviews = singleBusiness.review.filter(
+      (review) =>
+        review.status === "approved" &&
+        review.feedback.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    // Apply sorting
+    switch (sortBy) {
+      case "mostRecent":
+        reviews = reviews.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        break;
+      case "highestRated":
+        reviews = reviews.sort((a, b) => b.rating - a.rating);
+        break;
+      case "lowestRated":
+        reviews = reviews.sort((a, b) => a.rating - b.rating);
+        break;
+      default:
+        break;
+    }
+
+    setFilteredReviews(reviews);
+  }, [singleBusiness.review, searchQuery, sortBy]);
 
   // Custom icon
   const customMarker = new DivIcon({
@@ -848,20 +895,21 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
           {/* Rating & Reviews */}
           <div className="pt-8">
             <h2 className="text-xl font-semibold mb-4">Rating & Reviews</h2>
-            <div className="flex items-center gap-4 mb-6">
-              <div className="text-4xl font-bold">{averageRating}</div>
+
+            {/* Overall Rating */}
+            <div className="flex items-center gap-2 mb-6">
+              <div className="text-4xl font-bold">
+                <Image
+                  src={"/images/Star.png"}
+                  alt="star.png"
+                  width={1000}
+                  height={1000}
+                  className="w-12 h-12"
+                />
+              </div>
               <div>
-                <div className="flex items-center mb-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`w-5 h-5 ${
-                        star <= Math.round(Number(averageRating))
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-300"
-                      }`}
-                    />
-                  ))}
+                <div>
+                  <h1 className="font-bold text-2xl">{averageRating}</h1>
                 </div>
                 <div className="text-sm text-gray-600">
                   {singleBusiness.review.length} Reviews
@@ -869,17 +917,76 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
               </div>
             </div>
 
-            {singleBusiness.review.length === 0 ? (
+            {/* Star Distribution - Following Figma Design */}
+            <div className="mb-8">
+              {[5, 4, 3, 2, 1].map((star) => {
+                const count =
+                  starDistribution[star as keyof typeof starDistribution];
+                const percentage =
+                  singleBusiness.review.length > 0
+                    ? (count / singleBusiness.review.length) * 100
+                    : 0;
+
+                return (
+                  <div key={star} className="flex items-center gap-5 mb-2">
+                    <div className="text-sm font-medium">{star} Star</div>
+                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary"
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
+                    <span className="text-sm text-gray-600 w-12">
+                      ({count})
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Search and Sort Controls */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              {/* Search Input */}
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder="Search reviews"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 py-2 w-full"
+                />
+              </div>
+
+              {/* Sort Dropdown */}
+              <div className="mb-1">
+                <div className="text-sm text-gray-600 whitespace-nowrap">
+                  Sort by
+                </div>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="text-sm focus:outline-none bg-transparent border-none "
+                >
+                  <option value="mostRecent">Most Recent</option>
+                  <option value="highestRated">Highest Rated</option>
+                  <option value="lowestRated">Lowest Rated</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Reviews List */}
+            {filteredReviews.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                No reviews yet. Be the first to leave a review!
+                {searchQuery
+                  ? "No reviews match your search."
+                  : "No reviews yet. Be the first to leave a review!"}
               </div>
             ) : (
               <div className="space-y-4">
-                {singleBusiness.review
-                  .filter((review) => review.status === "approved")
-                  .map((review) => (
-                    <ReviewItem key={review._id} review={review} />
-                  ))}
+                {filteredReviews.map((review) => (
+                  <ReviewItem key={review._id} review={review} />
+                ))}
               </div>
             )}
           </div>
@@ -962,7 +1069,9 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
           <div>
             <h1 className="text-xl font-bold mb-2">Location</h1>
 
-            <h1 className="text-primary font-medium mb-5">{singleBusiness?.businessInfo?.address}</h1>
+            <h1 className="text-primary font-medium mb-5">
+              {singleBusiness?.businessInfo?.address}
+            </h1>
 
             {/* Location */}
             <div className="h-[300px] w-[300px]">
