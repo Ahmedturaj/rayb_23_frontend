@@ -115,27 +115,9 @@ const Service = ({
     }
   };
 
-  const handleServiceMusic = () => {
-    if (
-      selectedInstrumentsMusic.length === 0 ||
-      !selectedInstrumentsGroupMusic
-    ) {
-      return toast.error("Please select an instrument!");
-    } else {
-      setServiceModalMusic(true);
-    }
-  };
-
   // Helper function to remove a service
   const removeService = (serviceName: string) => {
     setSelected((prev) =>
-      prev.filter((item) => item.newInstrumentName !== serviceName)
-    );
-  };
-
-  // Helper function to remove a music service
-  const removeMusicService = (serviceName: string) => {
-    setSelectedMusic((prev) =>
       prev.filter((item) => item.newInstrumentName !== serviceName)
     );
   };
@@ -320,7 +302,7 @@ const Service = ({
                   Help customers understand the types of instruments the
                   business services by selecting the relevant instrument
                   families. These categories help us match the services with
-                  customers’ needs.
+                  customers&apos; needs.
                 </p>
 
                 {/* Instrument Groups */}
@@ -334,7 +316,7 @@ const Service = ({
               {/* Service Type & Pricing */}
               <div className="mt-10">
                 <h3 className="text-xl font-semibold">
-                  Service Type & Pricing
+                  Music Lessons & Pricing
                 </h3>
 
                 {/* category select */}
@@ -376,107 +358,71 @@ const Service = ({
                   )}
                 </div>
 
-                {/* instrument pricing list */}
-                <div className="grid grid-cols-3 gap-8 mt-8">
-                  {selectedMusic.length > 0 &&
-                    selectedMusic.map(
-                      (select, index) =>
-                        selectedInstrumentsGroupMusic ===
-                          select.selectedInstrumentsGroupMusic && (
-                          <div key={index} className="max-w-md rounded-lg">
-                            {/* Service Name Input */}
-                            <div>
-                              <label className="block font-medium text-gray-700 text-xl">
-                                {select.newInstrumentName}
-                              </label>
-                            </div>
+                {/* Lesson Price Input - Shows when category is selected */}
+                {selectedInstrumentsGroupMusic && (
+                  <div className="mt-8 max-w-md">
+                    <div className="mb-4">
+                      <label className="block font-medium text-xl mb-2">
+                        {selectedInstrumentsGroupMusic} Lessons
+                      </label>
+                    </div>
 
-                            {/* Service Pricing Input */}
-                            <div className="lg:col-span-2">
-                              <div className="flex items-center">
-                                <div className="flex items-center justify-between w-full space-x-4 mb-3">
-                                  <div className="flex items-center gap-4">
-                                    {["Exact", "Range", "Hourly"].map(
-                                      (type) => (
-                                        <label
-                                          key={type}
-                                          className="flex items-center space-x-1 text-sm text-gray-600"
-                                        >
-                                          <input
-                                            type="radio"
-                                            checked={
-                                              select.pricingType ===
-                                              type.toLowerCase()
-                                            }
-                                            readOnly
-                                            className="accent-primary cursor-not-allowed"
-                                          />
-                                          <span>{type}</span>
-                                        </label>
-                                      )
-                                    )}
-                                  </div>
+                    <div className="flex items-center gap-4 relative">
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          placeholder="Lesson Price"
+                          // Get the price for currently selected instrument
+                          value={
+                            selectedMusic.find(
+                              (lesson) =>
+                                lesson.selectedInstrumentsGroupMusic ===
+                                selectedInstrumentsGroupMusic
+                            )?.price || ""
+                          }
+                          onChange={(e) => {
+                            // Update or add price for current instrument
+                            const existingLessonIndex = selectedMusic.findIndex(
+                              (lesson) =>
+                                lesson.selectedInstrumentsGroupMusic ===
+                                selectedInstrumentsGroupMusic
+                            );
 
-                                  {/* Trash Icon to remove selected service */}
-                                  <div
-                                    className="cursor-pointer"
-                                    onClick={() =>
-                                      removeMusicService(
-                                        select.newInstrumentName
-                                      )
-                                    }
-                                  >
-                                    <Trash className="h-5 w-5 text-red-500" />
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Conditional Pricing Inputs */}
-                              {select.pricingType === "range" ? (
-                                <div className="flex gap-2">
-                                  <input
-                                    type="text"
-                                    placeholder="Min Price"
-                                    value={select.minPrice}
-                                    disabled
-                                    className="w-1/2 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none h-[48px] bg-gray-50 disabled:cursor-not-allowed"
-                                  />
-                                  <input
-                                    type="text"
-                                    placeholder="Max Price"
-                                    value={select.maxPrice}
-                                    disabled
-                                    className="w-1/2 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none h-[48px] bg-gray-50 disabled:cursor-not-allowed"
-                                  />
-                                </div>
-                              ) : (
-                                <input
-                                  type="text"
-                                  placeholder="$  Service Price"
-                                  value={select.price}
-                                  disabled
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none h-[48px] bg-gray-50 disabled:cursor-not-allowed"
-                                />
-                              )}
-                            </div>
-                          </div>
-                        )
-                    )}
-                </div>
-
-                {/* Add Instrument Button */}
-                <button
-                  type="button"
-                  disabled={
-                    selectedInstrumentsMusic.length === 0 ||
-                    !selectedInstrumentsGroupMusic
-                  }
-                  className="mt-10 inline-flex items-center gap-2 px-4 py-2 border border-teal-600 text-teal-700 rounded-md text-sm hover:bg-teal-50 transition-colors w-[100%] md:w-[580px] h-[48px] disabled:bg-gray-100 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-600"
-                  onClick={handleServiceMusic}
-                >
-                  <Plus className="w-4 h-4" />
-                  Add a Service
-                </button>
+                            if (existingLessonIndex >= 0) {
+                              // Update existing lesson
+                              const updatedMusic = [...selectedMusic];
+                              updatedMusic[existingLessonIndex] = {
+                                ...updatedMusic[existingLessonIndex],
+                                price: e.target.value,
+                                pricingType: "hourly", // Default for music lessons
+                                newInstrumentName: `${selectedInstrumentsGroupMusic} Lessons`,
+                              };
+                              setSelectedMusic(updatedMusic);
+                            } else {
+                              // Add new lesson
+                              setSelectedMusic((prev) => [
+                                ...prev,
+                                {
+                                  newInstrumentName: `${selectedInstrumentsGroupMusic} Lessons`,
+                                  pricingType: "hourly",
+                                  minPrice: "",
+                                  maxPrice: "",
+                                  price: e.target.value,
+                                  selectedInstrumentsGroupMusic:
+                                    selectedInstrumentsGroupMusic,
+                                },
+                              ]);
+                            }
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none h-[48px]"
+                        />
+                      </div>
+                      <div className="text-gray-500 text-sm whitespace-nowrap absolute right-3">
+                        /hr
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

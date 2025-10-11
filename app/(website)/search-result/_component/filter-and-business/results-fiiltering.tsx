@@ -41,7 +41,7 @@ const ResultsFiltering = () => {
     <div className="flex items-center justify-between">
       <div>
         <h1 className="text-gray-500">24 Results for</h1>
-        <h1 className="text-xl font-bold">{`"${location}"`}</h1>
+        <h1 className="text-xl font-bold">{`"${location || "San Francisco, CA"}"`}</h1>
       </div>
 
       <div>

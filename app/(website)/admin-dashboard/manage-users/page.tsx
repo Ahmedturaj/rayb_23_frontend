@@ -136,9 +136,40 @@ export default function ManageUsersPage() {
     setIsViewModalOpen(true);
   };
 
-  const handleDeleteUser = (userId: string) => {
+  const deleteUser = async (userId: string): Promise<void> => {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/user/delete-account/${userId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to delete user`);
+    }
+
+    // If your API returns data, you can return it here
+    return response.json();
+  };
+
+  const useDeleteUserMutation = useMutation({
+    mutationFn: deleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      toast.success('User Deleted Successfully!')
+    },
+  });
+  const handleDeleteUser = async (userId: string) => {
     setSelectedUserId(userId);
-    setIsDeleteModalOpen(true);
+    try {
+      useDeleteUserMutation.mutate(userId);
+    } catch (error) {
+      console.log("error from delete user : ", error);
+    }
   };
 
   const confirmDeactivate = () => {

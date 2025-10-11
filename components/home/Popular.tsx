@@ -180,7 +180,7 @@ const Popular = () => {
 
                               <div className="my-3 flex items-center gap-2">
                                 <Star className="fill-yellow-400 text-yellow-400 font-bold h-4 w-4 " />{" "}
-                                <span>{business?.review?.length || 0}</span>
+                                <span>{business?.review?.length || 0}</span> <span className="text-xs">( by google )</span>
                               </div>
 
                               {/* Services */}

@@ -13,6 +13,7 @@ const AlsoOffers = ({}) => {
     { label: "Sell" },
     { label: "Trade" },
     { label: "Rental" },
+    { label: "Music Lessons" },
   ];
 
   const { setOffers } = useFilterStore();
