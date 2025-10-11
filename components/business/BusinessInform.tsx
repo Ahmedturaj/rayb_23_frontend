@@ -116,7 +116,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Business address"
+                  placeholder="488 San Mateo Ave San Bruno, CA 94066"
                   className="mt-1 w-full rounded-md border border-gray-300 bg-gray-50 px-10 py-2 text-sm focus:outline-none h-[48px]"
                   value={addressName}
                   onChange={(e) => setAddressName(e.target.value)}
@@ -151,7 +151,7 @@ const BusinessInform: React.FC<BusinessInformProps> = ({
               </label>
               <input
                 type="text"
-                placeholder="Business phone number"
+                placeholder="(650) 877-0805"
                 className="mt-1 w-full rounded-md border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:outline-none h-[48px]"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
