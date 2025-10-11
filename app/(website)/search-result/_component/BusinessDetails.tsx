@@ -1106,7 +1106,19 @@ const BusinessDetails: React.FC<BusinessProfileProps> = ({
             </div>
 
             <div className="mt-8">
-              <Button className="w-full bg-primary/20 hover:bg-primary/15 text-primary">
+              <Button
+                onClick={() => {
+                  // Encode the business address for Google Maps
+                  const encodedAddress = encodeURIComponent(
+                    singleBusiness.businessInfo.address
+                  );
+                  const googleMapsUrl = `https://www.google.com/maps/dir//${encodedAddress}`;
+
+                  // Open Google Maps in a new tab
+                  window.open(googleMapsUrl, "_blank", "noopener,noreferrer");
+                }}
+                className="w-full bg-primary/20 hover:bg-primary/15 text-primary"
+              >
                 Get Directions
               </Button>
             </div>
