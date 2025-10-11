@@ -100,20 +100,20 @@ export default function BannerHome() {
   }, []);
 
   const handleSearch = () => {
-    if (searchQuery.trim() || location.trim()) {
-      // Navigate to search result page with both query and location as query parameters
-      const queryParams = new URLSearchParams();
-      if (searchQuery.trim()) {
-        queryParams.append("q", searchQuery.trim());
-      }
-      if (location.trim()) {
-        queryParams.append("location", location.trim());
-      }
-
-      router.push(`/search-result?${queryParams.toString()}`);
-      setShowResults(false);
+  // Use actual location or fallback to default
+  const searchLocation = location.trim() || "San Francisco, CA";
+  
+  if (searchQuery.trim() || searchLocation) {
+    const queryParams = new URLSearchParams();
+    if (searchQuery.trim()) {
+      queryParams.append("q", searchQuery.trim());
     }
-  };
+    queryParams.append("location", searchLocation);
+
+    router.push(`/search-result?${queryParams.toString()}`);
+    setShowResults(false);
+  }
+};
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -128,7 +128,7 @@ export default function BannerHome() {
   };
 
   const clearLocation = () => {
-    setLocation("");
+    setLocation("San Francisco, CA");
   };
 
   const handleInputFocus = () => {
@@ -274,7 +274,6 @@ export default function BannerHome() {
                     value={location}
                     onChange={(e) => {
                       setLocation(e.target.value);
-                      // Don't show results when typing location
                       setShowResults(false);
                     }}
                     onKeyDown={handleKeyPress}
@@ -282,7 +281,7 @@ export default function BannerHome() {
                     placeholder="San Francisco, CA"
                     className="pl-10 w-full h-[48px] border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 bg-[#F7F8F8] rounded-lg border border-gray-200 shadow-inner"
                   />
-                  {location && location !== "San Francisco, CA" && (
+                  {location && (
                     <button
                       onClick={clearLocation}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
