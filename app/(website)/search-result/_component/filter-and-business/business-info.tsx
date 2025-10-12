@@ -38,9 +38,9 @@ const BusinessInfo = () => {
     familyTag,
     instrumentTag,
     serviceTag,
+    offersTag,
     minPriceRange,
     maxPriceRange,
-    offers,
     open,
     sort,
     search
@@ -53,17 +53,39 @@ const BusinessInfo = () => {
       familyTag,
       instrumentTag,
       serviceTag,
+      offersTag,
       minPriceRange,
       maxPriceRange,
-      offers,
       open,
       sort,
       search
     ],
     queryFn: async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/business?page=${page}&limit=${limit}&instrumentFamily=${familyTag}&selectedInstrumentsGroup=${instrumentTag}&newInstrumentName=${serviceTag}&minPrice=${minPriceRange}&maxPrice=${maxPriceRange}&buyInstruments=${offers}&sellInstruments=${offers}&offerMusicLessons=${offers}&openNow=${open}&sort=${sort}&search=${search}`
-      );
+      const offersParams = offersTag.map(tag => {
+        switch(tag.label) {
+          case "Buy":
+            return "buyInstruments=true";
+          case "Sell":
+            return "sellInstruments=true";
+          case "Trade":
+            return "tradeInstruments=true";
+          case "Rental":
+            return "rentalInstruments=true";
+          case "Music Lessons":
+            return "offerMusicLessons=true";
+          default:
+            return "";
+        }
+      }).filter(param => param !== "").join("&");
+
+      const baseUrl = `${process.env.NEXT_PUBLIC_API_URL}/business?page=${page}&limit=${limit}`;
+      
+      const filterParams = `&instrumentFamily=${familyTag[0]?.label || ""}&selectedInstrumentsGroup=${instrumentTag[0]?.label || ""}&newInstrumentName=${serviceTag[0]?.label || ""}&minPrice=${minPriceRange}&maxPrice=${maxPriceRange}&openNow=${open}&sort=${sort}&search=${search}`;
+      
+      const url = `${baseUrl}${filterParams}${offersParams ? `&${offersParams}` : ""}`;
+      
+      
+      const res = await fetch(url);
       const data = await res.json();
       return data;
     },

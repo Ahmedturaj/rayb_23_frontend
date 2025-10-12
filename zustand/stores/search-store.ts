@@ -14,6 +14,9 @@ interface IFilterStore {
   serviceTag: TagType[];
   setServiceTag: (value: string) => void;
   removeServiceTag: (value: string) => void;
+  offersTag: TagType[];
+  setOffersTag: (value: string) => void;
+  removeOffersTag: (value: string) => void;
   minPriceRange: string;
   setMinPriceRange: (value: string) => void;
   maxPriceRange: string;
@@ -41,6 +44,7 @@ const initialState: Pick<
   | "familyTag"
   | "instrumentTag"
   | "serviceTag"
+  | "offersTag"
   | "minPriceRange"
   | "offers"
   | "maxPriceRange"
@@ -55,6 +59,7 @@ const initialState: Pick<
   familyTag: [],
   instrumentTag: [],
   serviceTag: [],
+  offersTag: [],
   minPriceRange: "",
   offers: false,
   maxPriceRange: "",
@@ -75,7 +80,7 @@ export const useFilterStore = create<IFilterStore>((set) => ({
     })),
   removeFamilyTag: (value) =>
     set((state) => ({
-      familyTag: state.instrumentTag.filter((t) => t.label !== value),
+      familyTag: state.familyTag.filter((t) => t.label !== value),
     })),
   setInstrumentTag: (value) =>
     set(() => ({
@@ -93,7 +98,15 @@ export const useFilterStore = create<IFilterStore>((set) => ({
     set((state) => ({
       serviceTag: state.serviceTag.filter((t) => t.label !== value),
     })),
-
+  // Updated to support multiple offers tags
+  setOffersTag: (value) =>
+    set((state) => ({
+      offersTag: [...state.offersTag, { label: value }],
+    })),
+  removeOffersTag: (value) =>
+    set((state) => ({
+      offersTag: state.offersTag.filter((t) => t.label !== value),
+    })),
   setMinPriceRange: (value) => {
     set({ minPriceRange: value });
   },
@@ -106,37 +119,31 @@ export const useFilterStore = create<IFilterStore>((set) => ({
   setOpen: (value) => {
     set({ open: value });
   },
-
   setSort: (value) => {
     set({
       sort: value,
     });
   },
-
   setSearch: (value) => {
     set({
       search: value,
     });
   },
-
   setSelectInstrument: (value) => {
     set({
       selectInstrument: value,
     });
   },
-
   setSelectService: (value) => {
     set({
       selectService: value,
     });
   },
-
   setInstrument: (value) => {
     set({
       instrument: value,
     });
   },
-
   setService: (value) => {
     set({
       service: value,
