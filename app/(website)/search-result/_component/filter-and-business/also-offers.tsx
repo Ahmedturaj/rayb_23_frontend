@@ -16,7 +16,15 @@ const AlsoOffers = ({}) => {
     { label: "Music Lessons" },
   ];
 
-  const { setOffers } = useFilterStore();
+  const { setOffersTag, removeOffersTag, offersTag } = useFilterStore();
+
+  const handleOffersChange = (itemLabel: string, isChecked: boolean) => {
+    if (isChecked) {
+      setOffersTag(itemLabel);
+    } else {
+      removeOffersTag(itemLabel);
+    }
+  };
 
   return (
     <div>
@@ -32,13 +40,14 @@ const AlsoOffers = ({}) => {
           </AccordionTrigger>
 
           <AccordionContent className="flex flex-col gap-2">
-            <div className=" space-y-3">
+            <div className="space-y-3">
               {items.map((item, index) => (
                 <label key={index} className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     className="h-4 w-4 accent-primary"
-                    onChange={() => setOffers(true)}
+                    onChange={(e) => handleOffersChange(item.label, e.target.checked)}
+                    checked={offersTag.some(tag => tag.label === item.label)}
                   />
                   <span className="text-base">{item.label}</span>
                 </label>

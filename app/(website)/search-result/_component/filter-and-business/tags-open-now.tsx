@@ -10,6 +10,8 @@ const TagsAndOpenNow = () => {
     removeInstrumentTag,
     serviceTag,
     removeServiceTag,
+    offersTag,
+    removeOffersTag,
     setOpen,
   } = useFilterStore();
 
@@ -20,9 +22,9 @@ const TagsAndOpenNow = () => {
           familyTag.map((item, index) => (
             <div
               key={index}
-              className="flex items-center justify-center gap-4 text-black/75 bg-[#f7f8f8] border border-gray-200  py-2 px-3 rounded-lg"
+              className="flex items-center justify-center gap-4 text-black/75 bg-[#f7f8f8] border border-gray-200 py-2 px-3 rounded-lg"
             >
-              <h1>{item.label}</h1>{" "}
+              <h1>{item.label}</h1>
               <button onClick={() => removeFamilyTag(item.label)}>
                 <X className="h-4 w-4" />
               </button>
@@ -33,9 +35,9 @@ const TagsAndOpenNow = () => {
           instrumentTag.map((item, index) => (
             <div
               key={index}
-              className="flex items-center justify-center gap-4 text-black/75 bg-[#f7f8f8] border border-gray-200  py-2 px-3 rounded-lg"
+              className="flex items-center justify-center gap-4 text-black/75 bg-[#f7f8f8] border border-gray-200 py-2 px-3 rounded-lg"
             >
-              <h1>{item.label}</h1>{" "}
+              <h1>{item.label}</h1>
               <button onClick={() => removeInstrumentTag(item.label)}>
                 <X className="h-4 w-4" />
               </button>
@@ -46,10 +48,23 @@ const TagsAndOpenNow = () => {
           serviceTag.map((item, index) => (
             <div
               key={index}
-              className="flex items-center justify-center gap-4 text-black/75 bg-[#f7f8f8] border border-gray-200  py-2 px-3 rounded-lg"
+              className="flex items-center justify-center gap-4 text-black/75 bg-[#f7f8f8] border border-gray-200 py-2 px-3 rounded-lg"
             >
-              <h1>{item.label}</h1>{" "}
+              <h1>{item.label}</h1>
               <button onClick={() => removeServiceTag(item.label)}>
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+
+        {offersTag &&
+          offersTag.map((item, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-center gap-4 text-black/75 bg-[#f7f8f8] border border-gray-200 py-2 px-3 rounded-lg"
+            >
+              <h1>{item.label}</h1>
+              <button onClick={() => removeOffersTag(item.label)}>
                 <X className="h-4 w-4" />
               </button>
             </div>
