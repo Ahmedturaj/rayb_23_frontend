@@ -54,10 +54,10 @@ const ResultsFiltering = () => {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="high-to-low">Rated High to Low</SelectItem>
-            <SelectItem value="low-to-high">Rated Low to High</SelectItem>
-            <SelectItem value="price-low-to-high">Price Low to High</SelectItem>
-            <SelectItem value="price-high-to-low">Price High to Low</SelectItem>
+            <SelectItem value="rating-high-to-low">Rated High to Low</SelectItem>
+            <SelectItem value="rating-low-to-high">Rated Low to High</SelectItem>
+            <SelectItem value="low-to-high">Price Low to High</SelectItem>
+            <SelectItem value="high-to-low">Price High to Low</SelectItem>
           </SelectContent>
         </Select>
       </div>
