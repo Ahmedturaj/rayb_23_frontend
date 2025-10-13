@@ -158,7 +158,7 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
   const containerClass =
     variant === "mobile"
       ? "relative"
-      : "hidden md:flex flex-1 max-w-2xl mx-auto items-center relative";
+      : "hidden md:flex flex-1 max-w-2xl mx-auto items-center relative bg-[#F7F8F8] rounded-lg";
 
   const inputContainerClass =
     variant === "mobile" ? "flex flex-col" : "flex items-center w-full";
@@ -180,7 +180,7 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
 
   return (
     <div className={containerClass} ref={searchRef}>
-      <div className={inputContainerClass}>
+      <div className={`${inputContainerClass}`}>
         {/* Search Input */}
         <div className="flex-1 relative">
           <div className="relative">
@@ -206,7 +206,7 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
           </div>
         </div>
 
-        <div className="h-[35px] border-r border-r-gray-300 bg-[#f7f8f8]"></div>
+        <div className="h-[35px] border-r border-r-gray-300"></div>
 
         {/* Location Input */}
         <div className="flex-1 md:flex-none relative">
