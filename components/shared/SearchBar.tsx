@@ -206,7 +206,7 @@ const SearchBar = ({ variant = "desktop", onResultClick }: SearchBarProps) => {
           </div>
         </div>
 
-        <div className="h-[48px] border-r border-r-gray-300 bg-[#f7f8f8]"></div>
+        <div className="h-[35px] border-r border-r-gray-300 bg-[#f7f8f8]"></div>
 
         {/* Location Input */}
         <div className="flex-1 md:flex-none relative">
