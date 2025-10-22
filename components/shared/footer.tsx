@@ -34,7 +34,7 @@ export default function Footer() {
           <div>
             <h1 className="font-semibold text-lg mb-3">For Business</h1>
             <ul>
-              <Link href={"/add-a-business"}>
+              <Link href={"/add-my-business"}>
                 <li className="hover:underline">Add my Business</li>
               </Link>
               <Link href={"/claim-your-business"}>
