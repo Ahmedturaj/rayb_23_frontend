@@ -80,7 +80,7 @@ const Popular = () => {
   });
 
   return (
-    <section className="py-20">
+    <section className="pt-20 pb-10">
       <div className="container">
         <div className="text-center">
           <h1 className="text-[40px] font-bold">
@@ -91,7 +91,7 @@ const Popular = () => {
           </p>
         </div>
 
-        <div className="mt-10">
+        <div className="mt-10 pb-10">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[...Array(4)].map((_, index) => (
@@ -123,8 +123,8 @@ const Popular = () => {
               {allBusiness?.slice(0, 12)?.map((business: Business) => (
                 <SwiperSlide key={business?._id}>
                   <Link href={`search-result/${business?._id}`}>
-                    <div className="bg-white rounded-lg border border-gray-100 shadow-lg p-6 h-full">
-                      <div className="flex flex-col gap-5 h-full">
+                    <div className="bg-white rounded-lg border border-gray-100 shadow-[0px_2px_12px_0px_#003D3914] p-6 h-full">
+                      <div className="space-y-5 h-full">
                         {/* Profile Image Slider with Arrows */}
                         <div className="flex-shrink-0 overflow-hidden rounded-lg relative group">
                           <Swiper
@@ -140,17 +140,21 @@ const Popular = () => {
                             loop={business?.businessInfo?.image?.length > 1}
                             className="w-full h-[250px] rounded-lg"
                           >
-                            {business?.businessInfo?.image?.map((img, index) => (
-                              <SwiperSlide key={index}>
-                                <Image
-                                  src={img}
-                                  alt={`${business?.businessInfo?.name} - Image ${index + 1}`}
-                                  width={1000}
-                                  height={1000}
-                                  className="rounded-lg object-cover w-full h-full hover:scale-105 transition duration-500"
-                                />
-                              </SwiperSlide>
-                            ))}
+                            {business?.businessInfo?.image?.map(
+                              (img, index) => (
+                                <SwiperSlide key={index}>
+                                  <Image
+                                    src={img}
+                                    alt={`${
+                                      business?.businessInfo?.name
+                                    } - Image ${index + 1}`}
+                                    width={1000}
+                                    height={1000}
+                                    className="rounded-lg object-cover w-full h-full group-hover:scale-105 transition duration-500"
+                                  />
+                                </SwiperSlide>
+                              )
+                            )}
                           </Swiper>
 
                           {/* Custom Arrow Buttons */}
@@ -180,21 +184,42 @@ const Popular = () => {
 
                               <div className="my-3 flex items-center gap-2">
                                 <Star className="fill-yellow-400 text-yellow-400 font-bold h-4 w-4 " />{" "}
-                                <span>{business?.review?.length || 0}</span> <span className="text-xs">( by google )</span>
+                                <span>{business?.review?.length || 0}</span>{" "}
+                                <span className="text-xs flex items-center gap-1">
+                                  ({" "}
+                                  <Image
+                                    src={"/images/google.jpeg"}
+                                    alt="img.png"
+                                    width={1000}
+                                    height={1000}
+                                    className="h-4 w-4"
+                                  />{" "}
+                                  )
+                                </span>
                               </div>
 
                               {/* Services */}
                               <div className="flex items-center gap-2">
-                                <div className="flex flex-wrap items-center gap-2 mb-2">
-                                  {business?.services?.map((service, index) => (
-                                    <button
-                                      className="h-[48px] px-5 rounded-lg bg-[#F8F8F8]"
-                                      key={index}
-                                    >
-                                      {service?.newInstrumentName}
-                                    </button>
-                                  ))}
+                                <div className="grid grid-cols-2 gap-2 mb-2">
+                                  {business?.services
+                                    ?.slice(0, 2)
+                                    ?.map((service, index) => (
+                                      <button
+                                        className="h-[52px] px-5 rounded-lg bg-[#F8F8F8]"
+                                        key={index}
+                                      >
+                                        {service?.newInstrumentName}
+                                      </button>
+                                    ))}
                                 </div>
+                              </div>
+
+                              <div>
+                                <Link href={`search-result/${business?._id}`}>
+                                  <button className="text-primary mt-2 font-semibold">
+                                    See More
+                                  </button>
+                                </Link>
                               </div>
                             </div>
                           </div>
