@@ -25,7 +25,7 @@ export default function Footer() {
               <Link href={"/add-a-business"}>
                 <li className="hover:underline">Add a Business</li>
               </Link>
-              <Link href={"/login"}>
+              <Link href={"/auth/login"}>
                 <li className="hover:underline">Login</li>
               </Link>
             </ul>
@@ -40,7 +40,7 @@ export default function Footer() {
               <Link href={"/claim-your-business"}>
                 <li className="hover:underline">Claim my Business</li>
               </Link>
-              <Link href={"/login"}>
+              <Link href={"/auth/login"}>
                 <li className="hover:underline">Login</li>
               </Link>
             </ul>
