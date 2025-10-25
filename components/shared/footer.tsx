@@ -25,7 +25,7 @@ export default function Footer() {
               <Link href={"/add-a-business"}>
                 <li className="hover:underline">Add a Business</li>
               </Link>
-              <Link href={"/login"}>
+              <Link href={"/auth/login"}>
                 <li className="hover:underline">Login</li>
               </Link>
             </ul>
@@ -34,13 +34,13 @@ export default function Footer() {
           <div>
             <h1 className="font-semibold text-lg mb-3">For Business</h1>
             <ul>
-              <Link href={"/add-a-business"}>
+              <Link href={"/add-my-business"}>
                 <li className="hover:underline">Add my Business</li>
               </Link>
               <Link href={"/claim-your-business"}>
                 <li className="hover:underline">Claim my Business</li>
               </Link>
-              <Link href={"/login"}>
+              <Link href={"/auth/login"}>
                 <li className="hover:underline">Login</li>
               </Link>
             </ul>

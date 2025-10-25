@@ -69,7 +69,7 @@ const Navbar = () => {
             <Link href="/auth/signup">
               <Button
                 variant="outline"
-                className="hover:bg-[#00998E] border-teal-500 text-[#00998E] hover:text-white rounded-lg px-4 py-2 bg-transparent"
+                className="hover:bg-[#00998E] border-primary text-[#00998E] hover:text-white rounded-lg px-4 py-2 bg-transparent"
               >
                 Sign Up
               </Button>
@@ -157,7 +157,7 @@ const Navbar = () => {
 
                 {/* Mobile Dropdowns */}
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="w-full justify-between text-gray-900 hover:text-teal-400 flex items-center p-2 rounded-lg hover:bg-gray-50">
+                  <DropdownMenuTrigger className="w-full justify-between text-gray-900 hover:text-primary flex items-center p-2 rounded-lg hover:bg-gray-50">
                     For Customer <ChevronDown className="h-4 w-4" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-white text-gray-900 border-gray-200 w-full">
@@ -168,7 +168,7 @@ const Navbar = () => {
                       Add a Business
                     </DropdownMenuItem>
                     {sessionStatus === "unauthenticated" && (
-                      <DropdownMenuItem className="hover:bg-gray-100 cursor-pointer">
+                      <DropdownMenuItem className="hover:bg-gray-100 focus:bg-gray-100 cursor-pointer">
                         <Link href="/auth/login">Log In</Link>
                       </DropdownMenuItem>
                     )}
@@ -176,7 +176,7 @@ const Navbar = () => {
                 </DropdownMenu>
 
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="w-full justify-between text-gray-900 hover:text-teal-400 flex items-center p-2 rounded-lg hover:bg-gray-50">
+                  <DropdownMenuTrigger className="w-full justify-between text-gray-900 hover:text-primary flex items-center p-2 rounded-lg hover:bg-gray-50">
                     For Business <ChevronDown className="h-4 w-4" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-white text-gray-900 border-gray-200 w-full">
@@ -200,7 +200,7 @@ const Navbar = () => {
                     <Link href="/auth/signup">
                       <Button
                         variant="outline"
-                        className="hover:bg-[#00998E] border-teal-500 text-[#00998E] hover:text-white w-full rounded-lg px-4 py-2 bg-transparent"
+                        className="hover:bg-[#00998E] border-primary text-[#00998E] hover:text-white w-full rounded-lg px-4 py-2 bg-transparent"
                       >
                         Sign Up
                       </Button>
@@ -208,7 +208,7 @@ const Navbar = () => {
                     <Link href="/auth/login">
                       <Button
                         variant="outline"
-                        className="hover:bg-[#00998E] border-teal-500 text-[#00998E] hover:text-white w-full rounded-lg px-4 py-2 bg-transparent"
+                        className="hover:bg-[#00998E] border-primary text-[#00998E] hover:text-white w-full rounded-lg px-4 py-2 bg-transparent"
                       >
                         Log In
                       </Button>
@@ -254,16 +254,16 @@ const Navbar = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white border-gray-700 border-none">
                   <Link href={"/review-business"}>
-                    <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                    <DropdownMenuItem className="hover:bg-gray-100 focus:bg-gray-100 cursor-pointer">
                       Write a Review
                     </DropdownMenuItem>
                   </Link>
                   <Link href={"/add-a-business"}>
-                    <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                    <DropdownMenuItem className="hover:bg-gray-100 focus:bg-gray-100 cursor-pointer">
                       Add a Business
                     </DropdownMenuItem>
                   </Link>
-                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                  <DropdownMenuItem className="hover:bg-gray-100 focus:bg-gray-100 cursor-pointer">
                     <Link href="/auth/login">Log In</Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -274,17 +274,17 @@ const Navbar = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white border-gray-700 border-none">
                   <Link href={"/add-my-business"}>
-                    <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                    <DropdownMenuItem className="hover:bg-gray-100 focus:bg-gray-100 cursor-pointer">
                       Add My Business
                     </DropdownMenuItem>
                   </Link>
                   <Link href={"/claim-your-business"}>
                     {" "}
-                    <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                    <DropdownMenuItem className="hover:bg-gray-100 focus:bg-gray-100 cursor-pointer">
                       Claim My Business
                     </DropdownMenuItem>
                   </Link>
-                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                  <DropdownMenuItem className="hover:bg-gray-100 focus:bg-gray-100 cursor-pointer">
                     <Link href="/auth/login">Log In</Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -297,7 +297,7 @@ const Navbar = () => {
               <Link href="/auth/signup">
                 <Button
                   variant="outline"
-                  className="hover:bg-[#00998E] border-teal-500 text-[#00998E] hover:text-white rounded-lg px-6 py-2 bg-transparent"
+                  className="hover:bg-[#00998E] border-primary text-[#00998E] hover:text-white rounded-lg px-6 py-2 bg-transparent"
                 >
                   Signup
                 </Button>
@@ -305,7 +305,7 @@ const Navbar = () => {
               <Link href="/auth/login">
                 <Button
                   variant="outline"
-                  className="hover:bg-[#00998E] border-teal-500 text-[#00998E] hover:text-white rounded-lg px-6 py-2 bg-transparent"
+                  className="hover:bg-[#00998E] focus:bg-[#00998E] border-primary text-[#00998E] hover:text-white rounded-lg px-6 py-2 bg-transparent"
                 >
                   Login
                 </Button>

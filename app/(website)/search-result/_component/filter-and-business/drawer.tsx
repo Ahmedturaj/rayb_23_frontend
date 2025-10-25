@@ -13,7 +13,7 @@ export function FilterDrawer() {
           <Filter /> <span>Filters</span>
         </Button>
       </DrawerTrigger>
-      <DrawerContent>
+      <DrawerContent className="p-5">
         <FilterInfo />
       </DrawerContent>
     </Drawer>
