@@ -36,7 +36,7 @@ export default function BannerHome() {
           <h1 className="text-3xl sm:text-4xl md:text-[40px] lg:text-[48px] font-bold text-[#139a8e] leading-tight my-5">
             Back to Life
           </h1>
-          <p className="text-lg sm:text-xl md:text-2xl text-gray-800 font-medium mb-4">
+          <p className="text-lg sm:text-xl md:text-2xl text-gray-800 font-medium mb-4 lg:max-w-[540px]">
             Find the best instrument repair shops near you.
           </p>
 

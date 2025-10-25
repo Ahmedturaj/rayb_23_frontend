@@ -45,7 +45,7 @@ export function SearchForm({
 
   return (
     <div
-      className="relative w-full max-w-[526px] mx-auto lg:mx-0"
+      className="relative w-full lg:max-w-[540px] mx-auto lg:mx-0"
       ref={searchRef}
     >
       <div className="flex flex-col sm:flex-row gap-2">
