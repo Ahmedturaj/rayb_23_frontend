@@ -11,89 +11,90 @@ interface LocationAutocompleteProps {
   placeholder?: string;
 }
 
-interface CountryData {
-  country: string;
-  cities: string[];
+interface PlaceResult {
+  display_name: string;
+  address: {
+    city?: string;
+    town?: string;
+    village?: string;
+    state?: string;
+    state_code?: string;
+    country?: string;
+  };
 }
 
 export function LocationAutocomplete({
   location,
   setLocation,
   onKeyDown,
-  placeholder = "San Francisco, CA",
+  placeholder = "Search city...",
 }: LocationAutocompleteProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [allCities, setAllCities] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch all cities on component mount
+  // Fetch city suggestions from OpenStreetMap (Nominatim)
   useEffect(() => {
-    const fetchAllCities = async () => {
-      try {
-        const response = await fetch(
-          "https://countriesnow.space/api/v0.1/countries"
-        );
-        const data = await response.json();
+    if (!location || location.length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
 
-        if (data.error === false && data.data) {
-          const cities = data.data.flatMap(
-            (country: CountryData) => country.cities
-          );
-          setAllCities(cities);
-        }
-      } catch (error) {
-        console.error("Error fetching cities:", error);
-      }
-    };
-
-    fetchAllCities();
-  }, []);
-
-  // Filter suggestions based on input
-  useEffect(() => {
-    const filterSuggestions = () => {
-      if (!location || location.length < 2) {
-        setSuggestions([]);
-        setShowSuggestions(false);
-        return;
-      }
-
+    const fetchLocations = async () => {
       setIsLoading(true);
       try {
-        const filteredCities = allCities
-          .filter((city) => city.toLowerCase().includes(location.toLowerCase()))
-          .slice(0, 10);
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(
+            location
+          )}&format=json&addressdetails=1&limit=10`
+        );
+        const data: PlaceResult[] = await response.json();
 
-        setSuggestions(filteredCities);
-        setShowSuggestions(filteredCities.length > 0);
+        const formattedResults = data
+          .map((place) => {
+            const city = place.address.city;
+            const state =
+              place.address.state_code || // some places return short code like "CA"
+              (place.address.state ? place.address.state : "");
+
+            if (!city) return ""; // skip if no city available
+
+            // Combine city and state only
+            return state ? `${city}, ${state}` : city;
+          })
+          .filter((v) => v.trim() !== "");
+
+        // Remove duplicates
+        const uniqueResults = Array.from(new Set(formattedResults));
+
+        setSuggestions(uniqueResults);
+        setShowSuggestions(uniqueResults.length > 0);
       } catch (error) {
-        console.error("Error filtering locations:", error);
+        console.error("Error fetching locations:", error);
         setSuggestions([]);
       } finally {
         setIsLoading(false);
       }
     };
 
-    const timeoutId = setTimeout(filterSuggestions, 300);
+    const timeoutId = setTimeout(fetchLocations, 400);
     return () => clearTimeout(timeoutId);
-  }, [location, allCities]);
+  }, [location]);
 
-  const handleLocationSelect = (selectedCity: string) => {
-    setLocation(selectedCity);
+  const handleLocationSelect = (selected: string) => {
+    setLocation(selected);
     setShowSuggestions(false);
   };
 
   const clearLocation = () => {
-    setLocation("San Francisco, CA");
+    setLocation("");
     setShowSuggestions(false);
   };
 
   const handleFocus = () => {
-    if (location.length >= 2 && suggestions.length > 0) {
-      setShowSuggestions(true);
-    }
+    if (suggestions.length > 0) setShowSuggestions(true);
   };
 
   return (
@@ -110,7 +111,7 @@ export function LocationAutocomplete({
           placeholder={placeholder}
           className="pl-10 w-full h-[48px] border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-800 bg-[#F7F8F8] rounded-lg border border-gray-200 shadow-inner"
         />
-        {location && location !== "San Francisco, CA" && (
+        {location && (
           <button
             onClick={clearLocation}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
@@ -121,7 +122,7 @@ export function LocationAutocomplete({
         )}
       </div>
 
-      {/* Location Suggestions Dropdown */}
+      {/* Suggestions Dropdown */}
       {showSuggestions && (
         <div className="absolute z-20 mt-1 w-full bg-white rounded-lg shadow-lg border border-gray-200 max-h-[300px] overflow-y-auto">
           {isLoading ? (
@@ -130,15 +131,15 @@ export function LocationAutocomplete({
             <div className="p-4 text-gray-500">No locations found</div>
           ) : (
             <ul>
-              {suggestions.map((city, index) => (
+              {suggestions.map((item, index) => (
                 <li
                   key={index}
                   className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 cursor-pointer"
-                  onClick={() => handleLocationSelect(city)}
+                  onClick={() => handleLocationSelect(item)}
                 >
                   <div className="p-3 flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-gray-500" />
-                    <span>{city}</span>
+                    <span>{item}</span>
                   </div>
                 </li>
               ))}

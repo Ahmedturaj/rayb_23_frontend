@@ -305,7 +305,7 @@ const Navbar = () => {
               <Link href="/auth/login">
                 <Button
                   variant="outline"
-                  className="hover:bg-[#00998E] focus:bg-[#00998E] border-primary text-[#00998E] hover:text-white rounded-lg px-6 py-2 bg-transparent"
+                  className="hover:bg-[#00998E] border-primary text-[#00998E] hover:text-white rounded-lg px-6 py-2 bg-transparent"
                 >
                   Login
                 </Button>
